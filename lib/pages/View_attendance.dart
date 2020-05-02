@@ -1,12 +1,27 @@
-import 'dart:math';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/pages/AttendanceData.dart';
-import 'package:liquid_progress_indicator/liquid_progress_indicator.dart';
+import 'package:flutter_app/responsive/Screensize.dart';
+import 'package:flutter_swiper/flutter_swiper.dart';
+extension HexColor on Color {
+  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
+  static Color fromHex(String hexString) {
+    final buffer = StringBuffer();
+    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+    buffer.write(hexString.replaceFirst('#', ''));
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
 
+  /// Prefixes a hash sign if [leadingHashSign] is set to `true` (default is `true`).
+  String toHex({bool leadingHashSign = true}) => '${leadingHashSign ? '#' : ''}'
+      '${alpha.toRadixString(16).padLeft(2, '0')}'
+      '${red.toRadixString(16).padLeft(2, '0')}'
+      '${green.toRadixString(16).padLeft(2, '0')}'
+      '${blue.toRadixString(16).padLeft(2, '0')}';
+}
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -14,281 +29,409 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final databaseReference = FirebaseDatabase.instance.reference();
-  final List<AttendanceData> attendanceDataList = List<AttendanceData>();
-
+  String subjectName = 'Overall';
+  int height;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-
-    String roll_no = '2';
-    String class_name = "TE1";
-
-    int attended_lect;
-    int total_lect;
-    int attended_pract;
-    int total_pract;
-    String subject;
-
-    databaseReference
-        .child('Attendance')
-        .child("Class")
-        .child(class_name)
-        .once()
-        .then((snapshot) {
-      Map data = snapshot.value;
-      for (final key in data.keys) {
-        Map subjectData = data[key];
-        subject = key.toString();
-        attended_lect = 0;
-        total_lect = 0;
-        attended_pract = 0;
-        total_pract = 0;
-
-        for (final key in subjectData.keys) {
-          Map TeacherData = subjectData[key];
-          for (final key in TeacherData.keys) {
-            Map DateWiseData = TeacherData[key];
-
-            // retriving lecture Attendance
-            try{
-              Map lectureData = DateWiseData['lecture']; // Lecture
-              total_lect += int.parse(lectureData['leccount'].toString());
-
-              int lect_held =  int.parse(lectureData['leccount'].toString());
-
-              for (int i=1;i<= lect_held;i++) {
-                String key=i.toString();
-                Map SessionData = lectureData[key]; // Lecture
-                try {
-                  Map StudentData = SessionData[roll_no]; //student info
-                  attended_lect +=
-                      int.parse(StudentData['Attended'].toString());
-                } catch (Exception) {}
-              } // for - per Session
-            } //try
-            catch (Exception) {}
-
-            //retriving Pract Attendance
-
-            try{
-              Map PracticalData = DateWiseData['Practical']; // Lecture
-              total_pract += int.parse(PracticalData['practcount'].toString());
-              int pract_held =  int.parse(PracticalData['practcount'].toString());
-
-              for (int i=1;i<= pract_held;i++) {
-                String key=i.toString();
-                Map SessionData = PracticalData[key]; // Lecture
-                try {
-                  Map StudentData = SessionData[roll_no]; //student info
-                  attended_pract +=
-                      int.parse(StudentData['Attended'].toString());
-                } catch (Exception) {}
-              } // for - per Session
-            } //try
-            catch (Exception) {}
-
-          } //for - per Teacher
-        } //for - per Subject
-
-
-        print(subject+" : ");
-        print(attended_lect.toString()+" out of "+total_lect.toString());
-        print(attended_pract.toString()+" out of "+total_pract.toString());
-
-        AttendanceData a = new AttendanceData(
-            subject, total_lect, attended_lect, total_pract, attended_pract);
-        attendanceDataList.add(a);
-      } //all data
-    });
   }
+
 
   @override
   Widget build(BuildContext context) {
-    double TotalAttendance = 0;
-
-    try {
-      for (int i = 0; i < attendanceDataList.length; i++) {
-        TotalAttendance += (attendanceDataList[i].total_attendance /
-            attendanceDataList.length);
-      }
-    } catch (Exception) {}
-
     return Scaffold(
+//        backgroundColor:HexColor.fromHex("#80e5ff"),
+//        appBar: GradientAppBar(
+//          title: Text('Your attendance'),
+//          backgroundColorStart: HexColor.fromHex("#1e130c"),
+//          backgroundColorEnd: HexColor.fromHex("#9a8478"),
+//        ),
         appBar: AppBar(
-          title: Text('AppName'),
+          backgroundColor: HexColor.fromHex("#6d6d46"),
+          title: Text('Your attendance'),
         ),
-
-        body: SingleChildScrollView(
+        body: FittedBox(
           child: Container(
-            child: attendanceDataList.length == 0
-                ? ProgressBar()
-                : Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
+            color: Colors.black87,
+              child: Padding(
+                padding:  EdgeInsets.symmetric(vertical:5*SizeConfig.heightMultiplier,horizontal:4*SizeConfig.widthMultiplier),
+                child: Container(
+                  height: 85*SizeConfig.heightMultiplier ,
+                  width: 100*SizeConfig.widthMultiplier ,
+                  decoration: BoxDecoration(
 
-                AttendancePieChart(attendanceDataList),
-
-                Text(
-                  'Total Attendance : ${TotalAttendance.round()} %',
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
+                    boxShadow: <BoxShadow>[
+                      BoxShadow(
+                          color: Colors.black54,
+                          blurRadius: 2.8*SizeConfig.widthMultiplier,
+                          spreadRadius: -12
+                      )
+                    ],
                   ),
-                  textAlign: TextAlign.center,
+                  child: Container(
+                    child: Card(
+                      margin: new EdgeInsets.symmetric(
+                          horizontal: 7*SizeConfig.widthMultiplier),
+                      elevation: 5.0,
+                      color: Colors.blueAccent.shade50,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Container(
+                       // color: Colors.black87,
+//                            decoration: BoxDecoration(
+//                              image: DecorationImage(
+//                                image: new AssetImage("assets/profile.jpg"),
+//                                fit: BoxFit.cover,
+//                              ),
+//                            ),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                             // mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                AttendancePieChart(subjectName),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(vertical:7*SizeConfig.heightMultiplier,horizontal: 4*SizeConfig.widthMultiplier),
+                                  child: new Swiper(
+                                      layout: SwiperLayout.TINDER,
+                                      customLayoutOption: new CustomLayoutOption(
+                                          startIndex: -1,
+                                          stateCount: 3
+                                      ).addRotate([
+                                        -45.0/180,
+                                        0.0,
+                                        45.0/180
+                                      ]).addTranslate([
+                                        new Offset(-370.0, -40.0),
+                                        new Offset(0.0, 0.0),
+                                        new Offset(370.0, -40.0)
+                                      ]),
+                                      onIndexChanged: (int index){
+                                        setState(() {
+                                          subjectName=Attendance.subjectList.elementAt(index);
+                                        });
+                                      },
+                                      itemWidth: 60*SizeConfig.widthMultiplier,
+                                      itemHeight: 20*SizeConfig.heightMultiplier,
+                                      itemBuilder: (context, index) {
+
+                                        return new Container(
+//                                          width: 100,
+//                                          height: 100,
+                                          child: Center(child: Text(Attendance.subjectList.elementAt(index),style: TextStyle(fontSize: 4*SizeConfig.heightMultiplier,fontWeight: FontWeight.bold,color: Colors.black87),)),
+                                          decoration:BoxDecoration(
+                                              image: DecorationImage(
+                                                image: new AssetImage("assets/card1.jpg"),
+                                                fit: BoxFit.cover,
+                                              ),
+                                              borderRadius: new BorderRadius
+                                                  .circular(30.0),
+                                              shape: BoxShape.rectangle,
+                                              border: Border.all(width: 4.0, color: Colors.grey.shade500),
+//
+//                                              gradient:LinearGradient(
+//                                                  begin: Alignment.topRight,
+//                                                  end: Alignment.bottomLeft,
+//                                                  colors: [
+//                                                    HexColor.fromHex("#00d2ff"),
+//                                                    HexColor.fromHex("#3a7bd5")
+////                                                Colors.cyan,
+//////                                                Colors.yellowAccent
+////                                                Colors.black,
+////                                                  Colors.yellowAccent
+//                                                  ])
+                                          ),
+                                        );
+                                      },
+                                      itemCount: Attendance.subjectList.length),
+                                ),
+                              ]
+                          ),
+
+                      ),
+                    ),
+                  ),
                 ),
-
-                TableUI(),
-
-              ],
-            ),
+              )
           ),
         )
-
-    );
-  }
-
-
-// Table :
-  Widget TableUI() {
-    List<TableRow> tableRows = [];
-    tableRows.add(TableRow(children: [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'Subject',
-          style: TextStyle( fontSize: 20,),
-          textAlign: TextAlign.start,
-        ),
-      ),
-
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text('Attended lectures' ,
-          style: TextStyle( fontSize: 20,),
-          textAlign: TextAlign.start,
-        ),
-      ),
-
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text('Total lectures',
-          style: TextStyle( fontSize: 20,),
-          textAlign: TextAlign.start,
-        ),
-      ),
-
-    ]));
-
-    for(int i=0; i<attendanceDataList.length;i++)
-    {
-      tableRows.add(TableRow(children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(attendanceDataList[i].subjectName,
-            style: TextStyle( fontSize: 20,),
-            textAlign: TextAlign.start,
-          ),
-        ),
-
-
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(attendanceDataList[i].attended_lectures.toString(),
-            style: TextStyle( fontSize: 20,),
-            textAlign: TextAlign.start,
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(attendanceDataList[i].total_lect.toString(),
-            style: TextStyle( fontSize: 20,),
-            textAlign: TextAlign.start,
-          ),
-        ),
-
-      ]));
-    }
-
-    return new Table(
-      border: TableBorder(
-          horizontalInside: new BorderSide(color: Colors.grey[600], width: 1)
-      ),
-      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-      children: tableRows,
-
+//        Padding(
+//          padding: const EdgeInsets.all(30.0),
 
     );
   }
 
 //Pie Chart Class :
-  Widget AttendancePieChart(List<AttendanceData> attendanceDataList) {
+  Widget AttendancePieChart(String sub) {
     List<PieChartSectionData> _sections = List<PieChartSectionData>();
-    List<AttendanceData> data = List<AttendanceData>();
     double AttendanceCounter = 0;
+    int tot=0,cnt=0;
+    double TotalAttendance = 0;
+    int index = 0;
+    int total_lect=0;
+    int att_lect=0;
+    int total_pract=0;
+    int att_pract=0;
+//print(MediaQuery.of(context).size.width);
+//print(MediaQuery.of(context).size.height);
+    try {
+      for (int i = 0; i < Attendance.attendanceDataList.length; i++) {
+        TotalAttendance += (Attendance.attendanceDataList[i].total_attendance);
+        // print(TotalAttendance);
+        total_lect += (Attendance.attendanceDataList[i].total_lect);
+        att_lect += (Attendance.attendanceDataList[i].attended_lect);
+        total_pract += (Attendance.attendanceDataList[i].total_pract);
+        att_pract += (Attendance.attendanceDataList[i].attended_pract);
+      }
+      TotalAttendance = (att_lect+att_pract) / (total_lect+total_pract)*100;
+      TotalAttendance=TotalAttendance.toStringAsFixed(2) as double;
+      FirebaseDatabase.instance.reference().child("defaulter")
+          .child(Studinfo.branch).child(Studinfo.classs)
+          .child(Studinfo.roll).child("zzTotal").set(TotalAttendance.toStringAsFixed(2)+"%");
+    } catch (Exception) {}
+    List<Color> c=[HexColor.fromHex("#008080"),Colors.orange.shade400,HexColor.fromHex("#001a33"),HexColor.fromHex("#ff4d4d"),HexColor.fromHex("#73264d")];
+    bool b=false;
+    if (sub == 'Overall') {
+      b=true;
+      for (int i = 0; i < Attendance.attendanceDataList.length; i++) {
+        AttendanceCounter +=
+        (Attendance.attendanceDataList[i].total_attendance /
+            Attendance.attendanceDataList.length);
+        PieChartSectionData _item = PieChartSectionData(
+          color: c.elementAt(i%5),
+          value: 100/Attendance.attendanceDataList.length,
+          title: '${Attendance.attendanceDataList[i].subjectName}',
+          radius: 6*SizeConfig.heightMultiplier,
+          titleStyle: TextStyle(color: Colors.white, fontSize: 2.1*SizeConfig.textMultiplier),
+        );
+        _sections.add(_item);
+        // }
+      }
+    }
+    else {
+      //AttendanceCounter=0;
+      for (index; index < Attendance.attendanceDataList.length; index++) {
+        if (Attendance.attendanceDataList[index].subjectName == sub)
+          break;
+      }
 
-    for (int i = 0; i < attendanceDataList.length; i++) {
-      AttendanceCounter +=
-      (attendanceDataList[i].total_attendance / attendanceDataList.length);
-      PieChartSectionData _item = PieChartSectionData(
-        color: attendanceDataList[i].total_attendance > 75
-            ? Colors.green[400]
-            : Colors.orange,
-        value: (attendanceDataList[i].total_attendance /
-            attendanceDataList.length),
-        title: '${attendanceDataList[i].subjectName}',
-        radius: 50,
-        titleStyle: TextStyle(color: Colors.white, fontSize: 15),
-      );
-      _sections.add(_item);
+//      for Lectures :
+      tot=0;
+      cnt=0;
+      double value;
+      if (Attendance.attendanceDataList[index].total_lect != 0) {
+        value = (Attendance.attendanceDataList[index].attended_lect /
+            Attendance.attendanceDataList[index].total_lect) * 100;
+        tot+=Attendance.attendanceDataList[index].total_lect;
+        cnt+=Attendance.attendanceDataList[index].attended_lect;
+      }
+      else {
+        value = 100.00;
+      }
+      if(value!=0){
+        AttendanceCounter += (value / 2);
+        PieChartSectionData _item1 = PieChartSectionData(
+          color: value > 75
+              ? HexColor.fromHex("#008080")
+              : HexColor.fromHex("#ff4d4d"),
+          value: value / 2,
+          title: 'Lec',
+          radius: 6*SizeConfig.heightMultiplier,
+          titleStyle: TextStyle(color: Colors.white, fontSize: 2*SizeConfig.textMultiplier),
+        );
+        _sections.add(_item1);
+      }
+
+//    For Practicals :
+      if (Attendance.attendanceDataList[index].total_pract != 0) {
+        value = (Attendance.attendanceDataList[index].attended_pract /
+            Attendance.attendanceDataList[index].total_pract) * 100;
+        tot+=Attendance.attendanceDataList[index].total_pract;
+        cnt+=Attendance.attendanceDataList[index].attended_pract;
+      }
+      else {
+        value = 100.00;
+      }
+
+      AttendanceCounter += (value / 2);
+      if(value!=0){
+        PieChartSectionData _item2 = PieChartSectionData(
+          color: value > 75
+              ? HexColor.fromHex("#008080")
+              : HexColor.fromHex("#ff4d4d"),
+          value: value / 2,
+          title: 'Prac',
+          radius: 6*SizeConfig.heightMultiplier,
+          titleStyle: TextStyle(color: Colors.white, fontSize: 2.1*SizeConfig.textMultiplier),
+        );
+        _sections.add(_item2);
+      }
+    }
+    if(b==false){
+      if (AttendanceCounter < 100) {
+        PieChartSectionData _item = PieChartSectionData(
+          color:HexColor.fromHex("#ff4d4d"),
+          value: (100 - AttendanceCounter),
+          title: 'Abs',
+          radius: 6*SizeConfig.heightMultiplier,
+          titleStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 2*SizeConfig.textMultiplier,
+          ),
+        );
+        _sections.add(_item);
+      }
     }
 
-    if (AttendanceCounter < 100) {
-      PieChartSectionData _item = PieChartSectionData(
-        color: Colors.red,
-        value: (100 - AttendanceCounter),
-        title: 'Absent',
-        radius: 50,
-        titleStyle: TextStyle(
-          color: Colors.white,
-          fontSize: 15,
-        ),
-      );
-      _sections.add(_item);
-    }
+    return SafeArea(
+        child:Container(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+        //    mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              AspectRatio(
+                  aspectRatio: (SizeConfig.widthMultiplier/SizeConfig.heightMultiplier)*2.4,
+                  child: FlChart(
+                      chart: PieChart(
+                        PieChartData(
+                          sections: _sections,
+                          borderData: FlBorderData(show: false),
+                          centerSpaceRadius: 7*SizeConfig.heightMultiplier,
+                          sectionsSpace: 5,
+                        ),
+                      )
+                  )
+              ),
 
-    return Container(
-        child: AspectRatio(
-            aspectRatio: 1,
-            child: FlChart(
-                chart: PieChart(
-                  PieChartData(
-                    sections: _sections,
-                    borderData: FlBorderData(show: false),
-                    centerSpaceRadius: 60,
-                    sectionsSpace: 1,
+              sub == 'Overall' ?
+          //    Padding(
+//                padding:  EdgeInsets.only(),
+//                child: Text(
+//                  'Total Attendance : ${TotalAttendance.toStringAsFixed(2)} %\n'
+//                      'Attended Lectures : ${att_lect} out of ${total_lect} \n'
+//                      'Attended Practicals : ${att_pract} out of ${total_pract} \n',
+//                  style: TextStyle(
+//                    fontSize: 2.5*SizeConfig.textMultiplier,
+//                  ),
+//                  textAlign: TextAlign.center,
+//                ),
+//              ) :
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 5.7*SizeConfig.textMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                        'Total Attendance : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                            '${TotalAttendance.toStringAsFixed(2)} %'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
                   ),
-                ))));
-  }
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'lectures  Attended: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '$att_lect'+'/'+'$total_lect'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Practicals  Attended: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '$att_pract'+'/'+'$total_pract'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ):
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Total  Attendance: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '${(cnt/tot*100).toStringAsFixed(2)} %'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Attended Lectures : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '${Attendance.attendanceDataList[index]
+                      .attended_lect}/${Attendance.attendanceDataList[index]
+                      .total_lect}'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Attended Practicals: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '${Attendance.attendanceDataList[index]
+                      .attended_pract}/${Attendance.attendanceDataList[index]
+                      .total_pract}'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
 
+                ],
+              )
+//              Padding(
+//                padding:  EdgeInsets.only(),
+//                child: Text(
+//                  'Total Attendance : ${(cnt/tot*100).toStringAsFixed(2)} %\n'
+//                      'Attended Lectures : ${Attendance.attendanceDataList[index]
+//                      .attended_lect} out of ${Attendance.attendanceDataList[index]
+//                      .total_lect} \n'
+//                      'Attended Practicals : ${Attendance.attendanceDataList[index]
+//                      .attended_pract} out of ${Attendance.attendanceDataList[index]
+//                      .total_pract} \n',
+//                  style: TextStyle(
+//                    fontSize:2.5*SizeConfig.textMultiplier,
+//                  ),
+//                  textAlign: TextAlign.center,
+//                ),
+//              ),
+            ],
+          ),
+        )
+    ) ;
+
+  }
 
 //Progress bar :
-  Widget ProgressBar() {
-    return Container(
-        width: 100,
-        height: 100,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(
-              backgroundColor: Colors.cyan,
-              strokeWidth: 10,
-            ),
-          ),
-        ));
-  }
-
-
 }

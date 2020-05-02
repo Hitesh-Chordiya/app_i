@@ -1,18 +1,12 @@
 import 'dart:async';
-import 'dart:io';
-
-import 'package:firebase_database/firebase_database.dart';
-import 'package:flutter_app/pages/Signup.dart';
 import 'package:flutter_app/pages/View_attendance.dart';
-import 'package:flutter_app/pages/homepage.dart';
 import 'package:flutter_app/pages/login_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/pages/Student.dart';
 import 'package:flutter_app/pages/TeacherHome.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/responsive/Screensize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -20,14 +14,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
       home: Spalsh(),
-
     );
-
   }
 }
 class Spalsh extends StatefulWidget {
@@ -40,69 +31,59 @@ class _SpalshState extends State<Spalsh> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    // Timer(Duration(seconds:5),()=> check(context));
+    Timer(Duration(seconds: 5),()=>check(context));
   }
-//  void foo(){
-//    sleep(const Duration(seconds:4));
-//  }
   @override
   Widget build(BuildContext context) {
-    check(context);
-    return new Scaffold(
-//      body: Stack(
-//        fit: StackFit.expand,
-//        children: <Widget>[
-//          Container(
-//            decoration: BoxDecoration(color: Colors.redAccent),
-//
-//          ),
-//          Column(
-//            mainAxisAlignment: MainAxisAlignment.start,
-//            children: <Widget>[
-//              Expanded(
-//                flex: 2,
-//                child: Container(
-//                  child: Column(
-//                    mainAxisAlignment: MainAxisAlignment.center,
-//                    children: <Widget>[
-//                        CircleAvatar(
-//                          backgroundColor: Colors.white,
-//                          radius: 50.0,
-//                          child: Icon(
-//                            Icons.satellite,
-//                            color: Colors.blueAccent,
-//                            size: 50.0,
-//                          ),
-//                        ),
-//                      Padding(
-//                        padding: EdgeInsets.only(top:10.0),
-//                      ),
-//                      Text(
-//                        "MESCOE",style: TextStyle(color: Colors.white,fontSize: 24.0,fontWeight: FontWeight.bold),
-//                      )
-//                    ],
-//                  ),
-//                ),
-//              ),
-//              Expanded(
-//                flex: 1,
-//                child: Column(
-//                  mainAxisAlignment: MainAxisAlignment.center,
-//                  children: <Widget>[
-//                    CircularProgressIndicator(),
-//                    Padding(
-//                      padding: EdgeInsets.only(top:10.0),
-//                    ),
-//                    Text(
-//                      "MOTO",style: TextStyle(color: Colors.white,fontSize: 24.0,fontWeight: FontWeight.bold),
-//                    )
-//                  ],
-//                ) ,
-//              )
-//            ],
-//          )
-//        ],
-//      ),
+    return LayoutBuilder(
+        builder: (context, constraints) {
+          return OrientationBuilder(
+              builder:(context,orientation){
+                SizeConfig().init(constraints, orientation);
+                return new MaterialApp(
+                  home: Stack(
+                    fit: StackFit.expand,
+                    children: <Widget>[
+                      Container(
+                        decoration: new BoxDecoration(
+                            image: DecorationImage(
+                              image: new AssetImage("assets/one.jpg"),
+                              fit: BoxFit.cover,
+                            ),
+                              borderRadius: new BorderRadius.circular(10.00),
+                            ),
+
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Expanded(
+                            flex: 2,
+                            child: Container(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: <Widget>[
+                                  Padding(
+                                    padding:  EdgeInsets.only(top:8.0*SizeConfig.heightMultiplier, bottom: 2.1*SizeConfig.heightMultiplier),
+                                    child: new Image(
+                                      image: new AssetImage("assets/college_logo.png"),
+                                      alignment: Alignment.topCenter,
+                                      height: 30*SizeConfig.heightMultiplier,
+                                      width: 45*SizeConfig.widthMultiplier,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              }
+          );
+        }
     );
   }
 }
@@ -111,29 +92,23 @@ Future<bool> check(BuildContext context) async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool login = prefs.getBool("login");
-  String email= prefs.getString('email');
-  var e;
-
-  bool v=false;
+  String type=prefs.getString("type");
   if (login==true) {
-    final checkemail=FirebaseDatabase.instance.reference();
-    checkemail.child("Teacher_account").once().then((snap){
-      e=email.split('@');
-      Map data = snap.value;
-      for (final key in data.keys) {
-        if(e[0].toString()==key.toString()){
-          v=true;
-          break;
-        }
-      }
-
-    });
-    await Future.delayed(Duration(seconds: 3));
-
     runApp(MaterialApp(
-        home: v == true ? stud() : Student()));
+        home: !(type=="student") ? thome() : shome()));
   } else {
     runApp(MaterialApp(
-        home:Date()));
+        home:LoginPage()));
   }
 }
+//_checkWifi() async {
+//  // the method below returns a Future
+//  var connectivityResult = await (new Connectivity().checkConnectivity());
+//  bool connectedToWifi = (connectivityResult == ConnectivityResult.wifi);
+//  if (!connectedToWifi) {
+//    _showAlert(context);
+//  }
+//  if (_tryAgain != !connectedToWifi) {
+//    setState(() => _tryAgain = !connectedToWifi);
+//  }
+//}
