@@ -4,17 +4,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/pages/AttendanceData.dart';
-import 'package:flutter_app/pages/View_attendance.dart';
+//import 'package:flutter_app/pages/View_attendance.dart';
+import 'package:flutter_app/pages/login_page.dart';
 import 'package:flutter_app/responsive/Screensize.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/widgets.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 fun(BuildContext context) async {
-  bool val=false;
+  bool val=false,pressed=false;
   final formKey = new GlobalKey<FormState>();
-String disp="";
+  String disp="";
   FocusNode focusNode1 = new FocusNode();
   TextEditingController _controller = TextEditingController();
   return showGeneralDialog(
@@ -22,7 +24,7 @@ String disp="";
       transitionBuilder: (context, a1, a2, widget) {
         final curvedValue = Curves.easeInOutBack.transform(a1.value) -   1.0;
         return StatefulBuilder(
-         // transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+          // transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
             builder: (context, setState) {
               return Opacity(
                 opacity: a1.value,
@@ -39,9 +41,9 @@ String disp="";
                     height: 10*SizeConfig.heightMultiplier,
                     child: Column(
                       children: <Widget>[
-                   //    new Padding(padding: EdgeInsets.only(top:5)),
+                        //    new Padding(padding: EdgeInsets.only(top:5)),
                         new Form(
-                         autovalidate: val,
+                          autovalidate: val,
                           key: formKey,
                           child: TextFormField(
                             controller: _controller,
@@ -54,9 +56,9 @@ String disp="";
                                 fontSize: 2.4*SizeConfig.textMultiplier),
                             decoration: new InputDecoration(
                                 errorStyle: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FontStyle.italic,
-                                fontSize: 4*SizeConfig.widthMultiplier
+                                    fontWeight: FontWeight.bold,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 4*SizeConfig.widthMultiplier
                                 ),
                                 contentPadding: EdgeInsets.only(left: 20.00, right: 20.00),
                                 border: OutlineInputBorder(
@@ -80,7 +82,7 @@ String disp="";
                           'send email',
                           style: TextStyle(color: HexColor.fromHex("#00004d"),fontWeight: FontWeight.bold,fontSize: 2.3*SizeConfig.textMultiplier),
                         ),
-                        onPressed: () async {
+                        onPressed:pressed==false? () async {
                           if (_controller.text.isEmpty) {
                             Fluttertoast.showToast(
                                 msg: "Invalid  email",
@@ -92,7 +94,7 @@ String disp="";
 
                           }else{
                             if(formKey.currentState.validate()){
-                              resetPassword(_controller.text);
+                              resetPassword(_controller.text.toLowerCase());
                               setState(() {
                                 disp="email sent";
                               });
@@ -106,17 +108,22 @@ String disp="";
                             }else{
                               val=true;
                             }
-
+                            setState((){
+                              pressed=true;
+                            });
                           }
-                        }),
+                        }:null),
                     new FlatButton(
                       child: new Text(
                         'cancel',
                         style: TextStyle(color: HexColor.fromHex("00004d"),fontWeight: FontWeight.bold,fontSize: 2.3*SizeConfig.textMultiplier),
                       ),
-                      onPressed: () {
+                      onPressed: pressed==false?() {
                         Navigator.of(context).pop();
-                      },
+                        setState((){
+                          pressed=true;
+                        });
+                      }:null,
                     )
                   ],
                 ),
@@ -207,7 +214,7 @@ class MapScreenState extends State<profilestud>
                   new Container(
 
                     height: 35*SizeConfig.heightMultiplier,
-                   // decoration:BoxDecoration(
+                    // decoration:BoxDecoration(
 
 //                        gradient:LinearGradient(
 //                            begin: Alignment.topRight,
@@ -233,7 +240,7 @@ class MapScreenState extends State<profilestud>
                               children: <Widget>[
                                 new InkWell(
                                   child: Icon(
-                                    Icons.arrow_back_ios,
+                                    Icons.arrow_back,
                                     color: Colors.white,
                                     size: 3*SizeConfig.heightMultiplier,
                                   ),
@@ -283,13 +290,13 @@ class MapScreenState extends State<profilestud>
                   new Container(
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin:  Alignment.topCenter,
+                            begin:  Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                                Colors.white,
-                                  HexColor.fromHex("#999999")
-                                      ,
-                          ]
+                              Colors.white,
+                              HexColor.fromHex("#999999")
+                              ,
+                            ]
                         )
                     ),
                     child: Padding(
@@ -317,13 +324,13 @@ class MapScreenState extends State<profilestud>
                                       ),
                                     ],
                                   ),
-                                  new Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      _status ? _getEditIcon() : new Container(),
-                                    ],
-                                  )
+//                                  new Column(
+//                                    mainAxisAlignment: MainAxisAlignment.end,
+//                                    mainAxisSize: MainAxisSize.min,
+//                                    children: <Widget>[
+//                                      _status ? _getEditIcon() : new Container(),
+//                                    ],
+//                                  )
                                 ],
                               )),
                           Padding(
@@ -401,7 +408,6 @@ class MapScreenState extends State<profilestud>
                                       focusNode: myFocusNode,
                                       controller: _namecontroller,
                                       enabled: !_status,
-
                                       onChanged: (text){
                                         setState(() {
                                           name=text;
@@ -587,7 +593,7 @@ class MapScreenState extends State<profilestud>
             child: Padding(
               padding: EdgeInsets.only(right: 2.8*SizeConfig.widthMultiplier),
               child: Container(
-                width: 30,
+                  width: 30,
 
                   child: new RaisedButton(
                     child: new Text("Save",style: TextStyle(fontSize: 18),),
@@ -598,15 +604,15 @@ class MapScreenState extends State<profilestud>
                         _status = true;
                         FocusScope.of(context).requestFocus(new FocusNode());
                         //   var e=email.split("@");
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert.name).child("name").set(name);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert.name).child("Branch").set(dep);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert.name).child("Class").set(classs);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert.name).child("Batch").set(batch);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert.name).child("PRN").set(prn);
+                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("name").set(name);
+                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Branch").set(dep);
+                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Class").set(classs);
+                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Batch").set(batch);
+                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("PRN").set(prn);
                         if(!(Studinfo.classs==classs )||!(Studinfo.branch==dep)){
                           //  print();
-                            FirebaseDatabase.instance.reference().child(dep).child(classs).child(Studinfo.roll).set(Studinfo.name);
-                            FirebaseDatabase.instance.reference().child(Studinfo.branch).child(Studinfo.classs).child(Studinfo.roll).remove();
+                          FirebaseDatabase.instance.reference().child(dep).child(classs).child(Studinfo.roll).set(Studinfo.name);
+                          FirebaseDatabase.instance.reference().child(Studinfo.branch).child(Studinfo.classs).child(Studinfo.roll).remove();
                           Studinfo.branch=dep;
                           Studinfo.classs=classs;
                         }
@@ -662,12 +668,12 @@ class MapScreenState extends State<profilestud>
         ),
       ),
       onTap: () {
-        setState(() {
-          _status = false;
-          FocusScope.of(context).requestFocus(myFocusNode);
-
-
-        });
+//        setState(() {
+//          _status = false;
+//          FocusScope.of(context).requestFocus(myFocusNode);
+//
+//
+//        });
       },
     );
   }
@@ -699,13 +705,13 @@ class _teachprofileState extends State<teachprofile> {
     prefs=await SharedPreferences.getInstance();
     cl.clear();
 //    cl1.clear();
-  //  cl2.clear();
+    //  cl2.clear();
     cl.addAll(prefs.getStringList("scount"));
 //    cl1.addAll(prefs.getStringList("lecture"));
 //    cl.addAll(prefs.getStringList("Practical"));
 //    cl2.addAll(prefs.getStringList("Practical"));
 //    cl=cl.toSet().toList();
-    print((cl.length).toString()+"hi");
+    //  print((cl.length).toString()+"hi");
     setState(() {
       l=cl.length;
     });
@@ -756,7 +762,7 @@ class _teachprofileState extends State<teachprofile> {
                               children: <Widget>[
                                 new InkWell(
                                   child: Icon(
-                                    Icons.arrow_back_ios,
+                                    Icons.arrow_back,
                                     color: Colors.black87,
                                     size: 2.5 * SizeConfig.heightMultiplier,
                                   ),
@@ -773,7 +779,26 @@ class _teachprofileState extends State<teachprofile> {
                                           fontSize: 2.7 *
                                               SizeConfig.heightMultiplier,
                                           color: Colors.black87)),
-                                )
+                                ),
+                                new Spacer(),
+                                CircleAvatar(
+                                  backgroundColor: Colors.black,
+                                  child: PopupMenuButton<String>(
+                                    onSelected: handleClick,
+                                    shape: new RoundedRectangleBorder(
+                                        borderRadius: new BorderRadius.circular(20.0)),
+                                    color: Colors.black,
+                                    itemBuilder: (BuildContext context) {
+                                      return {'Rate us', 'Logout'}
+                                          .map((String choice) {
+                                        return PopupMenuItem<String>(
+                                          value: choice,
+                                          child: Text(choice,style: TextStyle(color: Colors.white),),
+                                        );
+                                      }).toList();
+                                    },
+                                  ),
+                                ),
                               ],
                             )),
                         Padding(
@@ -808,12 +833,12 @@ class _teachprofileState extends State<teachprofile> {
                   ),
                   new Container(
                     decoration: BoxDecoration(
-                      border: Border(
+                        border: Border(
                           top: BorderSide( //                    <--- top side
                             color: Colors.black,
                             width: 5.0,
                           ),
-                      ),
+                        ),
                         gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -972,13 +997,13 @@ class _teachprofileState extends State<teachprofile> {
                                     itemBuilder: (context, index) {
                                       return new Container(
                                         decoration: BoxDecoration(
-color:HexColor.fromHex("#ffffff"),
-                                            border: Border.all(
+                                          color:HexColor.fromHex("#ffffff"),
+                                          border: Border.all(
                                               color: HexColor.fromHex("#4d0000")
-                                                  ,width: 3
-                                            ),
-                                            borderRadius: new BorderRadius
-                                                .circular(30.0),
+                                              ,width: 3
+                                          ),
+                                          borderRadius: new BorderRadius
+                                              .circular(30.0),
 //                                          image: DecorationImage(
 //                                            image: new AssetImage("assets/profile.jpg"),
 //                                            fit: BoxFit.cover,
@@ -1025,35 +1050,49 @@ color:HexColor.fromHex("#ffffff"),
   }
 
   Widget swipe(index) {
-    return new Text(
-      "Class:" + cl[index].toString() + "\n\nWorked hrs:" + prefs.getString(cl[index].toString()),
-      style: TextStyle(fontSize: 2.9*SizeConfig.textMultiplier, fontWeight: FontWeight.bold,color: Colors.black87),);
+    var a=cl[index].split("_");
+    if(a.length==3){
+      var b=prefs.getString(cl[index].toString()).split(" ");
+      return new Text(
+        "Class: " + a[0].toString()+"\nSubject: "+a[1].toString()+"\nBatch: "+a[2].toString() + "\nTotal Practicals: " + b[0].toString(),
+        style: TextStyle(fontSize: 2.9*SizeConfig.textMultiplier, fontWeight: FontWeight.bold,color: Colors.black87),);
 
-//    lecsubj.clear();
-//    pracsubj.clear();
-//    if(cl1.contains(cl[index].toString())&&cl2.contains(cl[index].toString())){
-//      lecsubj.addAll(prefs.getStringList(cl[index].toString()));
-//      pracsubj.addAll(prefs.getStringList(cl[index].toString()));
-//      return new Text(
-//          "class:"+cl[index].toString()+"\n"+"lecture:"+lecsubj.toString()+"\n"
-//              "Practical:"+pracsubj.toString(),
-//          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-//      );
-//    }
-//    else if(cl1.contains(cl[index].toString())&&!cl2.contains(cl[index].toString())){
-//      lecsubj.addAll(prefs.getStringList(cl[index].toString()));
-//      return new Text(
-//          "class:"+cl[index].toString()+"\n"+"lecture:"+lecsubj.toString()
-//          ,style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-//      );
-//    }
-//    else{
-//      pracsubj.addAll(prefs.getStringList(cl[index].toString()));
-//      return new Text(
-//          "class:"+cl[index].toString()+"\n"+"Practical:"+pracsubj.toString()
-//          ,style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-//      );
-//    }
+    }else if(a.length==2){
+      var b= prefs.getString(cl[index].toString()).split(" ");
+      return new Text(
+        "Class: " + a[0].toString()+"\nSubject: "+a[1].toString() + "\nTotal lectures: " +b[0].toString(),
+        style: TextStyle(fontSize: 2.9*SizeConfig.textMultiplier, fontWeight: FontWeight.bold,color: Colors.black87),);
 
+    }else{
+      var b=prefs.getString(cl[index].toString()).split(" ");
+      return new Text(
+        "Class: " + a[0].toString()+"\nSubject: "+a[1].toString()+"\nBatch: "+a[2].toString() + "\nTotal Tutorials: " + b[0].toString(),
+        style: TextStyle(fontSize: 2.9*SizeConfig.textMultiplier, fontWeight: FontWeight.bold,color: Colors.black87),);
+
+    }
+
+
+  }
+  Future<void> handleClick(String value) async {
+    switch (value) {
+      case 'Logout':
+        {
+          SharedPreferences log = await SharedPreferences.getInstance();
+          FirebaseAuth.instance.signOut();
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginPage(),
+              ));
+          //log.clear();
+          log.setBool("login", false);
+          break;
+        }
+      case "Rate us":
+        {
+          Alert1 alert = new Alert1();
+          alert.displayDialog(context);
+        }
+    }
   }
 }

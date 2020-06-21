@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:ui';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -12,7 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'View_attendance.dart';
+//import 'View_attendance.dart';
 
 class Date extends StatefulWidget {
   @override
@@ -21,6 +25,7 @@ class Date extends StatefulWidget {
 
 class _DateState extends State<Date> {
   Map map, dates;
+  bool isloading =false;
   var s1;
   Color dropcolor=Color(0xff996600);
   Color leftcolor=Color(0xff392613);
@@ -28,7 +33,7 @@ class _DateState extends State<Date> {
   List<String> classlist = ["Class"], subjectlist = ["Subject"];
   int group;
   final dbref = FirebaseDatabase.instance.reference();
-  var status = [ 'Select','lecture', 'Practical'];
+  //var status = [ 'Select','lecture', 'Practical'];
   FocusNode focusNode5 = new FocusNode();
   SharedPreferences prefs;
 
@@ -42,46 +47,106 @@ class _DateState extends State<Date> {
   String map1;
   var myFormat = DateFormat('yyyy_MM_dd');
   static Future<int> getcount() async {
-    final response = await FirebaseDatabase.instance
-        .reference()
-        .child(total.dep)
-        .child(total.classs)
-        .once();
-    try{
-      total.studnames = response.value;
-      Dateinfo.prnlist.clear();
-      // var len = [];
-      for (final k in total.studnames.keys) {
-        Dateinfo.prnlist.add(k.toString());
-      }
-      Dateinfo.prnlist.sort();
-      total.count = Dateinfo.prnlist.length;
-      await FirebaseDatabase.instance
-          .reference().child("Attendance")
+    if(Dateinfo.stat=="lecture"){
+      final response = await FirebaseDatabase.instance
+          .reference().child("Student")
           .child(total.dep)
-          .child(total.classs).child("total").set(total.count);
-      return Dateinfo.prnlist.length;
-    }catch(Exception){
+          .child(total.classs)
+          .once();
+      try {
+        Map  batches=response.value;
+        // print(batches);
+        Dateinfo.prnlist.clear();
+        for (final k in batches.keys) {
+          try {
+            Map map = batches[k];
+            total.studnames.addAll(map);
+            print("eds");
+            // var len = [];
+            for (final k in map.keys) {
+              Dateinfo.prnlist.add(k.toString());
+            }
+            // Dateinfo.prnlist.sort();
+            total.count = Dateinfo.prnlist.length;
+          } catch (Exception) {
+            Fluttertoast.showToast(
+                msg: "Nothing to show",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM,
+                backgroundColor: Colors.red,
+                textColor: Colors.white,
+                fontSize: 2.2 * SizeConfig.textMultiplier);
+            return null;
+          }
+        }
+        await FirebaseDatabase.instance
+            .reference().child("Attendance")
+            .child(total.dep)
+            .child(total.classs).child("total").set(total.count);
+        print(total.studnames);
 
-      Fluttertoast.showToast(
-          msg: "Nothing to show",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 2.2*SizeConfig.textMultiplier);
-      return null;
+        return Dateinfo.prnlist.length;
+      }catch(Exception){
+        Fluttertoast.showToast(
+            msg: "Nothing to ",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 2.2 * SizeConfig.textMultiplier);
+        return null;
+
+      }
+    }else {
+      final response = await FirebaseDatabase.instance
+          .reference().child("Student")
+          .child(total.dep)
+          .child(total.classs)
+          .child(Alert1.batch)
+          .once();
+      try {
+        total.studnames = response.value;
+        Dateinfo.prnlist.clear();
+        // var len = [];
+        for (final k in total.studnames.keys) {
+          Dateinfo.prnlist.add(k.toString());
+        }
+        // Dateinfo.prnlist.sort();
+        total.count = Dateinfo.prnlist.length;
+        await FirebaseDatabase.instance
+            .reference().child("Attendance")
+            .child(total.dep)
+            .child(total.classs).child("total").set(total.count);
+        return Dateinfo.prnlist.length;
+      } catch (Exception) {
+        Fluttertoast.showToast(
+            msg: "Nothing to show",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 2.2 * SizeConfig.textMultiplier);
+        return null;
+      }
     }
   }
   @override
   Widget build(BuildContext context) {
     copy();
+    Color righttxtclr = Color(0xff997a00);
+    Color lefttxtclr = Color(0xff00004d);
+    double lefttxtsize=2.5*SizeConfig.heightMultiplier;
+    Color butclr = Color(0xff996600);
     ProgressDialog pr = new ProgressDialog(context);
     pr.style(
         message: "wait");
     return MaterialApp(
         home: new Scaffold(
-          body: Container(
+          body:isloading?new SpinKitThreeBounce(
+            color: Color(0xff6d6d46),
+            size: 40.0,
+            // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+          ): Container(
             decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [Colors.black87,Colors.black87])
             ),
@@ -91,23 +156,23 @@ class _DateState extends State<Date> {
               ),
               margin: new EdgeInsets.symmetric(
                   horizontal: 6*SizeConfig.widthMultiplier,
-                  vertical: 15*SizeConfig.heightMultiplier
+                  vertical: 14*SizeConfig.heightMultiplier
               ),
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-              //  stops: [0,0.5,1],
+                //  stops: [0,0.5,1],
                 colors: [
-                //  HexColor.fromHex("#83afaf"),
-                  HexColor.fromHex("#bfbfbf"),
-                  HexColor.fromHex("#afaf83")
+                  //  HexColor.fromHex("#83afaf"),
+                  HexColor.fromHex("#DAD299"),
+                  HexColor.fromHex("#DAD299")
                 ],
               ),
               elevation: 5.0,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                new Padding(padding: EdgeInsets.only(top:30)),
+                  new Padding(padding: EdgeInsets.only(top:30)),
                   new Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
@@ -120,8 +185,8 @@ class _DateState extends State<Date> {
                       new Text(
                         'Theory' ,
                         style: TextStyle(
-                            fontSize: 2.2 * SizeConfig.textMultiplier,
-                            color: leftcolor,
+                            fontSize: 2.5 * SizeConfig.textMultiplier,
+                            color: lefttxtclr,
                             fontWeight: FontWeight.bold),
                       ),
                       // new Padding(padding: EdgeInsets.only(left: 10)),
@@ -134,81 +199,49 @@ class _DateState extends State<Date> {
                       new Text(
                         'Practical',
                         style: TextStyle(
-                            fontSize: 2.2 * SizeConfig.textMultiplier,
-                            color: leftcolor,
+                            fontSize: 2.5 * SizeConfig.textMultiplier,
+                            color: lefttxtclr,
                             fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
-//                  Padding(
-//                    padding: EdgeInsets.only(
-//                        top: 3.5 * SizeConfig.heightMultiplier,
-//                        left: 7 * SizeConfig.widthMultiplier),
-//                    child: Row(
-//                      children: <Widget>[
-//                        Text(
-//                          "Attendance of:",
-//                          style: TextStyle(
-//                              fontSize: 2.2 * SizeConfig.textMultiplier,
-//                              color: HexColor.fromHex("#00004d"),
-//                              fontWeight: FontWeight.bold),
-//                        ),
-//                        new Padding(
-//                            padding: EdgeInsets.only(
-//                                left: 6 * SizeConfig.widthMultiplier)),
-//                        Container(
-//                          height: 4.9*SizeConfig.heightMultiplier,
-//                          padding:
-//                          EdgeInsets.symmetric(horizontal: 3.1*SizeConfig.widthMultiplier, vertical: 0.7*SizeConfig.heightMultiplier),
-//                          decoration: BoxDecoration(
-//                              color: Colors.white,
-//                              borderRadius: BorderRadius.circular(8)
-//                          ),
-//                          child: DropdownButton<String>(
-//                            // itemHeight: 5.0,
-//                            //hint: new Text("Select City"),
-//                            items: status.map((String listvalue) {
-//                              return DropdownMenuItem<String>(
-//                                value: listvalue,
-//                                child: Text(
-//                                  listvalue,
-//                                  style: TextStyle(
-//                                      fontSize: 2 * SizeConfig.textMultiplier,
-//                                      fontWeight: FontWeight.bold),
-//                                ),
-//                              );
-//                            }).toList(),
-//                            onChanged: (val) {
-//                              setState(() {
-//                                stat=val;
-//                                classlist.clear();
-//                                classlist=["Class"];
-//                                subjectlist.clear();
-//                                subjectlist=["Subject"];
-//                                classs="Class";
-//                                _subject="Subject";
-//                                if(!(stat=="Status") && classs=="Class")
-//                                  classlist.addAll(prefs.getStringList(stat));
-//                              });
-//                            },
-//                            value: stat,
-//                          ),
-//                        ),
-//                      ],
-//                    ),
-//                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        bottom: 1 * SizeConfig.heightMultiplier,
+                       // left: 23 * SizeConfig.widthMultiplier
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Radio(
+                          activeColor: dropcolor,
+                          value: 2,
+                          groupValue: group,
+                          onChanged: _handleRadioValueChange1,
+                        ),
+                        new Text(
+                          'Tutorial',
+                          style: TextStyle(
+                              fontSize: 2.5 * SizeConfig.textMultiplier,
+                              color: lefttxtclr,fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
 
                   Padding(
                     padding: EdgeInsets.only(
                         top: 4 * SizeConfig.heightMultiplier,
-                        left: 7 * SizeConfig.widthMultiplier),
+                    //    left: 7 * SizeConfig.widthMultiplier
+                    ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
                           "Select Class:",
                           style: TextStyle(
-                              fontSize: 2.2 * SizeConfig.textMultiplier,
-                              color:leftcolor,
+                              fontSize: lefttxtsize,
+                              color:lefttxtclr,
                               fontWeight: FontWeight.bold),
                         ),
                         new Padding(
@@ -223,14 +256,14 @@ class _DateState extends State<Date> {
                               borderRadius: BorderRadius.circular(5)
                           ),
                           child: DropdownButton<String>(
-                            iconEnabledColor: dropcolor,
+                            iconEnabledColor: righttxtclr,
                             items: classlist.map((String listvalue) {
                               return DropdownMenuItem<String>(
 
                                 value: listvalue,
                                 child: Text(listvalue,style: TextStyle(
                                     fontSize: 2 * SizeConfig.textMultiplier,
-                                    fontWeight: FontWeight.bold,color: dropcolor),
+                                    fontWeight: FontWeight.bold,color: righttxtclr),
                                 ),
                               );
                             }).toList(),
@@ -253,14 +286,16 @@ class _DateState extends State<Date> {
                   Padding(
                     padding: EdgeInsets.only(
                         top: 5* SizeConfig.heightMultiplier,
-                        left: 7 * SizeConfig.widthMultiplier),
+                   //     left: 7 * SizeConfig.widthMultiplier
+                    ),
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
                           "Select Subject:",
                           style: TextStyle(
-                              fontSize: 2.2 * SizeConfig.textMultiplier,
-                              color: leftcolor,
+                              fontSize: lefttxtsize,
+                              color: lefttxtclr,
                               fontWeight: FontWeight.bold),
                         ),
                         new Padding(
@@ -275,19 +310,21 @@ class _DateState extends State<Date> {
                               borderRadius: BorderRadius.circular(8)
                           ),
                           child: DropdownButton<String>(
-                            iconEnabledColor: dropcolor,
+                            iconEnabledColor: righttxtclr,
                             items: subjectlist.map((String listvalue) {
                               return DropdownMenuItem<String>(
                                 value: listvalue,
                                 child: Text(listvalue,style: TextStyle(
                                     fontSize: 2 * SizeConfig.textMultiplier,
-                                    color: dropcolor,
+                                    color: righttxtclr,
                                     fontWeight: FontWeight.bold),
                                 ),
                               );
                             }).toList(),
                             onChanged: (val) {
+
                               setState(() => _subject = val);
+                              Dateinfo.subject=_subject;
                             },
                             value: _subject,
                           ),
@@ -296,40 +333,43 @@ class _DateState extends State<Date> {
                     ),
                   ),
                   Padding(
-                    padding:EdgeInsets.only(top: 7*SizeConfig.heightMultiplier),
+                    padding:EdgeInsets.only(top: 3*SizeConfig.heightMultiplier),
                     child: new MaterialButton(
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        DateTime newDateTime = await showRoundedDatePicker(
+                        DateTime newDateTime = await showDatePicker(
                           context: context,
-                          background: Color(0xff000000),
-                          theme: ThemeData.light(),
+
                           initialDate: DateTime.now(),
                           firstDate: DateTime(1900),
                           lastDate: DateTime(2100),
-                          borderRadius: 16,
+
                         );
+
                         setState(() {
-                          date = myFormat.format(newDateTime);
+                          try{
+                            date = myFormat.format(newDateTime);
+                          }catch(Exception){}
                         });
+
                       },
                       shape: new RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50.00)),
                       child: new Text(date,
                           style: TextStyle(
                               fontFamily: 'BalooChettan2',
-                              color: HexColor.fromHex("#330000"),
-                              fontSize: 3.0*SizeConfig.textMultiplier,
+                              color: lefttxtclr,
+                              fontSize: 3*SizeConfig.textMultiplier,
                               fontWeight: FontWeight.bold
                           )),
                     ),
                   ), //Forgot password button
                   Padding(
-                    padding:EdgeInsets.symmetric(horizontal: 30*SizeConfig.widthMultiplier,vertical: 4*SizeConfig.heightMultiplier),
+                    padding:EdgeInsets.symmetric(horizontal: 30*SizeConfig.widthMultiplier,vertical: 2*SizeConfig.heightMultiplier),
                     child: new RaisedButton(
                       onPressed: () async{
                         FocusScope.of(context).requestFocus(new FocusNode());
-                        if(stat=="Select"||classs=="Class"|| _subject=="Subject"){
+                        if(stat=="Select"||classs=="Class"|| _subject=="Subject"||date=="Select Date"){
                           Fluttertoast.showToast(
                               msg: "Fill all the fields",
                               toastLength: Toast.LENGTH_LONG,
@@ -338,7 +378,9 @@ class _DateState extends State<Date> {
                               textColor: Colors.white,
                               fontSize: 16.0);
                         }else {
-                          pr.show();
+                          //pr.show();
+
+                          print(Dateinfo.part);
                           total.classs = classs;
                           total.dep = Dateinfo.dept;
                           Dateinfo.stat = stat;
@@ -348,6 +390,9 @@ class _DateState extends State<Date> {
                           Dateinfo.lecnumber = "1";
                           try {
                             if (stat == "lecture") {
+                              setState(() {
+                                isloading=true;
+                              });
                               await dbref
                                   .child("Attendance")
                                   .child(Dateinfo.dept)
@@ -360,24 +405,49 @@ class _DateState extends State<Date> {
                                   .once()
                                   .then((snap) async {
                                 Dateinfo.part = snap.value;
+                                if (snap.value==null) throw Exception;
                               });
                             } else {
-                              await Alert.dialog(context);
-                              print(Alert.batch);
+                              Alert1.check=true;
+                              Alert1.inputlec=true;
+                              if(stat=="Practical") {
+                                Dateinfo.batches.clear();
+                                Dateinfo.batches =
+                                    prefs.getStringList(
+                                        Dateinfo.subject);
+                                print(Dateinfo.part);
+                              }else{
+                                Dateinfo.batches.clear();
+                                Dateinfo.batches =
+                                    prefs.getStringList(
+                                        Dateinfo.subject+"T");
+
+                              }
+                              //print("object");
+                              print(Dateinfo.part);
+                              await Alert1.dialog(context);
+                              setState(() {
+                                isloading=true;
+                              });
                             }
+                            await Future.delayed(Duration(seconds: 2));
                             // pr.show();
                             int k = await getcount();
+                            print(Dateinfo.part);
 
                             dbref.child("Attendance").child(Dateinfo.dept)
                                 .child(classs).child("total")
                                 .set(total.count);
                             if (Dateinfo.part != "1") {
                               await _displayDialog(context);
-                             // await Future.delayed(Duration(seconds: 4));
+                              // await Future.delayed(Duration(seconds: 4));
                             }
                             await Dateinfo.info();
-                        //    await Future.delayed(Duration(seconds: 6));
-                            pr.hide();
+                            //    await Future.delayed(Duration(seconds: 6));
+                            //pr.hide();
+                            setState(() {
+                              isloading=false;
+                            });
                             Dateinfo.viewmod=false;
                             if (!(k == null)) {
                               Navigator.push(
@@ -389,7 +459,9 @@ class _DateState extends State<Date> {
                           }
                           catch (Exception) {
                             pr.hide();
-
+                            setState(() {
+                              isloading=false;
+                            });
                             Fluttertoast.showToast(
                                 msg: "Nothing to show here",
                                 toastLength: Toast.LENGTH_LONG,
@@ -402,7 +474,7 @@ class _DateState extends State<Date> {
                         //  await Future.delayed(Duration(seconds: 4
 
                       },
-                      color: dropcolor,
+                      color: butclr,
                       shape: new RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(50.00)),
                       child: new Text("  Display",
@@ -419,14 +491,14 @@ class _DateState extends State<Date> {
             ),
           ),
           appBar: new AppBar(
-           leading: IconButton(
-            onPressed: (){
-              Navigator.pop(context);
-            },
-              icon:Icon(Icons.arrow_back_ios,color: Colors.white,)
+            leading: IconButton(
+                onPressed: (){
+                  Navigator.pop(context);
+                },
+                icon:Icon(Icons.arrow_back,color: Colors.white,)
 
-           ),
-            title: new Text("Homepage\\check att"),
+            ),
+            title: new Text("Homepage\\check att",style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier)),
             backgroundColor: Color(0xff6d6d46),
           ),
         ));
@@ -448,7 +520,7 @@ class _DateState extends State<Date> {
       });
 
     }
-    else{
+    else if(value==1){
       setState(() {
         group=value;
         stat="Practical";
@@ -462,7 +534,22 @@ class _DateState extends State<Date> {
           classlist.addAll(prefs.getStringList(stat));
 
       });
-          }
+    }
+    else{
+      setState(() {
+        group=value;
+        stat="Tutorial";
+        classlist.clear();
+        classlist=["Class"];
+        subjectlist.clear();
+        subjectlist=["Subject"];
+        classs="Class";
+        _subject="Subject";
+        if(!(stat=="Status") && classs=="Class")
+          classlist.addAll(prefs.getStringList(stat));
+
+      });
+    }
   }
 }
 
@@ -475,7 +562,7 @@ _displayDialog(BuildContext context) async {
   }
 
   return showDialog(
-    barrierDismissible: false,
+      barrierDismissible: false,
       context: context,
       builder: (context) {
         return AlertDialog(
@@ -518,8 +605,9 @@ class _HomePageState extends State<HomePage>{
   final GlobalKey<RefreshIndicatorState>refresh=GlobalKey<RefreshIndicatorState>();
   final GlobalKey<ScaffoldState>scaffold=GlobalKey<ScaffoldState>();
   IconData iconData = Icons.check_box;
-  final dbref=FirebaseDatabase.instance.reference().child("Attendance");
-  Color checkboxclr=Color(0xff6d6d46);
+  final String serverToken = 'AAAAzLvQqG0:APA91bFHMVn3YfGyxWs1Fkr9dtrFOvWg569HaK5vLy8lp3wOvFhZRvKMsQfsNEZhxZGj2hMwclWL_t7QLLNntuBojte5Jch58W20ykmyI7_0A2WwcHe-Z4FQNJIUvHcBg1mPNkY5X6iK';
+  final dbref=FirebaseDatabase.instance.reference();
+  Color checkboxclr=Colors.green;
   String  appbarname="home\\check_view";
   Future<void> handlerefresh(){
     final Completer<void>completer=Completer<void>();
@@ -528,6 +616,7 @@ class _HomePageState extends State<HomePage>{
     });
     setState(() {
       Dateinfo.list.addAll(list);
+      Dateinfo.list=Dateinfo.list.toSet().toList();
     });
     return completer.future.then<void>((_){
 
@@ -559,7 +648,7 @@ class _HomePageState extends State<HomePage>{
             .child(total.dep)
             .child(total.classs).child(Dateinfo.subject).
         child(Dateinfo.teachname)
-            .child(Dateinfo.date1).child(Dateinfo.stat).child(Alert.batch).child(Dateinfo.lecnumber.toString())
+            .child(Dateinfo.date1).child(Dateinfo.stat).child(Alert1.batch).child(Dateinfo.lecnumber.toString())
             .child("a_total").set(count.toString());
       }
 
@@ -594,8 +683,8 @@ class _HomePageState extends State<HomePage>{
     Icon obj;
     return Scaffold(
       appBar: new AppBar(
-        backgroundColor: Color(0xff6d6d46),
-        title: new Text(appbarname),
+        backgroundColor: Color(0xff008080),
+        title: new Text(appbarname,style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier),),
         elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0 : 0.0,
         actions: <Widget>[
           PopupMenuButton<String>(
@@ -611,146 +700,274 @@ class _HomePageState extends State<HomePage>{
           ),
         ],
       ),
-      body:Column(
-        children: <Widget>[
-          Container(
-            height: 50*SizeConfig.heightMultiplier,
-            child: LiquidPullToRefresh(
-              key:refresh,
-              color: Colors.black,
-              onRefresh: handlerefresh,
-              showChildOpacityTransition: false,
-              child: ListView.builder(padding:kMaterialListPadding,
-                itemCount: total.count,
-                itemBuilder:( BuildContext context,int index){
+      body:Container(
+        color: Colors.black87,
+        // height: 50*SizeConfig.heightMultiplier,
+        child: LiquidPullToRefresh(
+          key:refresh,
+          color: Colors.black,
+          onRefresh: handlerefresh,
+          showChildOpacityTransition: false,
+          child: ListView.builder(padding:kMaterialListPadding,
+            itemCount: total.count,
+            itemBuilder:( BuildContext context,int index){
 
-                  if (Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())) {
-                    obj=new Icon(Icons.check_box,color: checkboxclr);
-                  } else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                    obj=new Icon(Icons.check_box);
-                  }
-                  else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                    obj=new Icon(Icons.check_box_outline_blank);
-                  }else if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                    obj=new Icon(Icons.check_box_outline_blank);
-                  }
-                  else{
-                    obj=new Icon(Icons.check_box);
-                  }
-                  return ListTile(
-                      isThreeLine: false,
-                      leading:  Text(Dateinfo.prnlist.elementAt(index).toString()+": ",style: TextStyle(fontSize: 2.5*SizeConfig.textMultiplier,fontWeight: FontWeight.bold,
-                      color: Color(0xffac3973)
-                      )),
-                      title:Text(total.studnames[(Dateinfo.prnlist.elementAt(index).toString())].toString(),style: TextStyle(
-                        fontSize: 2.2*SizeConfig.textMultiplier,color: Color(0xff6d6d46,),fontWeight: FontWeight.bold
-                      ),),
-                      //subtitle: const Text("hiiiii"),
-                      trailing:
-                      new IconButton(icon: obj, onPressed: () async {
-                        if(Dateinfo.viewmod){
-                          Fluttertoast.showToast(
-                              msg: "Pull to save",
-                              toastLength: Toast.LENGTH_LONG,
-                              gravity: ToastGravity.BOTTOM,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0);
-                          if(Dateinfo.stat=="lecture"){
-                            if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                             await Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                              list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                              await dbref
-                                  .child(Dateinfo.dept)
-                                  .child(Dateinfo.classs)
-                                  .child(Dateinfo.subject)
-                                  .child(Dateinfo.teachname)
-                                  .child(Dateinfo.date1)
-                                  .child(Dateinfo.stat)
-                                  .child(Dateinfo.lecnumber)
-                                  .child((Dateinfo.prnlist.elementAt(index).toString())).remove();
-                              setState(() {
-                                count=list.length;
-                                obj=new Icon(Icons.check_box_outline_blank);
-                              });
-                              setcount();
-                            }
-                            else{
-                              list.add(Dateinfo.prnlist.elementAt(index).toString());
-                              await dbref
-                                  .child(Dateinfo.dept)
-                                  .child(Dateinfo.classs)
-                                  .child(Dateinfo.subject)
-                                  .child(Dateinfo.teachname)
-                                  .child(Dateinfo.date1)
-                                  .child(Dateinfo.stat)
-                                  .child(Dateinfo.lecnumber)
-                                  .child((Dateinfo.prnlist.elementAt(index).toString()))
-                                  .set("1");
-                              setState(() {
-                                count=list.length;
-                                new Icon(Icons.check_box);
-                              });
-                              setcount();
+              if (Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())) {
+                obj=new Icon(Icons.check_box,color: checkboxclr);
+              } else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                obj=new Icon(Icons.check_box);
+              }
+              else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                obj=new Icon(Icons.check_box_outline_blank);
+              }else if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                obj=new Icon(Icons.check_box_outline_blank);
+              }
+              else{
+                obj=new Icon(Icons.check_box);
+              }
+              return Card(
+                elevation: 50,
 
-                            }
-                          }else{
-                            if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                              Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                              list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                              await dbref
-                                  .child(Dateinfo.dept)
-                                  .child(Dateinfo.classs)
-                                  .child(Dateinfo.subject)
-                                  .child(Dateinfo.teachname)
-                                  .child(Dateinfo.date1)
-                                  .child(Dateinfo.stat)
-                                  .child(Alert.batch)
-                                  .child(Dateinfo.lecnumber)
-                                  .child((Dateinfo.prnlist.elementAt(index).toString()).toString()).remove();
-                              setState(() {
-                                count=list.length;
-                                obj=new Icon(Icons.check_box_outline_blank);
+                shape: new RoundedRectangleBorder(
+                    borderRadius: new BorderRadius.circular(15.0)),
+
+                child: ListTile(
+                    isThreeLine: false,
+                    leading:  Text(Dateinfo.prnlist.elementAt(index).toString()+": ",style: TextStyle(fontSize: 2.5*SizeConfig.textMultiplier,fontWeight: FontWeight.bold,
+                        color: Color(0xffac3973)
+                    )),
+                    title:Text(total.studnames[(Dateinfo.prnlist.elementAt(index).toString())].toString(),style: TextStyle(
+                        fontSize: 2.2*SizeConfig.textMultiplier,color: Colors.black,fontWeight: FontWeight.bold
+                    ),),
+                    //subtitle: const Text("hiiiii"),
+                    trailing:
+                    new IconButton(icon: obj, onPressed: () async {
+                      if(Dateinfo.viewmod){
+                        Fluttertoast.showToast(
+                            msg: "Pull to save",
+                            toastLength: Toast.LENGTH_LONG,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 16.0);
+                        await http.post(
+                          'https://fcm.googleapis.com/fcm/send',
+                          headers: <String, String>{
+                            'Content-Type': 'application/json',
+                            'Authorization': 'key=$serverToken',
+                          },
+                          body: jsonEncode(
+                            <String,   dynamic>{
+                              'notification': <String, dynamic>{
+                                'body': Dateinfo.teachname+" modified your "+Dateinfo.subject+" attendance ",
+                                'title': "Attendance Modified",
+                                //'icon':"assets/college_logo.png"
+                              },
+
+                              'priority': 'high',
+                              'data': <String, dynamic>{
+                                'Hello': 'Pune',
+                                'id': '1',
+                                'status': 'done',
+
+                              },
+                              "to": "/topics/${Dateinfo.prnlist.elementAt(index).toString()}"
+
+                            },
+                          ),
+                        );
+                        if(Dateinfo.stat=="lecture"){
+                          if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                            await Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                            list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                            dbref.child("defaulter")
+                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                            await dbref.child("Attendance")
+                                .child(Dateinfo.dept)
+                                .child(Dateinfo.classs)
+                                .child(Dateinfo.subject)
+                                .child(Dateinfo.teachname)
+                                .child(Dateinfo.date1)
+                                .child(Dateinfo.stat)
+                                .child(Dateinfo.lecnumber)
+                                .child((Dateinfo.prnlist.elementAt(index).toString())).remove();
+                            setState(() {
+                              count=list.length;
+                              obj=new Icon(Icons.check_box_outline_blank);
+                            });
+                            int a=0;
+                            try {
+                              await dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs)
+                                  .child(Dateinfo.prnlist.elementAt(index)
+                                  .toString())
+                                  .child(
+                                  Dateinfo.subject + "_" + Dateinfo.teachname)
+                                  .once()
+                                  .then((value) {
+                                if(value.value==null) throw Exception;
+                                a = value.value;
                               });
-                              setcount();
-                            }
-                            else{
-                              list.add(Dateinfo.prnlist.elementAt(index).toString());
-                              await dbref
-                                  .child(Dateinfo.dept)
-                                  .child(Dateinfo.classs)
-                                  .child(Dateinfo.subject)
-                                  .child(Dateinfo.teachname)
-                                  .child(Dateinfo.date1)
-                                  .child(Dateinfo.stat)
-                                  .child(Alert.batch)
-                                  .child(Dateinfo.lecnumber)
-                                  .child((Dateinfo.prnlist.elementAt(index).toString()).toString())
-                                  .set("1");
-                              setState(() {
-                                count=list.length;
-                                new Icon(Icons.check_box);
-                              });
-                              setcount();
-                            }
+                            }catch(Exception){}
+                            if(a>0)
+                              dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                  .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a-1);
+                            setcount();
+
                           }
-                         // Dateinfo.b=!Dateinfo.b;
+                          else{
+                            list.add(Dateinfo.prnlist.elementAt(index).toString());
+                            dbref.child("defaulter")
+                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                            await dbref.child("Attendance")
+                                .child(Dateinfo.dept)
+                                .child(Dateinfo.classs)
+                                .child(Dateinfo.subject)
+                                .child(Dateinfo.teachname)
+                                .child(Dateinfo.date1)
+                                .child(Dateinfo.stat)
+                                .child(Dateinfo.lecnumber)
+                                .child((Dateinfo.prnlist.elementAt(index).toString()))
+                                .set("1");
+                            setState(() {
+                              count=list.length;
+                              new Icon(Icons.check_box);
+                            });
+                            int a=0;
+                            try {
+                              await dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs)
+                                  .child(Dateinfo.prnlist.elementAt(index)
+                                  .toString())
+                                  .child(
+                                  Dateinfo.subject + "_" + Dateinfo.teachname)
+                                  .once()
+                                  .then((value) {
+                                if(value.value==null) throw Exception;
+                                a = value.value;
+                              });
+                            }catch(Exception){}
+                            dbref.child("defaulter")
+                                .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a+1);
+                            setcount();
+
+                          }
                         }else{
-                          Fluttertoast.showToast(
-                              msg: "You can't Modify here",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.BOTTOM,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 2.2*SizeConfig.textMultiplier);
+                          if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                            Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                            list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                            dbref.child("defaulter")
+                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+
+                            await dbref.child("Attendance")
+                                .child(Dateinfo.dept)
+                                .child(Dateinfo.classs)
+                                .child(Dateinfo.subject)
+                                .child(Dateinfo.teachname)
+                                .child(Dateinfo.date1)
+                                .child(Dateinfo.stat)
+                                .child(Alert1.batch)
+                                .child(Dateinfo.lecnumber)
+                                .child((Dateinfo.prnlist.elementAt(index).toString()).toString()).remove();
+                            setState(() {
+                              count=list.length;
+                              obj=new Icon(Icons.check_box_outline_blank);
+                            });
+                            int a=0;
+                            String key;
+                            if(Dateinfo.stat=="Practical"){
+                              key=Dateinfo.subject + "_" +
+                                  Dateinfo.teachname + "_" + Alert1.batch;
+                            }else{
+                              key=Dateinfo.subject + "_" +
+                                  Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
+                            }
+                            try {
+                              await dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs)
+                                  .child(Dateinfo.prnlist.elementAt(index)
+                                  .toString())
+                                  .child(key)
+                                  .once()
+                                  .then((value) {
+                                if(value.value==null) throw Exception;
+
+                                a = value.value;
+                              });
+                            }catch(Exception){
+                              a=0;
+                            }
+                            if(a>0)
+                              dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                  .child(key).set(a-1);
+                            setcount();
+                          }
+                          else{
+                            list.add(Dateinfo.prnlist.elementAt(index).toString());
+                            dbref.child("defaulter")
+                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                            await dbref.child("Attendance")
+                                .child(Dateinfo.dept)
+                                .child(Dateinfo.classs)
+                                .child(Dateinfo.subject)
+                                .child(Dateinfo.teachname)
+                                .child(Dateinfo.date1)
+                                .child(Dateinfo.stat)
+                                .child(Alert1.batch)
+                                .child(Dateinfo.lecnumber)
+                                .child((Dateinfo.prnlist.elementAt(index).toString()).toString())
+                                .set("1");
+                            setState(() {
+                              count=list.length;
+                              new Icon(Icons.check_box);
+                            });
+                            int a=0;
+                            String key;
+                            if(Dateinfo.stat=="Practical"){
+                              key=Dateinfo.subject + "_" +
+                                  Dateinfo.teachname + "_" + Alert1.batch;
+                            }else{
+                              key=Dateinfo.subject + "_" +
+                                  Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
+                            }
+                            try {
+                              await dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs)
+                                  .child(Dateinfo.prnlist.elementAt(index)
+                                  .toString())
+                                  .child(key)
+                                  .once()
+                                  .then((value) {
+                                if(value.value==null) throw Exception;
+                                a = value.value;
+                              });
+                            }catch(Exception){}
+                            dbref.child("defaulter")
+                                .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                .child(key).set(a+1);
+
+                            setcount();
+                          }
                         }
-                      })
-                  );
-                },
-              ),
-            ),
+                        // Dateinfo.b=!Dateinfo.b;
+                      }else{
+                        Fluttertoast.showToast(
+                            msg: "You can't Modify here",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            backgroundColor: Colors.red,
+                            textColor: Colors.white,
+                            fontSize: 2.2*SizeConfig.textMultiplier);
+                      }
+                    })
+                ),
+              );
+            },
           ),
-        ],
+        ),
       ),
 
     );

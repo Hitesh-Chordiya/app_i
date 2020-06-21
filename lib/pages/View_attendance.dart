@@ -41,29 +41,24 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//        backgroundColor:HexColor.fromHex("#80e5ff"),
-//        appBar: GradientAppBar(
-//          title: Text('Your attendance'),
-//          backgroundColorStart: HexColor.fromHex("#1e130c"),
-//          backgroundColorEnd: HexColor.fromHex("#9a8478"),
-//        ),
+//
         appBar: AppBar(
-          backgroundColor: HexColor.fromHex("#6d6d46"),
+          backgroundColor: HexColor.fromHex("#008080"),
           title: Text('Your attendance'),
         ),
-        body: FittedBox(
-          child: Container(
-            color: Colors.black87,
+        body:
+          Container(
+              color: Color(0xffd9d9d9),
               child: Padding(
-                padding:  EdgeInsets.symmetric(vertical:5*SizeConfig.heightMultiplier,horizontal:4*SizeConfig.widthMultiplier),
+                padding:  EdgeInsets.symmetric(vertical:3*SizeConfig.heightMultiplier,horizontal:4*SizeConfig.widthMultiplier),
                 child: Container(
-                  height: 85*SizeConfig.heightMultiplier ,
+                  height: 90*SizeConfig.heightMultiplier ,
                   width: 100*SizeConfig.widthMultiplier ,
                   decoration: BoxDecoration(
 
                     boxShadow: <BoxShadow>[
                       BoxShadow(
-                          color: Colors.black54,
+                          color: Colors.black87,
                           blurRadius: 2.8*SizeConfig.widthMultiplier,
                           spreadRadius: -12
                       )
@@ -72,6 +67,7 @@ class _HomeState extends State<Home> {
                   child: Container(
                     child: Card(
                       margin: new EdgeInsets.symmetric(
+                        //vertical: ,
                           horizontal: 7*SizeConfig.widthMultiplier),
                       elevation: 5.0,
                       color: Colors.blueAccent.shade50,
@@ -79,56 +75,56 @@ class _HomeState extends State<Home> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Container(
-                       // color: Colors.black87,
+                        // color: Colors.black87,
 //                            decoration: BoxDecoration(
 //                              image: DecorationImage(
 //                                image: new AssetImage("assets/profile.jpg"),
 //                                fit: BoxFit.cover,
 //                              ),
 //                            ),
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                             // mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                AttendancePieChart(subjectName),
-                                Padding(
-                                  padding: EdgeInsets.symmetric(vertical:7*SizeConfig.heightMultiplier,horizontal: 4*SizeConfig.widthMultiplier),
-                                  child: new Swiper(
-                                      layout: SwiperLayout.TINDER,
-                                      customLayoutOption: new CustomLayoutOption(
-                                          startIndex: -1,
-                                          stateCount: 3
-                                      ).addRotate([
-                                        -45.0/180,
-                                        0.0,
-                                        45.0/180
-                                      ]).addTranslate([
-                                        new Offset(-370.0, -40.0),
-                                        new Offset(0.0, 0.0),
-                                        new Offset(370.0, -40.0)
-                                      ]),
-                                      onIndexChanged: (int index){
-                                        setState(() {
-                                          subjectName=Attendance.subjectList.elementAt(index);
-                                        });
-                                      },
-                                      itemWidth: 60*SizeConfig.widthMultiplier,
-                                      itemHeight: 20*SizeConfig.heightMultiplier,
-                                      itemBuilder: (context, index) {
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            // mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              AttendancePieChart(subjectName),
+                              Padding(
+                                padding: EdgeInsets.symmetric(vertical:3*SizeConfig.heightMultiplier,horizontal: 4*SizeConfig.widthMultiplier),
+                                child: new Swiper(
+                                    layout: SwiperLayout.TINDER,
+                                    customLayoutOption: new CustomLayoutOption(
+                                        startIndex: -1,
+                                        stateCount: 3
+                                    ).addRotate([
+                                      -45.0/180,
+                                      0.0,
+                                      45.0/180
+                                    ]).addTranslate([
+                                      new Offset(-370.0, -40.0),
+                                      new Offset(0.0, 0.0),
+                                      new Offset(370.0, -40.0)
+                                    ]),
+                                    onIndexChanged: (int index){
+                                      setState(() {
+                                        subjectName=Attendance.subjectList.elementAt(index);
+                                      });
+                                    },
+                                    itemWidth: 60*SizeConfig.widthMultiplier,
+                                    itemHeight: 15*SizeConfig.heightMultiplier,
+                                    itemBuilder: (context, index) {
 
-                                        return new Container(
+                                      return new Container(
 //                                          width: 100,
 //                                          height: 100,
-                                          child: Center(child: Text(Attendance.subjectList.elementAt(index),style: TextStyle(fontSize: 4*SizeConfig.heightMultiplier,fontWeight: FontWeight.bold,color: Colors.black87),)),
-                                          decoration:BoxDecoration(
-                                              image: DecorationImage(
-                                                image: new AssetImage("assets/card1.jpg"),
-                                                fit: BoxFit.cover,
-                                              ),
-                                              borderRadius: new BorderRadius
-                                                  .circular(30.0),
-                                              shape: BoxShape.rectangle,
-                                              border: Border.all(width: 4.0, color: Colors.grey.shade500),
+                                        child: Center(child: Text(Attendance.subjectList.elementAt(index),style: TextStyle(fontSize: 4*SizeConfig.heightMultiplier,fontWeight: FontWeight.bold,color: Colors.black87),)),
+                                        decoration:BoxDecoration(
+                                          image: DecorationImage(
+                                            image: new AssetImage("assets/card1.jpg"),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius: new BorderRadius
+                                              .circular(30.0),
+                                          shape: BoxShape.rectangle,
+                                          border: Border.all(width: 4.0, color: Colors.grey.shade500),
 //
 //                                              gradient:LinearGradient(
 //                                                  begin: Alignment.topRight,
@@ -141,13 +137,13 @@ class _HomeState extends State<Home> {
 ////                                                Colors.black,
 ////                                                  Colors.yellowAccent
 //                                                  ])
-                                          ),
-                                        );
-                                      },
-                                      itemCount: Attendance.subjectList.length),
-                                ),
-                              ]
-                          ),
+                                        ),
+                                      );
+                                    },
+                                    itemCount: Attendance.subjectList.length),
+                              ),
+                            ]
+                        ),
 
                       ),
                     ),
@@ -155,7 +151,7 @@ class _HomeState extends State<Home> {
                 ),
               )
           ),
-        )
+
 //        Padding(
 //          padding: const EdgeInsets.all(30.0),
 
@@ -173,6 +169,8 @@ class _HomeState extends State<Home> {
     int att_lect=0;
     int total_pract=0;
     int att_pract=0;
+    int att_tut=0;
+    int total_tut=0;
 //print(MediaQuery.of(context).size.width);
 //print(MediaQuery.of(context).size.height);
     try {
@@ -183,8 +181,11 @@ class _HomeState extends State<Home> {
         att_lect += (Attendance.attendanceDataList[i].attended_lect);
         total_pract += (Attendance.attendanceDataList[i].total_pract);
         att_pract += (Attendance.attendanceDataList[i].attended_pract);
+        att_tut += (Attendance.attendanceDataList[i].attended_tut);
+        total_tut += (Attendance.attendanceDataList[i].total_tut);
+
       }
-      TotalAttendance = (att_lect+att_pract) / (total_lect+total_pract)*100;
+      TotalAttendance = (att_lect+att_pract+att_tut+Attendance.medical+Attendance.sports+Attendance.others) / (total_lect+total_pract+total_tut)*100;
       TotalAttendance=TotalAttendance.toStringAsFixed(2) as double;
       FirebaseDatabase.instance.reference().child("defaulter")
           .child(Studinfo.branch).child(Studinfo.classs)
@@ -233,8 +234,8 @@ class _HomeState extends State<Home> {
         AttendanceCounter += (value / 2);
         PieChartSectionData _item1 = PieChartSectionData(
           color: value > 75
-              ? HexColor.fromHex("#008080")
-              : HexColor.fromHex("#ff4d4d"),
+              ? Color(0xff155511)
+              : Color(0xffa60c0c),
           value: value / 2,
           title: 'Lec',
           radius: 6*SizeConfig.heightMultiplier,
@@ -253,15 +254,38 @@ class _HomeState extends State<Home> {
       else {
         value = 100.00;
       }
+      AttendanceCounter += (value / 2);
+      if(value!=0){
+        PieChartSectionData _item2 = PieChartSectionData(
+          color: value > 75
+              ? Color(0xff155511)
+              : Color(0xffa60c0c),
+          value: value / 2,
+          title: 'Prac',
+          radius: 6*SizeConfig.heightMultiplier,
+          titleStyle: TextStyle(color: Colors.white, fontSize: 2.1*SizeConfig.textMultiplier),
+        );
+        _sections.add(_item2);
+      }
+      // for tutorial
+      if (Attendance.attendanceDataList[index].total_tut != 0) {
+        value = (Attendance.attendanceDataList[index].attended_tut /
+            Attendance.attendanceDataList[index].total_tut) * 100;
+        tot+=Attendance.attendanceDataList[index].total_tut;
+        cnt+=Attendance.attendanceDataList[index].attended_tut;
+      }
+      else {
+        value = 100.00;
+      }
 
       AttendanceCounter += (value / 2);
       if(value!=0){
         PieChartSectionData _item2 = PieChartSectionData(
           color: value > 75
-              ? HexColor.fromHex("#008080")
-              : HexColor.fromHex("#ff4d4d"),
+              ? Color(0xff155511)
+              : Color(0xffa60c0c),
           value: value / 2,
-          title: 'Prac',
+          title: 'Tut',
           radius: 6*SizeConfig.heightMultiplier,
           titleStyle: TextStyle(color: Colors.white, fontSize: 2.1*SizeConfig.textMultiplier),
         );
@@ -271,7 +295,7 @@ class _HomeState extends State<Home> {
     if(b==false){
       if (AttendanceCounter < 100) {
         PieChartSectionData _item = PieChartSectionData(
-          color:HexColor.fromHex("#ff4d4d"),
+          color:Color(0xffa60c0c),
           value: (100 - AttendanceCounter),
           title: 'Abs',
           radius: 6*SizeConfig.heightMultiplier,
@@ -288,7 +312,7 @@ class _HomeState extends State<Home> {
         child:Container(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-        //    mainAxisSize: MainAxisSize.min,
+            //    mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               AspectRatio(
                   aspectRatio: (SizeConfig.widthMultiplier/SizeConfig.heightMultiplier)*2.4,
@@ -305,29 +329,18 @@ class _HomeState extends State<Home> {
               ),
 
               sub == 'Overall' ?
-          //    Padding(
-//                padding:  EdgeInsets.only(),
-//                child: Text(
-//                  'Total Attendance : ${TotalAttendance.toStringAsFixed(2)} %\n'
-//                      'Attended Lectures : ${att_lect} out of ${total_lect} \n'
-//                      'Attended Practicals : ${att_pract} out of ${total_pract} \n',
-//                  style: TextStyle(
-//                    fontSize: 2.5*SizeConfig.textMultiplier,
-//                  ),
-//                  textAlign: TextAlign.center,
-//                ),
-//              ) :
               Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 5.7*SizeConfig.textMultiplier),
+                    padding: EdgeInsets.symmetric(),
                     child: new Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                        'Total Attendance : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                            'Total Attendance : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
                         Text(
-                            '${TotalAttendance.toStringAsFixed(2)} %'
+                          '${TotalAttendance.toStringAsFixed(2)} %'
                           ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
                         )
                       ],
@@ -359,6 +372,19 @@ class _HomeState extends State<Home> {
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Tutorials  Attended: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '$att_tut'+'/'+'$total_tut'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
                 ],
               ):
               Column(
@@ -385,8 +411,8 @@ class _HomeState extends State<Home> {
                             'Attended Lectures : ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
                         Text(
                           '${Attendance.attendanceDataList[index]
-                      .attended_lect}/${Attendance.attendanceDataList[index]
-                      .total_lect}'
+                              .attended_lect}/${Attendance.attendanceDataList[index]
+                              .total_lect}'
                           ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
                         )
                       ],
@@ -400,32 +426,31 @@ class _HomeState extends State<Home> {
                             'Attended Practicals: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
                         Text(
                           '${Attendance.attendanceDataList[index]
-                      .attended_pract}/${Attendance.attendanceDataList[index]
-                      .total_pract}'
+                              .attended_pract}/${Attendance.attendanceDataList[index]
+                              .total_pract}'
                           ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
                         )
                       ],
                     ),
                   ),
-
+                  Padding(
+                    padding: EdgeInsets.only(left: 5.7*SizeConfig.textMultiplier,top: 2*SizeConfig.heightMultiplier),
+                    child: new Row(
+                      children: <Widget>[
+                        Text(
+                            'Attended Tutorials: ',style: TextStyle(fontWeight: FontWeight.bold,fontSize: 2.7*SizeConfig.textMultiplier)),
+                        Text(
+                          '${Attendance.attendanceDataList[index]
+                              .attended_tut}/${Attendance.attendanceDataList[index]
+                              .total_tut}'
+                          ,style: TextStyle(fontSize: 2.4*SizeConfig.textMultiplier,fontWeight: FontWeight.bold),
+                        )
+                      ],
+                    ),
+                  ),
                 ],
               )
-//              Padding(
-//                padding:  EdgeInsets.only(),
-//                child: Text(
-//                  'Total Attendance : ${(cnt/tot*100).toStringAsFixed(2)} %\n'
-//                      'Attended Lectures : ${Attendance.attendanceDataList[index]
-//                      .attended_lect} out of ${Attendance.attendanceDataList[index]
-//                      .total_lect} \n'
-//                      'Attended Practicals : ${Attendance.attendanceDataList[index]
-//                      .attended_pract} out of ${Attendance.attendanceDataList[index]
-//                      .total_pract} \n',
-//                  style: TextStyle(
-//                    fontSize:2.5*SizeConfig.textMultiplier,
-//                  ),
-//                  textAlign: TextAlign.center,
-//                ),
-//              ),
+//
             ],
           ),
         )
