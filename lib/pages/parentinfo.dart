@@ -57,31 +57,31 @@ class _parentinfoPageState extends State<parentinfoPage> {
                 height: 5 * SizeConfig.heightMultiplier,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                padding: EdgeInsets.symmetric(horizontal: 5*SizeConfig.widthMultiplier),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       "If you are bad, \nI am your dad",
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 4.1*SizeConfig.heightMultiplier,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(
-                      height: 40,
+                      height: 5.7*SizeConfig.heightMultiplier,
                     ),
                     Text(
                       "Student's Information",
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 4.1*SizeConfig.heightMultiplier,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.0),
                         color: Colors.transparent,
@@ -89,7 +89,7 @@ class _parentinfoPageState extends State<parentinfoPage> {
                       child: Column(
                         children: <Widget>[
                           Container(
-                            padding: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -108,7 +108,7 @@ class _parentinfoPageState extends State<parentinfoPage> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -131,26 +131,26 @@ class _parentinfoPageState extends State<parentinfoPage> {
                       ),
                     ),
                     SizedBox(
-                      height: 40,
+                      height: 5.7*SizeConfig.heightMultiplier,
                     ),
                     Text(
                       "Parent's Information",
                       style: TextStyle(
-                        fontSize: 30,
+                        fontSize: 4.2*SizeConfig.heightMultiplier,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10.0),
+                        borderRadius: BorderRadius.circular(SizeConfig.heightMultiplier),
                         color: Colors.transparent,
                       ),
                       child: Column(
                         children: <Widget>[
                           Container(
-                            padding: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -169,7 +169,7 @@ class _parentinfoPageState extends State<parentinfoPage> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -189,7 +189,7 @@ class _parentinfoPageState extends State<parentinfoPage> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.all(10.0),
+                            padding: EdgeInsets.all(SizeConfig.heightMultiplier),
                             decoration: BoxDecoration(
                               border: Border(
                                 bottom: BorderSide(
@@ -227,7 +227,7 @@ class _parentinfoPageState extends State<parentinfoPage> {
                                       gravity: ToastGravity.BOTTOM,
                                       backgroundColor: Colors.red,
                                       textColor: Colors.white,
-                                      fontSize: 16.0);
+                                      fontSize: 2.3*SizeConfig.heightMultiplier);
                                 } else {
                                   if (formKey.currentState.validate()) {
                                     formKey.currentState.save();

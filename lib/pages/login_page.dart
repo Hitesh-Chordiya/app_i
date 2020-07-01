@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/pages/Signup.dart';
 import 'package:flutter_app/pages/Student.dart';
 import 'package:flutter_app/pages/TeacherHome.dart';
+
 //import 'package:flutter_app/pages/parentinfo.dart';
 import 'package:flutter_app/responsive/Screensize.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -14,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'AttendanceData.dart';
+import 'demo.dart';
 import 'forgotpassword.dart';
 
 class LoginPage extends StatefulWidget {
@@ -40,7 +42,7 @@ class _LoginPageState extends State<LoginPage>
   final successSnackBar = new SnackBar(
     duration: Duration(milliseconds: 2000),
     shape:
-    RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+        RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
     backgroundColor: HexColor.fromHex("#00004d"),
     elevation: 2.0,
     content: new Row(
@@ -68,7 +70,7 @@ class _LoginPageState extends State<LoginPage>
   final incorrectPSnackBar = new SnackBar(
       duration: Duration(milliseconds: 1000),
       shape:
-      RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
       backgroundColor: HexColor.fromHex(" #ff4d4d"),
       elevation: 2.0,
       content: new Text("Incorrect Password",
@@ -79,7 +81,7 @@ class _LoginPageState extends State<LoginPage>
   final noUserSnackBar = new SnackBar(
       duration: Duration(milliseconds: 1000),
       shape:
-      RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
       elevation: 2.0,
       backgroundColor: Colors.red,
       content: new Text("User not Found",
@@ -95,6 +97,7 @@ class _LoginPageState extends State<LoginPage>
 
   @override
   Widget build(BuildContext context) {
+    int grp = SizeConfig.grp;
     return new Scaffold(
         resizeToAvoidBottomInset: true,
         resizeToAvoidBottomPadding: true,
@@ -116,13 +119,38 @@ class _LoginPageState extends State<LoginPage>
               children: <Widget>[
                 new Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.max,
+                  //   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(
-                          top: 7.0 * SizeConfig.heightMultiplier,
-                          bottom: 2.6 * SizeConfig.heightMultiplier),
+                      padding: grp == 1
+                          ? EdgeInsets.only(
+                              top: 1 * SizeConfig.heightMultiplier,
+                              bottom: 1 * SizeConfig.heightMultiplier)
+                          : grp == 2
+                              ? EdgeInsets.only(
+                                  top: 2 * SizeConfig.heightMultiplier,
+                                  bottom: 1 * SizeConfig.heightMultiplier)
+                              : grp == 3
+                                  ? EdgeInsets.only(
+                                      top: 2.5 * SizeConfig.heightMultiplier,
+                                      bottom: 1 * SizeConfig.heightMultiplier)
+                                  : grp == 4
+                                      ? EdgeInsets.only(
+                                          top: 2 * SizeConfig.heightMultiplier,
+                                          bottom:
+                                              1 * SizeConfig.heightMultiplier)
+                                      : grp == 5
+                                          ? EdgeInsets.only(
+                                              top: 6 *
+                                                  SizeConfig.heightMultiplier,
+                                              bottom: 1 *
+                                                  SizeConfig.heightMultiplier)
+                                          : EdgeInsets.only(
+                                              top: 8 *
+                                                  SizeConfig.heightMultiplier,
+                                              bottom: 1 *
+                                                  SizeConfig.heightMultiplier),
                       child: new Image(
                         image: new AssetImage("assets/college_logo.png"),
                         alignment: Alignment.topCenter,
@@ -131,11 +159,9 @@ class _LoginPageState extends State<LoginPage>
                       ),
                     ),
                     new Card(
-                      margin: new EdgeInsets.only(
-                          left: 6 * SizeConfig.widthMultiplier,
-                          right: 6 * SizeConfig.widthMultiplier,
-                          bottom: 5.5 * SizeConfig.heightMultiplier,
-                          top: 5.5 * SizeConfig.heightMultiplier),
+                      margin: new EdgeInsets.symmetric(
+                          horizontal: 6 * SizeConfig.widthMultiplier,
+                          vertical: 3 * SizeConfig.heightMultiplier),
                       elevation: 10.0,
                       color: Colors.white,
                       shape: RoundedRectangleBorder(
@@ -150,45 +176,43 @@ class _LoginPageState extends State<LoginPage>
                                   brightness: Brightness.light,
                                   primarySwatch: Colors.blue,
                                   inputDecorationTheme:
-                                  new InputDecorationTheme(
-                                      labelStyle: new TextStyle(
-                                          color: Colors.blue,
-                                          fontSize: 2 *
-                                              SizeConfig.textMultiplier))),
+                                      new InputDecorationTheme(
+                                          labelStyle: new TextStyle(
+                                              color: Colors.blue,
+                                              fontSize: 2 *
+                                                  SizeConfig.textMultiplier))),
                               child: new Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   Padding(
                                     padding: EdgeInsets.only(
-                                        top: 2.8 * SizeConfig.heightMultiplier,
+                                        top: 2 * SizeConfig.heightMultiplier,
                                         bottom:
-                                        2 * SizeConfig.heightMultiplier),
+                                            1 * SizeConfig.heightMultiplier),
                                     child: new Text(
                                       "LOGIN",
                                       style: TextStyle(
                                         // fontStyle: FontStyle.italic,
                                         color: HexColor.fromHex("#00004d"),
                                         fontSize:
-                                        3.4 * SizeConfig.heightMultiplier,
+                                            3.4 * SizeConfig.heightMultiplier,
                                         fontWeight: FontWeight.bold,
                                         decoration: TextDecoration.underline,
                                       ),
                                     ),
                                   ),
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: <Widget>[
-                                      new Padding(
-                                          padding: EdgeInsets.only(
-                                              left: 8 *
-                                                  SizeConfig.widthMultiplier)),
                                       Text(
                                         "Department:",
                                         style: TextStyle(
                                           color: HexColor.fromHex("#800000"),
                                           fontSize:
-                                          2.5 * SizeConfig.heightMultiplier,
+                                              2.5 * SizeConfig.heightMultiplier,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -244,7 +268,7 @@ class _LoginPageState extends State<LoginPage>
                                       padding: EdgeInsets.symmetric(
                                           vertical: SizeConfig.heightMultiplier,
                                           horizontal:
-                                          2 * SizeConfig.widthMultiplier)),
+                                              2 * SizeConfig.widthMultiplier)),
                                   Padding(
                                     padding: EdgeInsets.only(
                                         left: 5 * SizeConfig.widthMultiplier,
@@ -257,19 +281,19 @@ class _LoginPageState extends State<LoginPage>
                                             style: TextStyle(
                                                 fontFamily: 'BalooChettan2',
                                                 color:
-                                                HexColor.fromHex("#00004d"),
+                                                    HexColor.fromHex("#00004d"),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 2.2 *
                                                     SizeConfig
                                                         .heightMultiplier),
                                             cursorColor:
-                                            HexColor.fromHex("#00004d"),
+                                                HexColor.fromHex("#00004d"),
                                             decoration: new InputDecoration(
                                                 focusedBorder:
-                                                OutlineInputBorder(
+                                                    OutlineInputBorder(
                                                   borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(10)),
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
                                                   borderSide: BorderSide(
                                                       width: 1,
                                                       color: HexColor.fromHex(
@@ -291,8 +315,8 @@ class _LoginPageState extends State<LoginPage>
                                                             .widthMultiplier),
                                                 border: OutlineInputBorder(
                                                     borderRadius:
-                                                    BorderRadius.circular(
-                                                        10.00)),
+                                                        BorderRadius.circular(
+                                                            10.00)),
                                                 labelText: "Enter Email",
                                                 labelStyle: new TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -302,7 +326,7 @@ class _LoginPageState extends State<LoginPage>
                                                         SizeConfig
                                                             .textMultiplier)),
                                             keyboardType:
-                                            TextInputType.emailAddress,
+                                                TextInputType.emailAddress,
                                             validator: validateEmail,
                                             onSaved: (val) {
                                               setState(() => _email = val);
@@ -319,19 +343,19 @@ class _LoginPageState extends State<LoginPage>
                                             style: TextStyle(
                                                 fontFamily: 'BalooChettan2',
                                                 color:
-                                                HexColor.fromHex("#00004d"),
+                                                    HexColor.fromHex("#00004d"),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 2.2 *
                                                     SizeConfig
                                                         .heightMultiplier),
                                             cursorColor:
-                                            HexColor.fromHex("#00004d"),
+                                                HexColor.fromHex("#00004d"),
                                             decoration: new InputDecoration(
                                                 focusedBorder:
-                                                OutlineInputBorder(
+                                                    OutlineInputBorder(
                                                   borderRadius:
-                                                  BorderRadius.all(
-                                                      Radius.circular(10)),
+                                                      BorderRadius.all(
+                                                          Radius.circular(10)),
                                                   borderSide: BorderSide(
                                                       width: 1,
                                                       color: HexColor.fromHex(
@@ -353,8 +377,8 @@ class _LoginPageState extends State<LoginPage>
                                                             .widthMultiplier),
                                                 border: OutlineInputBorder(
                                                     borderRadius:
-                                                    BorderRadius.circular(
-                                                        10.00)),
+                                                        BorderRadius.circular(
+                                                            10.00)),
                                                 labelText: "Enter Password",
                                                 labelStyle: TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -375,16 +399,16 @@ class _LoginPageState extends State<LoginPage>
                                   new Padding(
                                       padding: EdgeInsets.only(
                                           top:
-                                          4 * SizeConfig.heightMultiplier)),
+                                              4 * SizeConfig.heightMultiplier)),
                                   new SizedBox(
                                     width: 25 * SizeConfig.widthMultiplier,
                                     height: 5 * SizeConfig.heightMultiplier,
                                     child: RaisedButton(
                                         shape: new RoundedRectangleBorder(
                                             borderRadius:
-                                            BorderRadius.circular(80.00)),
+                                                BorderRadius.circular(80.00)),
                                         splashColor:
-                                        HexColor.fromHex("#ffffff"),
+                                            HexColor.fromHex("#ffffff"),
                                         onPressed: () async {
                                           //  fun(context);
                                           if (formKey.currentState.validate()) {
@@ -393,8 +417,8 @@ class _LoginPageState extends State<LoginPage>
                                             signIn(_email, _password)
                                                 .then((user) async {
                                               SharedPreferences prefs =
-                                              await SharedPreferences
-                                                  .getInstance();
+                                                  await SharedPreferences
+                                                      .getInstance();
                                               prefs.clear();
                                               prefs.setBool('login', true);
                                               var e;
@@ -403,13 +427,13 @@ class _LoginPageState extends State<LoginPage>
                                                 setState(() {
                                                   scaffoldKey.currentState
                                                       .showSnackBar(
-                                                      successSnackBar);
+                                                          successSnackBar);
                                                 });
                                                 e = uemail.split('@');
                                                 String b = e[0]
                                                     .toString()
                                                     .replaceAll(
-                                                    new RegExp(r'\W'), "_")
+                                                        new RegExp(r'\W'), "_")
                                                     .toLowerCase();
                                                 prefs.setString(
                                                     'email', uemail);
@@ -439,8 +463,8 @@ class _LoginPageState extends State<LoginPage>
                                                     Dateinfo.email = e[0]
                                                         .toString()
                                                         .replaceAll(
-                                                        new RegExp(r'\W'),
-                                                        "_");
+                                                            new RegExp(r'\W'),
+                                                            "_");
                                                     Map days;
                                                     prefs.setBool(
                                                         "check", false);
@@ -455,17 +479,47 @@ class _LoginPageState extends State<LoginPage>
                                                     checkemail
                                                         .child("Registration")
                                                         .child(
-                                                        'Teacher_account')
+                                                            'Teacher_account')
                                                         .child(Dateinfo.email)
-                                                        .child('class_sub')
+                                                        .child("slot")
+                                                        .once()
+                                                        .then((snapshot) {
+                                                      try {
+                                                        Map data =
+                                                            snapshot.value;
+                                                        if (data == null) {
+                                                          throw Exception;
+                                                        }
+                                                        List<String> slot =
+                                                            new List<String>();
+                                                        for (final key
+                                                            in data.keys) {
+                                                          slot.add(
+                                                              key.toString() +
+                                                                  "h");
+                                                        }
+                                                        prefs.setStringList(
+                                                            "slot", slot);
+                                                      } catch (Exception) {
+                                                        List<String> slot =
+                                                            new List<String>();
+                                                        prefs.setStringList(
+                                                            "slot", slot);
+                                                      }
+                                                    });
+                                                    checkemail
+                                                        .child("Registration")
+                                                        .child(
+                                                            'Teacher_account')
+                                                        .child(Dateinfo.email)
                                                         .child("work_hr")
                                                         .once()
                                                         .then((snapshot) {
                                                       try {
                                                         Map data =
                                                             snapshot.value;
-                                                        if (data==null) throw Exception;
-
+                                                        if (data == null)
+                                                          throw Exception;
                                                         else {
                                                           prefs.setString(
                                                               "today_date",
@@ -484,19 +538,19 @@ class _LoginPageState extends State<LoginPage>
                                                       } catch (Exception) {
                                                         print("work");
                                                         var now =
-                                                        new DateTime.now();
+                                                            new DateTime.now();
                                                         var ford =
-                                                        new DateFormat(
-                                                            "yyyy_MM_dd");
+                                                            new DateFormat(
+                                                                "yyyy_MM_dd");
 
                                                         String date =
-                                                        ford.format(now);
+                                                            ford.format(now);
 
                                                         int current =
                                                             DateTime.utc(
-                                                                now.year,
-                                                                now.month,
-                                                                1)
+                                                                    now.year,
+                                                                    now.month,
+                                                                    1)
                                                                 .weekday;
                                                         int weekno = 0;
                                                         int i = 9 - current;
@@ -514,6 +568,7 @@ class _LoginPageState extends State<LoginPage>
                                                         prefs.setInt(
                                                             "weekc", 0);
                                                       }
+
                                                       //  checkemail.child("")
                                                     });
                                                     await Teacher.data();
@@ -523,8 +578,8 @@ class _LoginPageState extends State<LoginPage>
                                                       context,
                                                       PageTransition(
                                                           type:
-                                                          PageTransitionType
-                                                              .fade,
+                                                              PageTransitionType
+                                                                  .fade,
                                                           duration: Duration(
                                                               seconds: 2),
                                                           child: thome()));
@@ -536,15 +591,15 @@ class _LoginPageState extends State<LoginPage>
                                                     if (dept.isEmpty) {
                                                       Fluttertoast.showToast(
                                                           msg:
-                                                          "Select Department",
+                                                              "Select Department",
                                                           toastLength: Toast
                                                               .LENGTH_SHORT,
                                                           gravity: ToastGravity
                                                               .BOTTOM,
                                                           backgroundColor:
-                                                          Colors.red,
+                                                              Colors.red,
                                                           textColor:
-                                                          Colors.white,
+                                                              Colors.white,
                                                           fontSize: 16.0);
                                                     } else {
                                                       await checkemail
@@ -558,18 +613,18 @@ class _LoginPageState extends State<LoginPage>
                                                         print(map);
                                                         //    await Future.delayed(Duration(seconds: 5));
                                                         Studinfo.name =
-                                                        map["Name"];
+                                                            map["Name"];
                                                         Studinfo.roll =
-                                                        map["Prn"];
+                                                            map["Prn"];
                                                         prefs.setString("name",
                                                             map["Name"]);
                                                         prefs.setString(
                                                             "branch", dept);
                                                         Studinfo.branch = dept;
                                                         Studinfo.classs =
-                                                        map["Class"];
+                                                            map["Class"];
                                                         Studinfo.batch =
-                                                        map["Batch"];
+                                                            map["Batch"];
                                                         // prefs.setString("roll", map["Serial"]);
                                                         prefs.setString("class",
                                                             map["Class"]);
@@ -585,22 +640,27 @@ class _LoginPageState extends State<LoginPage>
                                                         prefs.setInt(
                                                             "fetchatt", 1);
                                                       });
+                                                      if (map.containsKey("Parent")){
+                                                        Studinfo.parentname = map["Parent"];
+                                                        prefs.setString("parent", map["Parent"]);
+                                                      }
                                                       await FirebaseDatabase
                                                           .instance
                                                           .reference()
                                                           .child("defaulter")
                                                           .child("modified")
-                                                          .child(
-                                                          Studinfo.roll)
-                                                          .once().then((onValue){
-                                                        if (onValue.value==-1) throw Exception;
+                                                          .child(Studinfo.roll)
+                                                          .once()
+                                                          .then((onValue) {
+                                                        if (onValue.value == -1)
+                                                          throw Exception;
                                                       });
                                                       final FirebaseMessaging
-                                                      firebaseMessaging =
-                                                      FirebaseMessaging();
+                                                          firebaseMessaging =
+                                                          FirebaseMessaging();
                                                       firebaseMessaging
                                                           .subscribeToTopic(
-                                                          Studinfo.roll);
+                                                              Studinfo.roll);
 
                                                       try {
                                                         await Attendance
@@ -611,7 +671,7 @@ class _LoginPageState extends State<LoginPage>
                                                             .child("defaulter")
                                                             .child("modified")
                                                             .child(
-                                                            Studinfo.roll)
+                                                                Studinfo.roll)
                                                             .set(0);
                                                       } catch (Exception) {}
 
@@ -620,24 +680,24 @@ class _LoginPageState extends State<LoginPage>
                                                           context,
                                                           PageTransition(
                                                               type:
-                                                              PageTransitionType
-                                                                  .fade,
+                                                                  PageTransitionType
+                                                                      .fade,
                                                               duration:
-                                                              Duration(
-                                                                  seconds:
-                                                                  2),
-                                                              child: shome()));
+                                                                  Duration(
+                                                                      seconds:
+                                                                          2),
+                                                              child: Demopage()));
                                                     }
                                                   } catch (Exception) {
                                                     print(Exception);
                                                     Fluttertoast.showToast(
                                                         msg: "No data Found",
                                                         toastLength:
-                                                        Toast.LENGTH_SHORT,
+                                                            Toast.LENGTH_SHORT,
                                                         gravity:
-                                                        ToastGravity.BOTTOM,
+                                                            ToastGravity.BOTTOM,
                                                         backgroundColor:
-                                                        Colors.red,
+                                                            Colors.red,
                                                         textColor: Colors.white,
                                                         fontSize: 16.0);
                                                   }
@@ -669,52 +729,57 @@ class _LoginPageState extends State<LoginPage>
                                   new Padding(
                                       padding: EdgeInsets.only(
                                           bottom:
-                                          2 * SizeConfig.heightMultiplier))
+                                              2 * SizeConfig.heightMultiplier))
                                 ],
                               )),
                         ),
                       ),
                     ),
                     //new Padding(padding: EdgeInsets.only(top:2.5*SizeConfig.heightMultiplier)),
-                    new MaterialButton(
-                      onPressed: () => {
-                        FocusScope.of(context).requestFocus(new FocusNode()),
-                         fun(context),
-//                        Navigator.push(
-//                            context,
-//                            MaterialPageRoute(
-//                              builder: (context) => appbar(),
-//                            )),
-                      },
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.00)),
-                      child: new Text("Forgot Password?",
-                          style: TextStyle(
-                              fontFamily: 'BalooChettan2',
-                              color: HexColor.fromHex("#00004d"),
-                              fontSize: 2.8 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold)),
+                    Column(
+                      children: <Widget>[
+                        new MaterialButton(
+                          onPressed: () => {
+                            FocusScope.of(context).requestFocus(new FocusNode()),
+                            //fun(context),
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Demopage(),
+                                )),
+                          },
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.00)),
+                          child: new Text("Forgot Password?",
+                              style: TextStyle(
+                                  fontFamily: 'BalooChettan2',
+                                  color: HexColor.fromHex("#00004d"),
+                                  fontSize: 2.8 * SizeConfig.textMultiplier,
+                                  fontWeight: FontWeight.bold)),
+                        ),
+                        new MaterialButton(
+                          onPressed: () => {
+                            FocusScope.of(context).requestFocus(new FocusNode()),
+                            Navigator.pushReplacement(
+                                context,
+                                PageTransition(
+                                    type: PageTransitionType.rightToLeftWithFade,
+                                    duration: Duration(seconds: 1),
+                                    child: Signup()))
+                          },
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.00)),
+                          child: new Text("Create account",
+                              style: TextStyle(
+                                  fontFamily: 'BalooChettan2',
+                                  color: HexColor.fromHex("#00004d"),
+                                  fontSize: 2.8 * SizeConfig.textMultiplier,
+                                  fontWeight: FontWeight.bold)),
+                        )
+                      ],
                     ),
                     //Forgot password button
-                    new MaterialButton(
-                      onPressed: () => {
-                        FocusScope.of(context).requestFocus(new FocusNode()),
-                        Navigator.pushReplacement(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.rightToLeftWithFade,
-                                duration: Duration(seconds: 1),
-                                child: Signup()))
-                      },
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.00)),
-                      child: new Text("Create account",
-                          style: TextStyle(
-                              fontFamily: 'BalooChettan2',
-                              color: HexColor.fromHex("#00004d"),
-                              fontSize: 2.8 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold)),
-                    )
+
                     //Forgot password button
                   ],
                 )

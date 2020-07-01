@@ -204,6 +204,7 @@ class MapScreenState extends State<profilestud>
 
   @override
   Widget build(BuildContext context) {
+    int grp=SizeConfig.grp;
     return new Scaffold(
         body: new Container(
           color: Colors.grey.shade500,
@@ -213,7 +214,7 @@ class MapScreenState extends State<profilestud>
                 children: <Widget>[
                   new Container(
 
-                    height: 35*SizeConfig.heightMultiplier,
+                    height: 27*SizeConfig.heightMultiplier,
                     // decoration:BoxDecoration(
 
 //                        gradient:LinearGradient(
@@ -259,30 +260,16 @@ class MapScreenState extends State<profilestud>
                               ],
                             )),
                         Padding(
-                          padding: EdgeInsets.only(top: 5.5*SizeConfig.heightMultiplier),
-                          child: new Stack(fit: StackFit.loose, children: <Widget>[
-                            new Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                new CircleAvatar(
-                                    radius:7*SizeConfig.heightMultiplier,
-                                    backgroundColor: Colors.black87,
-                                    child: CircleAvatar(
-                                      backgroundColor: Colors.white,
-                                      radius: 6.8*SizeConfig.heightMultiplier,
-                                      child: new Icon(
-                                        Icons.person,
-                                        color: Colors.black87,
-                                        size: 11.4*SizeConfig.heightMultiplier,
-                                      ),
-                                    )
-                                )
-
-
-                              ],
+                          padding: EdgeInsets.only(top: 4*SizeConfig.heightMultiplier),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.white,
+                            radius: 5.3*SizeConfig.heightMultiplier,
+                            child: new Icon(
+                              Icons.person,
+                              color: Colors.black87,
+                              size: 9.4*SizeConfig.heightMultiplier,
                             ),
-                          ]),
+                          ),
                         )
                       ],
                     ),
@@ -306,8 +293,11 @@ class MapScreenState extends State<profilestud>
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                              padding: EdgeInsets.only(
-                                  left: 8*SizeConfig.widthMultiplier, right: 8*SizeConfig.widthMultiplier, top: 2.8*SizeConfig.heightMultiplier),
+                              padding: grp<=4 ?EdgeInsets.only(
+                                  left: 8*SizeConfig.widthMultiplier, right: 8*SizeConfig.widthMultiplier, top: 1*SizeConfig.heightMultiplier):
+                              EdgeInsets.only(
+                                  left: 8*SizeConfig.widthMultiplier, right: 8*SizeConfig.widthMultiplier, top: 2.4*SizeConfig.heightMultiplier)
+                              ,
                               child: new Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 mainAxisSize: MainAxisSize.max,
@@ -355,7 +345,7 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 0.25*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
@@ -375,7 +365,7 @@ class MapScreenState extends State<profilestud>
 
                           Padding(
                               padding: EdgeInsets.only(
-                                  left:7*SizeConfig.widthMultiplier , right: 7*SizeConfig.widthMultiplier, top: 3.5*SizeConfig.heightMultiplier),
+                                  left:7*SizeConfig.widthMultiplier , right: 7*SizeConfig.widthMultiplier, top: grp<=4?2.4*SizeConfig.heightMultiplier:3.5*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
@@ -395,9 +385,9 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 0.28*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
-                                mainAxisSize: MainAxisSize.max,
+                               // mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Flexible(
                                     child: new TextField(
@@ -419,9 +409,9 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 3.5*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?2.4*SizeConfig.heightMultiplier:3.5*SizeConfig.heightMultiplier),
                               child: new Row(
-                                mainAxisSize: MainAxisSize.max,
+                              //  mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
@@ -439,7 +429,7 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 0.28*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
@@ -458,7 +448,7 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 3.5*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier,top: grp<=4?2.4*SizeConfig.heightMultiplier:3.5*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
@@ -478,7 +468,7 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 0.28*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top:grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
@@ -498,7 +488,7 @@ class MapScreenState extends State<profilestud>
 
                           Padding(
                               padding: EdgeInsets.only(
-                                  left:7*SizeConfig.widthMultiplier , right: 7*SizeConfig.widthMultiplier, top: 3.5*SizeConfig.widthMultiplier),
+                                  left:7*SizeConfig.widthMultiplier , right: 7*SizeConfig.widthMultiplier, top: grp<=4?2.4*SizeConfig.heightMultiplier:3.5*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -529,7 +519,7 @@ class MapScreenState extends State<profilestud>
                               )),
                           Padding(
                               padding: EdgeInsets.only(
-                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 0.28*SizeConfig.heightMultiplier),
+                                  left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
                                 mainAxisSize: MainAxisSize.max,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -563,7 +553,6 @@ class MapScreenState extends State<profilestud>
                                   ),
                                 ],
                               )),
-                          !_status ? _getActionButtons() : new Container(),
                         ],
                       ),
                     ),
@@ -582,101 +571,7 @@ class MapScreenState extends State<profilestud>
     super.dispose();
   }
 
-  Widget _getActionButtons() {
-    return Padding(
-      padding: EdgeInsets.only(left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: 6.2*SizeConfig.heightMultiplier),
-      child: new Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: 2.8*SizeConfig.widthMultiplier),
-              child: Container(
-                  width: 30,
 
-                  child: new RaisedButton(
-                    child: new Text("Save",style: TextStyle(fontSize: 18),),
-                    textColor: Colors.white,
-                    color: HexColor.fromHex("#00cc99"),
-                    onPressed: () {
-                      setState(() async {
-                        _status = true;
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        //   var e=email.split("@");
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("name").set(name);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Branch").set(dep);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Class").set(classs);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("Batch").set(batch);
-                        FirebaseDatabase.instance.reference().child("Student").child(Alert1.name).child("PRN").set(prn);
-                        if(!(Studinfo.classs==classs )||!(Studinfo.branch==dep)){
-                          //  print();
-                          FirebaseDatabase.instance.reference().child(dep).child(classs).child(Studinfo.roll).set(Studinfo.name);
-                          FirebaseDatabase.instance.reference().child(Studinfo.branch).child(Studinfo.classs).child(Studinfo.roll).remove();
-                          Studinfo.branch=dep;
-                          Studinfo.classs=classs;
-                        }
-                        Fluttertoast.showToast(
-                            msg: "To update info login again",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: HexColor.fromHex("#800000"),
-                            textColor: Colors.white,
-                            fontSize: 2.2*SizeConfig.textMultiplier);
-                      });
-                    },
-                    shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0)),
-                  )),
-            ),
-            flex: 2,
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 2.8*SizeConfig.widthMultiplier),
-              child: Container(
-                  child: new RaisedButton(
-                    child: new Text("Cancel",style: TextStyle(fontSize: 18),),
-                    textColor: Colors.white,
-                    color: HexColor.fromHex("#ff944d"),
-                    onPressed: () {
-                      setState(() {
-                        _status = true;
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                      });
-                    },
-                    shape: new RoundedRectangleBorder(
-                        borderRadius: new BorderRadius.circular(20.0)),
-                  )),
-            ),
-            flex: 2,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _getEditIcon() {
-    return new GestureDetector(
-      child: new CircleAvatar(
-        backgroundColor: HexColor.fromHex("#000000"),//#996600
-        radius: 2.8*SizeConfig.heightMultiplier,
-        child: new Icon(
-          Icons.edit,
-          color: Colors.white,
-          size: 3.5*SizeConfig.heightMultiplier,
-        ),
-      ),
-      onTap: () {
-//        setState(() {
-//          _status = false;
-//          FocusScope.of(context).requestFocus(myFocusNode);
-//
-//
-//        });
-      },
-    );
-  }
 }
 class teachprofile extends StatefulWidget {
   @override
@@ -697,21 +592,10 @@ class _teachprofileState extends State<teachprofile> {
   bool _status = true;
   int l=1;
   List<String> cl=["nothing to show here"];
-//  List<String> cl1=["nothing to show here"];
-//  List<String> cl2=["nothing to show here"];
-//  List<String> lecsubj=["Lecture Subject"];
-//  List<String> pracsubj=["Practical Subject"];
   Future<void> getprefs() async {
     prefs=await SharedPreferences.getInstance();
     cl.clear();
-//    cl1.clear();
-    //  cl2.clear();
     cl.addAll(prefs.getStringList("scount"));
-//    cl1.addAll(prefs.getStringList("lecture"));
-//    cl.addAll(prefs.getStringList("Practical"));
-//    cl2.addAll(prefs.getStringList("Practical"));
-//    cl=cl.toSet().toList();
-    //  print((cl.length).toString()+"hi");
     setState(() {
       l=cl.length;
     });
@@ -742,14 +626,6 @@ class _teachprofileState extends State<teachprofile> {
                         fit: BoxFit.cover,
                       ),
                       borderRadius: new BorderRadius.circular(10.00),
-//                        gradient: LinearGradient(
-//                            begin: Alignment.topRight,
-//                            end: Alignment.bottomLeft,
-//
-//                            colors: [
-//                              HexColor.fromHex("#000046"),
-//                              HexColor.fromHex("#1CB5E0")
-//                            ])
                     ),
                     child: new Column(
                       children: <Widget>[
@@ -1004,20 +880,6 @@ class _teachprofileState extends State<teachprofile> {
                                           ),
                                           borderRadius: new BorderRadius
                                               .circular(30.0),
-//                                          image: DecorationImage(
-//                                            image: new AssetImage("assets/profile.jpg"),
-//                                            fit: BoxFit.cover,
-//                                          ),
-//                                            gradient: LinearGradient(
-//                                                begin: Alignment.topRight,
-//                                                end: Alignment.bottomLeft,
-//                                                colors: [
-////                                                  HexColor.fromHex("#F37335"),
-////                                                  HexColor.fromHex("#FDC830")
-//                                                  Colors.cyan,
-//                                                  Colors.lightBlueAccent
-//                                                ])
-
                                         ),
                                         child:cl.length==0?Center(child: new Text("Nothing to show here",style: TextStyle(fontSize: 2.8*SizeConfig.textMultiplier,color: Colors.black87),)):
                                         new Center(

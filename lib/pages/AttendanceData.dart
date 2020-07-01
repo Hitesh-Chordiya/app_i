@@ -186,8 +186,13 @@ class Studinfo {
 
   Studinfo(String subjectname,int workload){
     this.subjectname=subjectname;
-    this.workload=workload;
-  }
+    if(workload<0){
+      this.workload=0;
+    }
+    else {
+      this.workload = workload;
+    }
+    }
   static void relist()async{
     remediallist.clear();
     SharedPreferences prefs =await SharedPreferences.getInstance();
@@ -1615,67 +1620,20 @@ class Teacher {
       other=values["other"];
     }
   }
-//    await databaseReference.child("Registration")
-//        .child('Teacher_account')
-//        .child(Dateinfo.email)
-//        .child('class_sub')
-//        .child('Practical')
-//        .once()
-//        .then((snapshot) {
-//      try {
-//        Map data = snapshot.value;
-//        for(final k in data.keys) {
-//        //  cla.add(k.toString());
-//          practlist.add(k.toString());
-//          List<String> practsub=["Select sub"];
-//          practsub.clear();
-//          Map classData = data[k];
-//          for (final k in classData.keys) {
-//          //  sub.add(k.toString());
-//            practsub.add(k.toString());
-//          }
-//          prefs.setStringList(k.toString()+"_"+"P", practsub);
-//        }
-//        prefs.setStringList("Practical", practlist);
-//      } catch (Exception) {
-//        print("practical");
-//      }
-//
-//    });
-//    await databaseReference.child("Registration")
-//        .child('Teacher_account')
-//        .child(Dateinfo.email)
-//        .child('class_sub')
-//        .child('lecture')
-//        .once()
-//        .then((snapshot) {
-//      try {
-//        Map data = snapshot.value;
-//        for (final k in data.keys) {
-//         // cla.add(k.toString());
-//          lectlist.add(k.toString());
-//          List<String> lectsub=["Select sub"];
-//          lectsub.clear();
-//          Map classData = data[k];
-//          for (final k in classData.keys){
-//          //  sub.add(k.toString());
-//            lectsub.add(k.toString());
-//          }
-//          prefs.setStringList(k.toString()+"_"+"l", lectsub);
-//        }
-//        prefs.setStringList("lecture", lectlist);
-//      } catch (Exception) {
-//        print("Ecept");
-//      }
-//    });
-
-
   static Future<void> data() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("check") == false) {
       classlist();
       prefs.setBool("check", true);
       final databaseReference = FirebaseDatabase.instance.reference();
+      databaseReference
+          .child("Registration")
+          .child(
+          'Teacher_account')
+          .child(Dateinfo.email)
+          .child("slot").remove();
+        List<String> slot=new List<String>();
+        prefs.setStringList("slot", slot);
       await databaseReference.child("teach_att")
           .child(Dateinfo.dept).child(Dateinfo.teachname).once().then((snap) {
         try {

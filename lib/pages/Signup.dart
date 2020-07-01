@@ -137,6 +137,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
     ProgressDialog pr = new ProgressDialog(
         context, type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: "Kindly wait");
+    int grp=SizeConfig.grp;
     return WillPopScope(
       onWillPop: _onBackPressed,
       child: new Scaffold(
@@ -164,8 +165,10 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.only(
-                            top: 4.2 * SizeConfig.heightMultiplier,
+                        padding: grp<4?EdgeInsets.only(
+                            top: 1.2 * SizeConfig.heightMultiplier,
+                            bottom: 1.5 * SizeConfig.heightMultiplier):EdgeInsets.only(
+                            top: 6 * SizeConfig.heightMultiplier,
                             bottom: 1.5 * SizeConfig.heightMultiplier),
                         child: new Image(
                           image: new AssetImage("assets/college_logo.png"),
@@ -843,7 +846,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
 
                         back: new Card(
                           margin: new EdgeInsets.symmetric(
-                              vertical: 1.2 * SizeConfig.heightMultiplier,
+                              vertical: 4 * SizeConfig.heightMultiplier,
                               horizontal: 5 * SizeConfig.widthMultiplier),
                           elevation: 10.0,
                           color: Colors.white,
@@ -1334,6 +1337,9 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                             ),
                           ),
                         ),),
+                      new Padding(
+                          padding: EdgeInsets.only(bottom: 2 *
+                              SizeConfig.heightMultiplier))
                     ],
                   )
                 ],

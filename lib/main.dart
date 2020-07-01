@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_app/pages/AttendanceData.dart';
+import 'package:flutter_app/pages/demo.dart';
 import 'package:flutter_app/pages/login_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/pages/Student.dart';
@@ -104,7 +105,7 @@ Future<bool> check(BuildContext context) async {
       }
     }
     runApp(MaterialApp(
-        home: !(type=="student") ? thome() : shome()));
+        home: !(type=="student") ? thome() : Demopage()));
   } else {
     runApp(MaterialApp(
         home:LoginPage()));

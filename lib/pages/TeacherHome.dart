@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'dart:ui';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,6 +19,7 @@ import 'package:gradient_app_bar/gradient_app_bar.dart';
 import 'package:gradient_widgets/gradient_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 //import 'View_attendance.dart';
@@ -36,7 +35,7 @@ class _PasscodeState extends State<Passcode>
     with SingleTickerProviderStateMixin {
   TabController controller;
   GlobalKey<FlipCardState> cardKey = GlobalKey<FlipCardState>();
-  double rating=0;
+  double srating=0,arating=0;
   int rat=0;
   dynamic value;
   int defaulercount;
@@ -392,18 +391,18 @@ class _PasscodeState extends State<Passcode>
             backgroundColorStart: Color(0xff6d6d46),
             backgroundColorEnd: Color(0xff6d6d46),
             actions: <Widget>[
-              PopupMenuButton<String>(
-                onSelected: handleClick,
-                itemBuilder: (BuildContext context) {
-                  return {'Subject registration', 'Monitor session'}
-                      .map((String choice) {
-                    return PopupMenuItem<String>(
-                      value: choice,
-                      child: Text(choice),
-                    );
-                  }).toList();
-                },
-              ),
+//              PopupMenuButton<String>(
+//                onSelected: handleClick,
+//                itemBuilder: (BuildContext context) {
+//                  return {'Subject registration', 'Monitor session'}
+//                      .map((String choice) {
+//                    return PopupMenuItem<String>(
+//                      value: choice,
+//                      child: Text(choice),
+//                    );
+//                  }).toList();
+//                },
+//              ),
             ],
           ),
           body: new Container(
@@ -516,16 +515,16 @@ class _PasscodeState extends State<Passcode>
                             child: Slider(
                                 activeColor: Color(0xff999966),
                                 inactiveColor: Color(0xffc2c2a3),
-                                label: (rating.toInt()).toString(),
-                                value: rating,
+                                label: (srating.toInt()).toString(),
+                                value: srating,
                                 divisions: 8,
 
                                 min: 0,
                                 max:8,
                                 onChanged: enabled ?(newrating){
                                   setState(() {
-                                    rating=newrating;
-                                    _ncontroller.text=rating.toInt().toString();
+                                    srating=newrating;
+                                    _ncontroller.text=srating.toInt().toString();
                                     timetable();
                                     workhr(_ccontroller.text,
                                         _scontroller.text);
@@ -534,8 +533,8 @@ class _PasscodeState extends State<Passcode>
                                     :null
                             ),
                             data: SliderTheme.of(context).copyWith(
-                               trackHeight:3,
-                               inactiveTickMarkColor: lefttxtclr,
+                                trackHeight:3,
+                                inactiveTickMarkColor: lefttxtclr,
                                 valueIndicatorColor: Colors.blue,
                                 activeTickMarkColor: lefttxtclr,
                                 valueIndicatorTextStyle: TextStyle(
@@ -596,7 +595,7 @@ class _PasscodeState extends State<Passcode>
                                         enabled: false,
                                         onChanged: (val) {
                                           setState(() {
-                                            rating=double.parse(val);
+                                            srating=double.parse(val);
                                             timetable();
                                             workhr(_ccontroller.text,
                                                 _scontroller.text);
@@ -714,6 +713,8 @@ class _PasscodeState extends State<Passcode>
                                     FocusScope.of(context)
                                         .requestFocus(new FocusNode());
                                     var rng = new Random();
+                                    var slot=prefs.getStringList("slot");
+
                                     code = code +
                                         rng.nextInt(20000) +
                                         rng.nextInt(30000);
@@ -728,6 +729,44 @@ class _PasscodeState extends State<Passcode>
                                           backgroundColor: Colors.red,
                                           textColor: Colors.white,
                                           fontSize: 16.0);
+                                    }else if((slot.contains(_ncontroller.text+"h"))){
+                                      bool click=true;
+                                      await Alert(
+                                        context: context,
+                                        type: AlertType.warning,
+                                        title: "Attendance already taken",
+                                        style: AlertStyle(
+                                            animationType: AnimationType.fromTop,
+                                            isCloseButton: false,
+                                            isOverlayTapDismiss: false,
+                                            descStyle: TextStyle(fontWeight: FontWeight.bold),
+                                            animationDuration: Duration(milliseconds: 400),
+                                            titleStyle: TextStyle(
+                                                color: Color(0xff00004d)
+                                            ),
+                                            alertBorder: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              side: BorderSide(
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                        ),
+
+                                        buttons: [
+                                          DialogButton(
+                                            child: Text(
+                                              "ok",
+                                              style: TextStyle(color: Colors.white, fontSize: 2.5*SizeConfig.textMultiplier),
+                                            ),
+                                            onPressed:click? (){ Navigator.pop(context);
+                                            setState(() {
+                                              click=false;
+                                            });
+                                            }:null,
+                                            color: Color.fromRGBO(0, 179, 134, 1.0),
+                                          )
+                                        ],
+                                      ).show();
                                     } else {
                                       radio_on = false;
                                       setState(() {
@@ -736,7 +775,9 @@ class _PasscodeState extends State<Passcode>
                                         card = "front";
                                       });
                                       startTimer();
-
+                                      //var slot=prefs.getStringList("slot");
+                                      slot.add(_ncontroller.text+"h");
+                                      prefs.setStringList("slot",slot);
                                       var now = new DateTime.now();
                                       String date = ford.format(now);
                                       Dateinfo.classs = _ccontroller.text;
@@ -1225,7 +1266,6 @@ class _PasscodeState extends State<Passcode>
                                           .child("Registration")
                                           .child('Teacher_account')
                                           .child(Dateinfo.email)
-                                          .child('class_sub')
                                           .child("work_hr")
                                           .set({
                                         "dayc": dayc,
@@ -1233,6 +1273,13 @@ class _PasscodeState extends State<Passcode>
                                         "date": date.toString(),
                                         "weekno": weekno
                                       });
+                                      databaseReference
+                                          .child("Registration")
+                                          .child('Teacher_account')
+                                          .child(Dateinfo.email)
+                                          .child("slot")
+                                          .child(_ncontroller.text+"h")
+                                          .set(1);
                                     }
                                     // _start=40;
                                   }
@@ -1385,7 +1432,7 @@ class _PasscodeState extends State<Passcode>
                           ),
                           Padding(
                             padding: EdgeInsets.only(
-                              bottom: 1 * SizeConfig.heightMultiplier,
+                              bottom: 2 * SizeConfig.heightMultiplier,
                               //  left: 23 * SizeConfig.widthMultiplier
                             ),
                             child: Row(
@@ -1420,16 +1467,16 @@ class _PasscodeState extends State<Passcode>
                                 activeColor: Color(0xff999966),
                                 inactiveColor: Color(0xffc2c2a3),
                                 // valueIndicatorColor: Colors.blue,
-                                label: (rating.toInt()).toString(),
-                                value: rating,
+                                label: (arating.toInt()).toString(),
+                                value: arating,
 
                                 divisions: 8,
                                 min: 0,
                                 max:8,
                                 onChanged: enabled ?(newrating){
                                   setState(() {
-                                    rating=newrating;
-                                    _controller.text=rating.toInt().toString();
+                                    arating=newrating;
+                                    _controller.text=arating.toInt().toString();
                                   });
                                 }
                                     :null
@@ -1506,9 +1553,9 @@ class _PasscodeState extends State<Passcode>
                                           onChanged: (val) {
                                             setState(() {
                                               if(int.parse(val)>8){
-                                                rating=8.0;
+                                                arating=8.0;
                                               }else{
-                                                rating=double.parse(val);
+                                                arating=double.parse(val);
                                               }
                                             });
 
@@ -1659,6 +1706,8 @@ class _PasscodeState extends State<Passcode>
                                       ? () async {
                                     prefs = await SharedPreferences
                                         .getInstance();
+                                    var slot=prefs.getStringList("slot");
+
                                     FocusScope.of(context)
                                         .requestFocus(new FocusNode());
                                     var rng = new Random();
@@ -1676,13 +1725,57 @@ class _PasscodeState extends State<Passcode>
                                           backgroundColor: Colors.red,
                                           textColor: Colors.white,
                                           fontSize: 16.0);
-                                    } else {
+                                    } else if((slot.contains(_controller.text+"h"))){
+                                      bool click=true;
+                                      await Alert(
+                                        context: context,
+                                        type: AlertType.warning,
+                                        style: AlertStyle(
+                                            animationType: AnimationType.fromTop,
+                                            isCloseButton: false,
+                                            isOverlayTapDismiss: false,
+                                            descStyle: TextStyle(fontWeight: FontWeight.bold),
+                                            animationDuration: Duration(milliseconds: 400),
+                                            titleStyle: TextStyle(
+                                                color: Color(0xff00004d)
+                                            ),
+                                            alertBorder: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              side: BorderSide(
+                                                color: Colors.grey,
+                                              ),
+                                            )
+                                        ),
+
+                                        buttons: [
+                                          DialogButton(
+                                            child: Text(
+                                              "ok",
+                                              style: TextStyle(color: Colors.white, fontSize: 2.5*SizeConfig.textMultiplier),
+                                            ),
+                                            onPressed:click? (){ Navigator.pop(context);
+                                            setState(() {
+                                              click=false;
+                                            });
+                                            }:null,
+                                            gradient: LinearGradient(colors: [
+                                              Color(0xffe63900),
+                                              Color(0xffe63900)
+                                            ]),
+                                          )
+                                        ],
+                                      ).show();
+
+                                    }else{
                                       radio_on = false;
                                       setState(() {
                                         clr = Color(0xffff9999);
                                         str = code.toString();
                                         card = "back";
                                       });
+                                      //var slot=prefs.getStringList("slot");
+                                      slot.add(_controller.text+"h");
+                                      prefs.setStringList("slot",slot);
                                       startTimer();
                                       drop = true;
                                       var now = new DateTime.now();
@@ -2177,7 +2270,6 @@ class _PasscodeState extends State<Passcode>
                                           .child("Registration")
                                           .child('Teacher_account')
                                           .child(Dateinfo.email)
-                                          .child('class_sub')
                                           .child("work_hr")
                                           .set({
                                         "dayc": dayc,
@@ -2185,6 +2277,13 @@ class _PasscodeState extends State<Passcode>
                                         "date": date.toString(),
                                         "weekno": weekno
                                       });
+                                      databaseReference
+                                          .child("Registration")
+                                          .child('Teacher_account')
+                                          .child(Dateinfo.email)
+                                          .child("slot")
+                                          .child(_controller.text+"h")
+                                          .set(1);
                                     }
                                     // _start=40;
                                   }
@@ -2292,118 +2391,79 @@ class _PasscodeState extends State<Passcode>
     }
   }
 
-  Future<void> handleClick(String value) async {
-    if (enabled) {
-      switch (value) {
-//      case 'Profile':
-//        {
-//          if (prefs.getBool("check") == false) {
-//            ProgressDialog pr =
-//            ProgressDialog(context, type: ProgressDialogType.Normal);
-//            pr.show();
-//            await Teacher.data();
-//            await Future.delayed(Duration(seconds: 5));
-//            //  print(Teacher.DataList);
-//            pr.hide();
+//  Future<void> handleClick(String value) async {
+//    if (enabled) {
+//      switch (value) {
+//
+//        case 'Monitor session':
+//          {
+//            Dateinfo.fetch = true;
+//            Dateinfo.viewmod = false;
+//            Navigator.pushReplacement(
+//                context,
+//                MaterialPageRoute(
+//                  builder: (context) => Date(),
+//                ));
+//
+//            break;
 //          }
-//          Navigator.pop(context);
-//          Navigator.push(
-//              context,
-//              MaterialPageRoute(
-//                builder: (context) => teachprofile(),
-//              ));
-//          break;
-//        }
-        case 'Subject registration':
-          {
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => subject(),
-                ));
-            break;
-          }
-        case 'Monitor session':
-          {
-            Dateinfo.fetch = true;
-            Dateinfo.viewmod = false;
-            Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Date(),
-                ));
-
-            break;
-          }
-//      case 'Logout':
-//        {
-//          SharedPreferences log = await SharedPreferences.getInstance();
-//          FirebaseAuth.instance.signOut();
-//          Navigator.pushReplacement(
-//              context,
-//              MaterialPageRoute(
-//                builder: (context) => LoginPage(),
-//              ));
-//          //log.clear();
-//          log.setBool("login", false);
-//        }
-      }
-    }
-  }
+////
+//      }
+//    }
+//  }
 
   void workhr(String classs, String subject) async {
     try{
-    if (stat == "lecture") {
-      var varcount = prefs
-          .getString(classs.toUpperCase() + "_" + subject.toUpperCase())
-          .split(" ");
-      setState(() {
-        lec = (int.parse(varcount[1]) + 1).toString();
-        if (!isSwitched) {
-          _lcontroller.text = lec;
-        }
-      });
-      //  }
-    } else {
-      if (stat == "Practical") {
-      var varcount = prefs
-          .getString(classs.toUpperCase() +
-          "_" +
-          subject.toUpperCase() +
-          "_" +
-          Alert1.batch.toUpperCase())
-          .split(" ");
-      setState(() {
-        lec = (int.parse(varcount[1]) + 1).toString();
-        if (!isSwitched) {
-          _lcontroller.text = lec;
-        }
-      });
-      // }
-    } else {
-      var varcount = prefs
-          .getString(classs.toUpperCase() +
-          "_" +
-          subject.toUpperCase() +
-          "_" +
-          Alert1.batch.toUpperCase() +
-          "_Tutorial")
-          .split(" ");
-      setState(() {
-        lec = (int.parse(varcount[1]) + 1).toString();
-        if (!isSwitched) {
-          _lcontroller.text = lec;
-        }
-      });
-    }
-    }}catch(Exception){
-
-    }
+      if (stat == "lecture") {
+        var varcount = prefs
+            .getString(classs.toUpperCase() + "_" + subject.toUpperCase())
+            .split(" ");
+        setState(() {
+          lec = (int.parse(varcount[1]) + 1).toString();
+          if (!isSwitched) {
+            _lcontroller.text = lec;
+          }
+        });
+        //  }
+      } else if (stat == "Practical") {
+//
+        var varcount = prefs
+            .getString(classs.toUpperCase() +
+            "_" +
+            subject.toUpperCase() +
+            "_" +
+            Alert1.batch.toUpperCase())
+            .split(" ");
+        setState(() {
+          lec = (int.parse(varcount[1]) + 1).toString();
+          if (!isSwitched) {
+            _lcontroller.text = lec;
+          }
+        });
+        // }
+      } else {
+//
+        var varcount = prefs
+            .getString(classs.toUpperCase() +
+            "_" +
+            subject.toUpperCase() +
+            "_" +
+            Alert1.batch.toUpperCase() +
+            "_Tutorial")
+            .split(" ");
+        setState(() {
+          lec = (int.parse(varcount[1]) + 1).toString();
+          if (!isSwitched) {
+            _lcontroller.text = lec;
+          }
+        });
+      }
+    }catch(Exception){}
   }
 
   void defaulter(String cl, String subject) async {
-    print(cl);
-    print(subject);
+//    print(cl);
+//    print(subject);
     if (stat == "lecture") {
       FirebaseDatabase.instance
           .reference()
@@ -2446,6 +2506,7 @@ class _PasscodeState extends State<Passcode>
   void timetable() async {
     int dayn = DateTime.now().weekday - 1;
     String day = weekNames[dayn];
+
     try {
       var a = prefs.getString(day + _ncontroller.text + "h").split(" ");
       setState(() {
@@ -2538,10 +2599,11 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
       child: new Scaffold(
         bottomNavigationBar: FancyBottomNavigation(
           initialSelection: 0,
-
+//          notchedShape: CircularNotchedRectangle(),
           activeIconColor:Colors.white ,
           inactiveIconColor:  HexColor.fromHex("#008080"),
           circleColor:  HexColor.fromHex("#008080"),
+
           tabs: [
             TabData(iconData: Icons.home, title: "Home",),
             TabData(iconData: Icons.local_parking, title: "Parent Teacher"),
@@ -2551,21 +2613,23 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
           onTabChangedListener: (position) {
             setState(() {
               // currentPage = position;
-              if (position == 1) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Parentteacherlist(),
-                    ));
-              }
-              if (position == 2) {
-                //remedial
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => defaulter(),
-                    ));
-              }
+              try {
+                if (position == 1) {
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Parentteacherlist(),
+                      ));
+                }
+                if (position == 2) {
+                  //remedial
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => defaulter(),
+                      ));
+                }
+              }catch(Exception){}
             });
           },
         ),
@@ -3165,8 +3229,8 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
 //                  ),
 //                  onTap: () {
 //                    Navigator.pop(context);
-//                    Alert1 alert = new Alert1();
-//                    alert.displayDialog(context);
+//                    Alert alert = new Alert();
+//                    Alert1.displayDialog(context);
 //                  }),
 //            ),
             //new Divider(),
@@ -3220,17 +3284,12 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
 void parentteachermap() async {
   //Dateinfo.parentteacherstud.addAll({"key": "value"});
   //Dateinfo.studclass.addAll({"key":"value"});
- // Dateinfo.ydlist.add("hi");
-  //print(Dateinfo.ydlist);
   if (Dateinfo.parentteacherstud.isNotEmpty) Dateinfo.parentteacherstud.clear();
   if (Dateinfo.studclass.isNotEmpty) Dateinfo.studclass.clear();
-  //Dateinfo.parentteacherclass.add("hi");
-// Dateinfo.parentteacherclass.clear();
 
-  //D//ateinfo.parentteacherlist.add("hi");
-  //Dateinfo.parentteacherlist.clear();
   if (Dateinfo.parentteacherlist.isNotEmpty) Dateinfo.parentteacherlist.clear();
-
+  if (Dateinfo.ydlist.isNotEmpty) Dateinfo.ydlist.clear();
+  Dateinfo.ydlist.add("value");
   try {
     await FirebaseDatabase.instance
         .reference()
@@ -3242,34 +3301,26 @@ void parentteachermap() async {
         throw Exception;
       }
       Dateinfo.parentteacherstud = snap.value;
-      print(Dateinfo.parentteacherstud);
-
+      //print(Dateinfo.parentteacherstud);
       for (final key in Dateinfo.parentteacherstud.keys) {
         Dateinfo.parentteacherclass.add(key.toString());
         Dateinfo.parentteacherlist.add(key.toString());
 
         Map map = Dateinfo.parentteacherstud[key];
-       // print(map);
+        // print(map);
         for (final k in map.keys) {
           Dateinfo.parentteacherlist.add(k.toString());
           Dateinfo.studclass.addAll({k.toString(): key.toString()});
-          Map m=map[k.toString()];
-          print("m");
-          print(m);
-          if(m.containsKey("Yd")){
-            Dateinfo.ydlist.add(k.toString());
+          Map yd=map[k];
+          if(yd.containsKey("Yd")){
+            Dateinfo.ydlist.add(k);
           }
         }
-        print(Dateinfo.parentteacherlist.length);
-        print(Dateinfo.parentteacherlist);
-        print(Dateinfo.parentteacherstud);
+
       }
     });
+    // print(Dateinfo.ydlist.contains("F17111009"));
   } catch (Exception) {
-   print(Exception);
     print("Exception here");
   }
-Dateinfo.ydlist.add("hi");
-print(Dateinfo.ydlist);
-Dateinfo.ydlist=Dateinfo.ydlist.toSet().toList();
 }

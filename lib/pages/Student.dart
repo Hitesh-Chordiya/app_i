@@ -1,4 +1,5 @@
 // ignore: avoid_web_libraries_in_flutter
+import 'dart:io';
 import 'dart:ui';
 import 'package:fancy_bottom_navigation/fancy_bottom_navigation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -99,7 +100,7 @@ class _shomeState extends State<shome> with TickerProviderStateMixin {
       await FirebaseDatabase.instance.reference().child("defaulter")
           .child("modified").child(Studinfo.roll).once().then((value) async {
         int bit = value.value;
-        print(bit);
+//        print(bit);
         if (bit == 1) {
           // Attendance.viewattendance=true;
           await Attendance.owndata();
@@ -505,10 +506,25 @@ class _shomeState extends State<shome> with TickerProviderStateMixin {
                       }
                     } else {
                       await get();
+//                      print("sdf");
                       if(checkyd){
                         _yd(context);
                       }else {
-                        _displayDialog(context);
+
+                        try {
+                          final result = await InternetAddress.lookup('google.com');
+                          print(result);
+                          if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+                            print('connected');
+                            _displayDialog(context);
+                          }else{
+                            print('not connected');
+                          }
+
+                        } catch (Exception) {
+                          print('not connected');
+                        }
+
                       }
                       setState(() {
                         clicked=false;
@@ -1099,7 +1115,6 @@ _displayDialog(BuildContext context) async {
   return showGeneralDialog(
       barrierColor: Colors.black.withOpacity(0.5),
       transitionBuilder: (context, a1, a2, widget) {
-        final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
         return StatefulBuilder(
           builder: (context, setState) {
             return Opacity(
@@ -1250,7 +1265,7 @@ _displayDialog(BuildContext context) async {
 
                                 String leccount = data["count"];
 //
-                                print("exist");
+//                                print("exist");
                                 // await Future.delayed(Duration(seconds: 4));
 
                                 Future.delayed(Duration(seconds: 2))
@@ -1265,6 +1280,17 @@ _displayDialog(BuildContext context) async {
                                 });
 
                                 if(status=="lecture") {
+                                  await databaseReference
+                                      .child('Attendance')
+                                      .child(Studinfo.branch)
+                                      .child(Studinfo.classs)
+                                      .child(data['Subject'])
+                                      .child(data['Teacher'])
+                                      .child(date)
+                                      .child(status)
+                                      .child(leccount.toString())
+                                      .child(Studinfo.roll)
+                                      .set("1");
                                   try{
                                     if(!(
                                         prefs.containsKey(data['Subject'] +
@@ -1298,6 +1324,10 @@ _displayDialog(BuildContext context) async {
                                           data['Teacher']
                                       ) +
                                           1);
+
+                                  print("if");
+//                            });
+                                }else if(status=="Practical"){
                                   await databaseReference
                                       .child('Attendance')
                                       .child(Studinfo.branch)
@@ -1306,12 +1336,10 @@ _displayDialog(BuildContext context) async {
                                       .child(data['Teacher'])
                                       .child(date)
                                       .child(status)
+                                      .child(Studinfo.batch)
                                       .child(leccount.toString())
                                       .child(Studinfo.roll)
                                       .set("1");
-                                  print("if");
-//                            });
-                                }else if(status=="Practical"){
                                   try{
                                     if(!(prefs.containsKey(data['Subject'] +
                                         data['Teacher'] +
@@ -1342,6 +1370,11 @@ _displayDialog(BuildContext context) async {
                                       data['Teacher'] +
                                       "L") +
                                       1);
+
+                                  print("if");
+                                  // });
+
+                                }else {
                                   await databaseReference
                                       .child('Attendance')
                                       .child(Studinfo.branch)
@@ -1354,10 +1387,6 @@ _displayDialog(BuildContext context) async {
                                       .child(leccount.toString())
                                       .child(Studinfo.roll)
                                       .set("1");
-                                  print("if");
-                                  // });
-
-                                }else {
                                   try{
                                     if(!(prefs.containsKey(data['Subject'] +
                                         data['Teacher'] +
@@ -1377,7 +1406,7 @@ _displayDialog(BuildContext context) async {
                                       .child(data['Subject'] +
                                       "_" +
                                       data['Teacher'] +
-                                      "_"+Studinfo.batch)
+                                      "_"+Studinfo.batch+"_"+status)
                                       .set(prefs.getInt(data['Subject'] +
                                       data['Teacher'] +
                                       "T") +
@@ -1388,18 +1417,7 @@ _displayDialog(BuildContext context) async {
                                       data['Teacher'] +
                                       "T") +
                                       1);
-                                  await databaseReference
-                                      .child('Attendance')
-                                      .child(Studinfo.branch)
-                                      .child(Studinfo.classs)
-                                      .child(data['Subject'])
-                                      .child(data['Teacher'])
-                                      .child(date)
-                                      .child(status)
-                                      .child(Studinfo.batch)
-                                      .child(leccount.toString())
-                                      .child(Studinfo.roll)
-                                      .set("1");
+
                                   print("tut");
                                   // });
 
@@ -1408,7 +1426,6 @@ _displayDialog(BuildContext context) async {
                                     .then((value) {
                                   pr.hide();
                                 });
-                                //   await Future.delayed(Duration(seconds: 3));
                                 prefs.setString(
                                     "text", _textFieldController.text);
                                 // Navigator.pop(context);
