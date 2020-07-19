@@ -130,6 +130,11 @@ class _DateState extends State<Date> {
       }
     }
   }
+  Future<bool> assigndept()async{
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    Dateinfo.dept= prefs.getString("dept");
+    return true;
+  }
   @override
   Widget build(BuildContext context) {
     copy();
@@ -141,365 +146,372 @@ class _DateState extends State<Date> {
     pr.style(
         message: "wait");
     return MaterialApp(
-        home: new Scaffold(
-          body:isloading?new SpinKitThreeBounce(
-            color: Color(0xff6d6d46),
-            size: 40.0,
-            // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
-          ): Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.black87,Colors.black87])
-            ),
-            child: GradientCard(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              margin: new EdgeInsets.symmetric(
-                  horizontal: 6*SizeConfig.widthMultiplier,
-                  vertical: 14*SizeConfig.heightMultiplier
-              ),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                //  stops: [0,0.5,1],
-                colors: [
-                  //  HexColor.fromHex("#83afaf"),
-                  HexColor.fromHex("#DAD299"),
-                  HexColor.fromHex("#DAD299")
-                ],
-              ),
-              elevation: 5.0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  new Padding(padding: EdgeInsets.only(top:30)),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+        home: WillPopScope(
+          onWillPop: assigndept,
+          child: new Scaffold(
+            body:isloading?new SpinKitThreeBounce(
+              color: Color(0xff6d6d46),
+              size: 40.0,
+              // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+            ): SingleChildScrollView(
+              child: Container(
+                height: 90*SizeConfig.heightMultiplier,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Colors.black87,Colors.black87])
+                ),
+                child: GradientCard(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  margin: new EdgeInsets.symmetric(
+                      horizontal: 6*SizeConfig.widthMultiplier,
+                      vertical: 14*SizeConfig.heightMultiplier
+                  ),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    //  stops: [0,0.5,1],
+                    colors: [
+                      //  HexColor.fromHex("#83afaf"),
+                      HexColor.fromHex("#DAD299"),
+                      HexColor.fromHex("#DAD299")
+                    ],
+                  ),
+                  elevation: 5.0,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      new Radio(
-                        activeColor:HexColor.fromHex ("#996600"),
-                        value: 0,
-                        groupValue: group,
-                        onChanged:  _handleRadioValueChange1,
+                      new Padding(padding: EdgeInsets.only(top:30)),
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          new Radio(
+                            activeColor:HexColor.fromHex ("#996600"),
+                            value: 0,
+                            groupValue: group,
+                            onChanged:  _handleRadioValueChange1,
+                          ),
+                          new Text(
+                            'Theory' ,
+                            style: TextStyle(
+                                fontSize: 2.5 * SizeConfig.textMultiplier,
+                                color: lefttxtclr,
+                                fontWeight: FontWeight.bold),
+                          ),
+                          // new Padding(padding: EdgeInsets.only(left: 10)),
+                          new Radio(
+                            activeColor:dropcolor,
+                            value: 1,
+                            groupValue: group,
+                            onChanged:  _handleRadioValueChange1,
+                          ),
+                          new Text(
+                            'Practical',
+                            style: TextStyle(
+                                fontSize: 2.5 * SizeConfig.textMultiplier,
+                                color: lefttxtclr,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
-                      new Text(
-                        'Theory' ,
-                        style: TextStyle(
-                            fontSize: 2.5 * SizeConfig.textMultiplier,
-                            color: lefttxtclr,
-                            fontWeight: FontWeight.bold),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          bottom: 1 * SizeConfig.heightMultiplier,
+                          // left: 23 * SizeConfig.widthMultiplier
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            new Radio(
+                              activeColor: dropcolor,
+                              value: 2,
+                              groupValue: group,
+                              onChanged: _handleRadioValueChange1,
+                            ),
+                            new Text(
+                              'Tutorial',
+                              style: TextStyle(
+                                  fontSize: 2.5 * SizeConfig.textMultiplier,
+                                  color: lefttxtclr,fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
                       ),
-                      // new Padding(padding: EdgeInsets.only(left: 10)),
-                      new Radio(
-                        activeColor:dropcolor,
-                        value: 1,
-                        groupValue: group,
-                        onChanged:  _handleRadioValueChange1,
+
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 4 * SizeConfig.heightMultiplier,
+                          //    left: 7 * SizeConfig.widthMultiplier
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              "Select Class:",
+                              style: TextStyle(
+                                  fontSize: lefttxtsize,
+                                  color:lefttxtclr,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            new Padding(
+                                padding: EdgeInsets.only(
+                                    left: 6 * SizeConfig.widthMultiplier)),
+                            Container(
+                              height: 4.9*SizeConfig.heightMultiplier,
+                              padding:
+                              EdgeInsets.symmetric(horizontal:3.1*SizeConfig.widthMultiplier , vertical:0.7*SizeConfig.heightMultiplier),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(5)
+                              ),
+                              child: DropdownButton<String>(
+                                iconEnabledColor: righttxtclr,
+                                items: classlist.map((String listvalue) {
+                                  return DropdownMenuItem<String>(
+
+                                    value: listvalue,
+                                    child: Text(listvalue,style: TextStyle(
+                                        fontSize: 2 * SizeConfig.textMultiplier,
+                                        fontWeight: FontWeight.bold,color: righttxtclr),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+                                  setState(() {
+                                    classs=val;
+                                    subjectlist.clear();
+                                    _subject="Subject";
+                                    subjectlist=["Subject"];
+                                    if(!(stat=="Status"&& _subject=="Subject"))
+                                      subjectlist.addAll(prefs.getStringList(classs+"_"+stat[0]));
+                                  });
+                                },
+                                value: classs,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      new Text(
-                        'Practical',
-                        style: TextStyle(
-                            fontSize: 2.5 * SizeConfig.textMultiplier,
-                            color: lefttxtclr,
-                            fontWeight: FontWeight.bold),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 5* SizeConfig.heightMultiplier,
+                          //     left: 7 * SizeConfig.widthMultiplier
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text(
+                              "Select Subject:",
+                              style: TextStyle(
+                                  fontSize: lefttxtsize,
+                                  color: lefttxtclr,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                            new Padding(
+                                padding: EdgeInsets.only(
+                                    left: 6 * SizeConfig.widthMultiplier)),
+                            Container(
+                              height: 4.9*SizeConfig.heightMultiplier,
+                              padding:
+                              EdgeInsets.symmetric(horizontal:3.1*SizeConfig.widthMultiplier, vertical: 0.7*SizeConfig.heightMultiplier),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8)
+                              ),
+                              child: DropdownButton<String>(
+                                iconEnabledColor: righttxtclr,
+                                items: subjectlist.map((String listvalue) {
+                                  return DropdownMenuItem<String>(
+                                    value: listvalue,
+                                    child: Text(listvalue,style: TextStyle(
+                                        fontSize: 2 * SizeConfig.textMultiplier,
+                                        color: righttxtclr,
+                                        fontWeight: FontWeight.bold),
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: (val) {
+
+                                  setState(() => _subject = val);
+                                  Dateinfo.subject=_subject;
+                                },
+                                value: _subject,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding:EdgeInsets.only(top: 3*SizeConfig.heightMultiplier),
+                        child: new MaterialButton(
+                          onPressed: () async{
+                            FocusScope.of(context).requestFocus(new FocusNode());
+
+                            DateTime newDateTime = await showDatePicker(
+                              context: context,
+
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime(2100),
+
+                            );
+                            setState(() {
+                              try{
+                                date = myFormat.format(newDateTime);
+                              }catch(Exception){}
+                            });
+                          },
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.00)),
+                          child: new Text(date,
+                              style: TextStyle(
+                                  fontFamily: 'BalooChettan2',
+                                  color: lefttxtclr,
+                                  fontSize: 3*SizeConfig.textMultiplier,
+                                  fontWeight: FontWeight.bold
+                              )),
+                        ),
+                      ), //Forgot password button
+                      Padding(
+                        padding:EdgeInsets.symmetric(horizontal: 30*SizeConfig.widthMultiplier,vertical: 2*SizeConfig.heightMultiplier),
+                        child: new RaisedButton(
+                          onPressed: () async{
+                            FocusScope.of(context).requestFocus(new FocusNode());
+                            if(stat=="Select"||classs=="Class"|| _subject=="Subject"||date=="Select Date"){
+                              Fluttertoast.showToast(
+                                  msg: "Fill all the fields",
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0);
+                            }else {
+                              //pr.show();
+                              if (Dateinfo.dept=="FE") {
+                                Dateinfo.dept=_subject.toString().substring(_subject.length-4);
+                              }
+                              //  print(Dateinfo.part);
+                              total.classs = classs;
+                              total.dep = Dateinfo.dept;
+                              Dateinfo.stat = stat;
+                              Dateinfo.date1 = date;
+                              Dateinfo.classs = classs;
+                              Dateinfo.subject = _subject;
+                              Dateinfo.lecnumber = "1";
+                              try {
+                                if (stat == "lecture") {
+                                  setState(() {
+                                    isloading=true;
+                                  });
+                                  await dbref
+                                      .child("Attendance")
+                                      .child(Dateinfo.dept)
+                                      .child(classs)
+                                      .child(_subject)
+                                      .child(Dateinfo.teachname)
+                                      .child(date)
+                                      .child(stat)
+                                      .child("leccount")
+                                      .once()
+                                      .then((snap) async {
+                                    Dateinfo.part = snap.value;
+                                    if (snap.value==null) throw Exception;
+                                  });
+                                } else {
+                                  Alert1.check=true;
+                                  Alert1.inputlec=true;
+                                  if(stat=="Practical") {
+                                    Dateinfo.batches.clear();
+                                    Dateinfo.batches =
+                                        prefs.getStringList(
+                                            Dateinfo.subject);
+                                    print(Dateinfo.part);
+                                  }else{
+                                    Dateinfo.batches.clear();
+                                    Dateinfo.batches =
+                                        prefs.getStringList(
+                                            Dateinfo.subject+"T");
+
+                                  }
+                                  //print("object");
+                                  print(Dateinfo.part);
+                                  await Alert1.dialog(context);
+                                  setState(() {
+                                    isloading=true;
+                                  });
+                                }
+                                await Future.delayed(Duration(seconds: 2));
+                                // pr.show();
+                                int k = await getcount();
+                                print(Dateinfo.part);
+
+                                dbref.child("Attendance").child(Dateinfo.dept)
+                                    .child(classs).child("total")
+                                    .set(total.count);
+                                if (Dateinfo.part != "1") {
+                                  await _displayDialog(context);
+                                  // await Future.delayed(Duration(seconds: 4));
+                                }
+                                await Dateinfo.info();
+                                //    await Future.delayed(Duration(seconds: 6));
+                                //pr.hide();
+                                setState(() {
+                                  isloading=false;
+                                });
+                                Dateinfo.viewmod=true;
+                                if (!(k == null)) {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => HomePage(),
+                                      ));
+                                }
+                              }
+                              catch (Exception) {
+                                pr.hide();
+                                setState(() {
+                                  isloading=false;
+                                });
+                                Fluttertoast.showToast(
+                                    msg: "Nothing to show here",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    gravity: ToastGravity.BOTTOM,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0);
+                              }
+                            }
+                            //  await Future.delayed(Duration(seconds: 4
+
+                          },
+                          color: butclr,
+                          shape: new RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50.00)),
+                          child: new Text("  Display",
+                              style: TextStyle(
+                                  fontFamily: 'BalooChettan2',
+                                  color: Colors.white,
+                                  fontSize: 2.5*SizeConfig.textMultiplier,
+                                  fontWeight: FontWeight.bold
+                              )),
+                        ),
                       ),
                     ],
                   ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 1 * SizeConfig.heightMultiplier,
-                       // left: 23 * SizeConfig.widthMultiplier
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Radio(
-                          activeColor: dropcolor,
-                          value: 2,
-                          groupValue: group,
-                          onChanged: _handleRadioValueChange1,
-                        ),
-                        new Text(
-                          'Tutorial',
-                          style: TextStyle(
-                              fontSize: 2.5 * SizeConfig.textMultiplier,
-                              color: lefttxtclr,fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: 4 * SizeConfig.heightMultiplier,
-                    //    left: 7 * SizeConfig.widthMultiplier
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          "Select Class:",
-                          style: TextStyle(
-                              fontSize: lefttxtsize,
-                              color:lefttxtclr,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        new Padding(
-                            padding: EdgeInsets.only(
-                                left: 6 * SizeConfig.widthMultiplier)),
-                        Container(
-                          height: 4.9*SizeConfig.heightMultiplier,
-                          padding:
-                          EdgeInsets.symmetric(horizontal:3.1*SizeConfig.widthMultiplier , vertical:0.7*SizeConfig.heightMultiplier),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(5)
-                          ),
-                          child: DropdownButton<String>(
-                            iconEnabledColor: righttxtclr,
-                            items: classlist.map((String listvalue) {
-                              return DropdownMenuItem<String>(
-
-                                value: listvalue,
-                                child: Text(listvalue,style: TextStyle(
-                                    fontSize: 2 * SizeConfig.textMultiplier,
-                                    fontWeight: FontWeight.bold,color: righttxtclr),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-                              setState(() {
-                                classs=val;
-                                subjectlist.clear();
-                                _subject="Subject";
-                                subjectlist=["Subject"];
-                                if(!(stat=="Status"&& _subject=="Subject"))
-                                  subjectlist.addAll(prefs.getStringList(classs+"_"+stat[0]));
-                              });
-                            },
-                            value: classs,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: 5* SizeConfig.heightMultiplier,
-                   //     left: 7 * SizeConfig.widthMultiplier
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Text(
-                          "Select Subject:",
-                          style: TextStyle(
-                              fontSize: lefttxtsize,
-                              color: lefttxtclr,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        new Padding(
-                            padding: EdgeInsets.only(
-                                left: 6 * SizeConfig.widthMultiplier)),
-                        Container(
-                          height: 4.9*SizeConfig.heightMultiplier,
-                          padding:
-                          EdgeInsets.symmetric(horizontal:3.1*SizeConfig.widthMultiplier, vertical: 0.7*SizeConfig.heightMultiplier),
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8)
-                          ),
-                          child: DropdownButton<String>(
-                            iconEnabledColor: righttxtclr,
-                            items: subjectlist.map((String listvalue) {
-                              return DropdownMenuItem<String>(
-                                value: listvalue,
-                                child: Text(listvalue,style: TextStyle(
-                                    fontSize: 2 * SizeConfig.textMultiplier,
-                                    color: righttxtclr,
-                                    fontWeight: FontWeight.bold),
-                                ),
-                              );
-                            }).toList(),
-                            onChanged: (val) {
-
-                              setState(() => _subject = val);
-                              Dateinfo.subject=_subject;
-                            },
-                            value: _subject,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding:EdgeInsets.only(top: 3*SizeConfig.heightMultiplier),
-                    child: new MaterialButton(
-                      onPressed: () async{
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        DateTime newDateTime = await showDatePicker(
-                          context: context,
-
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100),
-
-                        );
-
-                        setState(() {
-                          try{
-                            date = myFormat.format(newDateTime);
-                          }catch(Exception){}
-                        });
-
-                      },
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.00)),
-                      child: new Text(date,
-                          style: TextStyle(
-                              fontFamily: 'BalooChettan2',
-                              color: lefttxtclr,
-                              fontSize: 3*SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold
-                          )),
-                    ),
-                  ), //Forgot password button
-                  Padding(
-                    padding:EdgeInsets.symmetric(horizontal: 30*SizeConfig.widthMultiplier,vertical: 2*SizeConfig.heightMultiplier),
-                    child: new RaisedButton(
-                      onPressed: () async{
-                        FocusScope.of(context).requestFocus(new FocusNode());
-                        if(stat=="Select"||classs=="Class"|| _subject=="Subject"||date=="Select Date"){
-                          Fluttertoast.showToast(
-                              msg: "Fill all the fields",
-                              toastLength: Toast.LENGTH_LONG,
-                              gravity: ToastGravity.BOTTOM,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0);
-                        }else {
-                          //pr.show();
-
-                          print(Dateinfo.part);
-                          total.classs = classs;
-                          total.dep = Dateinfo.dept;
-                          Dateinfo.stat = stat;
-                          Dateinfo.date1 = date;
-                          Dateinfo.classs = classs;
-                          Dateinfo.subject = _subject;
-                          Dateinfo.lecnumber = "1";
-                          try {
-                            if (stat == "lecture") {
-                              setState(() {
-                                isloading=true;
-                              });
-                              await dbref
-                                  .child("Attendance")
-                                  .child(Dateinfo.dept)
-                                  .child(classs)
-                                  .child(_subject)
-                                  .child(Dateinfo.teachname)
-                                  .child(date)
-                                  .child(stat)
-                                  .child("leccount")
-                                  .once()
-                                  .then((snap) async {
-                                Dateinfo.part = snap.value;
-                                if (snap.value==null) throw Exception;
-                              });
-                            } else {
-                              Alert1.check=true;
-                              Alert1.inputlec=true;
-                              if(stat=="Practical") {
-                                Dateinfo.batches.clear();
-                                Dateinfo.batches =
-                                    prefs.getStringList(
-                                        Dateinfo.subject);
-                                print(Dateinfo.part);
-                              }else{
-                                Dateinfo.batches.clear();
-                                Dateinfo.batches =
-                                    prefs.getStringList(
-                                        Dateinfo.subject+"T");
-
-                              }
-                              //print("object");
-                              print(Dateinfo.part);
-                              await Alert1.dialog(context);
-                              setState(() {
-                                isloading=true;
-                              });
-                            }
-                            await Future.delayed(Duration(seconds: 2));
-                            // pr.show();
-                            int k = await getcount();
-                            print(Dateinfo.part);
-
-                            dbref.child("Attendance").child(Dateinfo.dept)
-                                .child(classs).child("total")
-                                .set(total.count);
-                            if (Dateinfo.part != "1") {
-                              await _displayDialog(context);
-                              // await Future.delayed(Duration(seconds: 4));
-                            }
-                            await Dateinfo.info();
-                            //    await Future.delayed(Duration(seconds: 6));
-                            //pr.hide();
-                            setState(() {
-                              isloading=false;
-                            });
-                            Dateinfo.viewmod=false;
-                            if (!(k == null)) {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => HomePage(),
-                                  ));
-                            }
-                          }
-                          catch (Exception) {
-                            pr.hide();
-                            setState(() {
-                              isloading=false;
-                            });
-                            Fluttertoast.showToast(
-                                msg: "Nothing to show here",
-                                toastLength: Toast.LENGTH_LONG,
-                                gravity: ToastGravity.BOTTOM,
-                                backgroundColor: Colors.red,
-                                textColor: Colors.white,
-                                fontSize: 16.0);
-                          }
-                        }
-                        //  await Future.delayed(Duration(seconds: 4
-
-                      },
-                      color: butclr,
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50.00)),
-                      child: new Text("  Display",
-                          style: TextStyle(
-                              fontFamily: 'BalooChettan2',
-                              color: Colors.white,
-                              fontSize: 2.5*SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold
-                          )),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
-          appBar: new AppBar(
-            leading: IconButton(
-                onPressed: (){
-                  Navigator.pop(context);
-                },
-                icon:Icon(Icons.arrow_back,color: Colors.white,)
+            appBar: new AppBar(
+              leading: IconButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  },
+                  icon:Icon(Icons.arrow_back,color: Colors.white,)
 
+              ),
+              title: new Text("Homepage\\check att",style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier)),
+              backgroundColor: Color(0xff6d6d46),
             ),
-            title: new Text("Homepage\\check att",style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier)),
-            backgroundColor: Color(0xff6d6d46),
           ),
         ));
   }
@@ -632,6 +644,11 @@ class _HomePageState extends State<HomePage>{
 
     });
   }
+  Future<bool> assigndept()async{
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    Dateinfo.dept= prefs.getString("dept");
+    return true;
+  }
   Future<void> setcount() async {
     try{
       if(Dateinfo.stat=="lecture"){
@@ -681,295 +698,296 @@ class _HomePageState extends State<HomePage>{
   @override
   Widget build(BuildContext context) {
     Icon obj;
-    return Scaffold(
-      appBar: new AppBar(
-        backgroundColor: Color(0xff008080),
-        title: new Text(appbarname,style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier),),
-        elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0 : 0.0,
-        actions: <Widget>[
-          PopupMenuButton<String>(
-            onSelected: handleClick,
-            itemBuilder: (BuildContext context) {
-              return {'Modify'}.map((String choice) {
-                return PopupMenuItem<String>(
-                  value: choice,
-                  child: Text(choice),
-                );
-              }).toList();
-            },
-          ),
-        ],
-      ),
-      body:Container(
-        color: Colors.black87,
-        // height: 50*SizeConfig.heightMultiplier,
-        child: LiquidPullToRefresh(
-          key:refresh,
-          color: Colors.black,
-          onRefresh: handlerefresh,
-          showChildOpacityTransition: false,
-          child: ListView.builder(padding:kMaterialListPadding,
-            itemCount: total.count,
-            itemBuilder:( BuildContext context,int index){
+    return WillPopScope(
+      onWillPop: assigndept,
+      child: Scaffold(
+        appBar: new AppBar(
+          backgroundColor: Color(0xff008080),
+          title: new Text(appbarname,style: TextStyle(fontStyle: FontStyle.italic,fontSize: 2.7*SizeConfig.textMultiplier),),
+          elevation: defaultTargetPlatform == TargetPlatform.android ? 5.0 : 0.0,
+//        actions: <Widget>[
+//          PopupMenuButton<String>(
+//            onSelected: handleClick,
+//            itemBuilder: (BuildContext context) {
+//              return {'Modify'}.map((String choice) {
+//                return PopupMenuItem<String>(
+//                  value: choice,
+//                  child: Text(choice),
+//                );
+//              }).toList();
+//            },
+//          ),
+//        ],
+        ),
+        body:Container(
+          color: Colors.black87,
+          // height: 50*SizeConfig.heightMultiplier,
+          child: LiquidPullToRefresh(
+            key:refresh,
+            color: Colors.black,
+            onRefresh: handlerefresh,
+            showChildOpacityTransition: false,
+            child: ListView.builder(padding:kMaterialListPadding,
+              itemCount: total.count,
+              itemBuilder:( BuildContext context,int index){
 
-              if (Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())) {
-                obj=new Icon(Icons.check_box,color: checkboxclr);
-              } else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                obj=new Icon(Icons.check_box);
-              }
-              else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                obj=new Icon(Icons.check_box_outline_blank);
-              }else if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                obj=new Icon(Icons.check_box_outline_blank);
-              }
-              else{
-                obj=new Icon(Icons.check_box);
-              }
-              return Card(
-                elevation: 50,
-
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(15.0)),
-
-                child: ListTile(
-                    isThreeLine: false,
-                    leading:  Text(Dateinfo.prnlist.elementAt(index).toString()+": ",style: TextStyle(fontSize: 2.5*SizeConfig.textMultiplier,fontWeight: FontWeight.bold,
-                        color: Color(0xffac3973)
-                    )),
-                    title:Text(total.studnames[(Dateinfo.prnlist.elementAt(index).toString())].toString(),style: TextStyle(
-                        fontSize: 2.2*SizeConfig.textMultiplier,color: Colors.black,fontWeight: FontWeight.bold
-                    ),),
-                    //subtitle: const Text("hiiiii"),
-                    trailing:
-                    new IconButton(icon: obj, onPressed: () async {
-                      if(Dateinfo.viewmod){
-                        Fluttertoast.showToast(
-                            msg: "Pull to save",
-                            toastLength: Toast.LENGTH_LONG,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            fontSize: 16.0);
-                        await http.post(
-                          'https://fcm.googleapis.com/fcm/send',
-                          headers: <String, String>{
-                            'Content-Type': 'application/json',
-                            'Authorization': 'key=$serverToken',
-                          },
-                          body: jsonEncode(
-                            <String,   dynamic>{
-                              'notification': <String, dynamic>{
-                                'body': Dateinfo.teachname+" modified your "+Dateinfo.subject+" attendance ",
-                                'title': "Attendance Modified",
-                                //'icon':"assets/college_logo.png"
-                              },
-
-                              'priority': 'high',
-                              'data': <String, dynamic>{
-                                'Hello': 'Pune',
-                                'id': '1',
-                                'status': 'done',
-
-                              },
-                              "to": "/topics/${Dateinfo.prnlist.elementAt(index).toString()}"
-
+                if (Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())) {
+                  obj=new Icon(Icons.check_box,color: checkboxclr);
+                } else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                  obj=new Icon(Icons.check_box);
+                }
+                else if(!Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                  obj=new Icon(Icons.check_box_outline_blank);
+                }else if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString()) && !list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                  obj=new Icon(Icons.check_box_outline_blank);
+                }
+                else{
+                  obj=new Icon(Icons.check_box);
+                }
+                return Card(
+                  elevation: 50,
+                  shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(15.0)),
+                  child: ListTile(
+                      isThreeLine: false,
+                      leading:  Text(Dateinfo.prnlist.elementAt(index).toString()+": ",style: TextStyle(fontSize: 2.5*SizeConfig.textMultiplier,fontWeight: FontWeight.bold,
+                          color: Color(0xffac3973)
+                      )),
+                      title:Text(total.studnames[(Dateinfo.prnlist.elementAt(index).toString())].toString(),style: TextStyle(
+                          fontSize: 2.2*SizeConfig.textMultiplier,color: Colors.black,fontWeight: FontWeight.bold
+                      ),),
+                      //subtitle: const Text("hiiiii"),
+                      trailing:
+                      new IconButton(icon: obj, onPressed: () async {
+                        if(Dateinfo.viewmod){
+                          Fluttertoast.showToast(
+                              msg: "Pull to save",
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0);
+                          await http.post(
+                            'https://fcm.googleapis.com/fcm/send',
+                            headers: <String, String>{
+                              'Content-Type': 'application/json',
+                              'Authorization': 'key=$serverToken',
                             },
-                          ),
-                        );
-                        if(Dateinfo.stat=="lecture"){
-                          if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                            await Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                            list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                            dbref.child("defaulter")
-                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
-                            await dbref.child("Attendance")
-                                .child(Dateinfo.dept)
-                                .child(Dateinfo.classs)
-                                .child(Dateinfo.subject)
-                                .child(Dateinfo.teachname)
-                                .child(Dateinfo.date1)
-                                .child(Dateinfo.stat)
-                                .child(Dateinfo.lecnumber)
-                                .child((Dateinfo.prnlist.elementAt(index).toString())).remove();
-                            setState(() {
-                              count=list.length;
-                              obj=new Icon(Icons.check_box_outline_blank);
-                            });
-                            int a=0;
-                            try {
-                              await dbref.child("defaulter")
-                                  .child(Dateinfo.dept).child(Dateinfo.classs)
-                                  .child(Dateinfo.prnlist.elementAt(index)
-                                  .toString())
-                                  .child(
-                                  Dateinfo.subject + "_" + Dateinfo.teachname)
-                                  .once()
-                                  .then((value) {
-                                if(value.value==null) throw Exception;
-                                a = value.value;
+                            body: jsonEncode(
+                              <String,   dynamic>{
+                                'notification': <String, dynamic>{
+                                  'body': Dateinfo.teachname+" modified your "+Dateinfo.subject+" attendance ",
+                                  'title': "Attendance Modified",
+                                  //'icon':"assets/college_logo.png"
+                                },
+
+                                'priority': 'high',
+                                'data': <String, dynamic>{
+                                  'Hello': 'Pune',
+                                  'id': '1',
+                                  'status': 'done',
+
+                                },
+                                "to": "/topics/${Dateinfo.prnlist.elementAt(index).toString()}"
+
+                              },
+                            ),
+                          );
+                          if(Dateinfo.stat=="lecture"){
+                            if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                              await Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                              list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                              dbref.child("defaulter")
+                                  .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                              await dbref.child("Attendance")
+                                  .child(Dateinfo.dept)
+                                  .child(Dateinfo.classs)
+                                  .child(Dateinfo.subject)
+                                  .child(Dateinfo.teachname)
+                                  .child(Dateinfo.date1)
+                                  .child(Dateinfo.stat)
+                                  .child(Dateinfo.lecnumber)
+                                  .child((Dateinfo.prnlist.elementAt(index).toString())).remove();
+                              setState(() {
+                                count=list.length;
+                                obj=new Icon(Icons.check_box_outline_blank);
                               });
-                            }catch(Exception){}
-                            if(a>0)
+                              int a=0;
+                              try {
+                                await dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs)
+                                    .child(Dateinfo.prnlist.elementAt(index)
+                                    .toString())
+                                    .child(
+                                    Dateinfo.subject + "_" + Dateinfo.teachname)
+                                    .once()
+                                    .then((value) {
+                                  if(value.value==null) throw Exception;
+                                  a = value.value;
+                                });
+                              }catch(Exception){}
+                              if(a>0)
+                                dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                    .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a-1);
+                              setcount();
+
+                            }
+                            else{
+                              list.add(Dateinfo.prnlist.elementAt(index).toString());
+                              dbref.child("defaulter")
+                                  .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                              await dbref.child("Attendance")
+                                  .child(Dateinfo.dept)
+                                  .child(Dateinfo.classs)
+                                  .child(Dateinfo.subject)
+                                  .child(Dateinfo.teachname)
+                                  .child(Dateinfo.date1)
+                                  .child(Dateinfo.stat)
+                                  .child(Dateinfo.lecnumber)
+                                  .child((Dateinfo.prnlist.elementAt(index).toString()))
+                                  .set("1");
+                              setState(() {
+                                count=list.length;
+                                new Icon(Icons.check_box);
+                              });
+                              int a=0;
+                              try {
+                                await dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs)
+                                    .child(Dateinfo.prnlist.elementAt(index)
+                                    .toString())
+                                    .child(
+                                    Dateinfo.subject + "_" + Dateinfo.teachname)
+                                    .once()
+                                    .then((value) {
+                                  if(value.value==null) throw Exception;
+                                  a = value.value;
+                                });
+                              }catch(Exception){}
                               dbref.child("defaulter")
                                   .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
-                                  .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a-1);
-                            setcount();
+                                  .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a+1);
+                              setcount();
 
-                          }
-                          else{
-                            list.add(Dateinfo.prnlist.elementAt(index).toString());
-                            dbref.child("defaulter")
-                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
-                            await dbref.child("Attendance")
-                                .child(Dateinfo.dept)
-                                .child(Dateinfo.classs)
-                                .child(Dateinfo.subject)
-                                .child(Dateinfo.teachname)
-                                .child(Dateinfo.date1)
-                                .child(Dateinfo.stat)
-                                .child(Dateinfo.lecnumber)
-                                .child((Dateinfo.prnlist.elementAt(index).toString()))
-                                .set("1");
-                            setState(() {
-                              count=list.length;
-                              new Icon(Icons.check_box);
-                            });
-                            int a=0;
-                            try {
-                              await dbref.child("defaulter")
-                                  .child(Dateinfo.dept).child(Dateinfo.classs)
-                                  .child(Dateinfo.prnlist.elementAt(index)
-                                  .toString())
-                                  .child(
-                                  Dateinfo.subject + "_" + Dateinfo.teachname)
-                                  .once()
-                                  .then((value) {
-                                if(value.value==null) throw Exception;
-                                a = value.value;
+                            }
+                          }else{
+                            if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
+                              Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                              list.remove(Dateinfo.prnlist.elementAt(index).toString());
+                              dbref.child("defaulter")
+                                  .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+
+                              await dbref.child("Attendance")
+                                  .child(Dateinfo.dept)
+                                  .child(Dateinfo.classs)
+                                  .child(Dateinfo.subject)
+                                  .child(Dateinfo.teachname)
+                                  .child(Dateinfo.date1)
+                                  .child(Dateinfo.stat)
+                                  .child(Alert1.batch)
+                                  .child(Dateinfo.lecnumber)
+                                  .child((Dateinfo.prnlist.elementAt(index).toString()).toString()).remove();
+                              setState(() {
+                                count=list.length;
+                                obj=new Icon(Icons.check_box_outline_blank);
                               });
-                            }catch(Exception){}
-                            dbref.child("defaulter")
-                                .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
-                                .child(Dateinfo.subject+"_"+Dateinfo.teachname).set(a+1);
-                            setcount();
+                              int a=0;
+                              String key;
+                              if(Dateinfo.stat=="Practical"){
+                                key=Dateinfo.subject + "_" +
+                                    Dateinfo.teachname + "_" + Alert1.batch;
+                              }else{
+                                key=Dateinfo.subject + "_" +
+                                    Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
+                              }
+                              try {
+                                await dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs)
+                                    .child(Dateinfo.prnlist.elementAt(index)
+                                    .toString())
+                                    .child(key)
+                                    .once()
+                                    .then((value) {
+                                  if(value.value==null) throw Exception;
 
+                                  a = value.value;
+                                });
+                              }catch(Exception){
+                                a=0;
+                              }
+                              if(a>0)
+                                dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                    .child(key).set(a-1);
+                              setcount();
+                            }
+                            else{
+                              list.add(Dateinfo.prnlist.elementAt(index).toString());
+                              dbref.child("defaulter")
+                                  .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
+                              await dbref.child("Attendance")
+                                  .child(Dateinfo.dept)
+                                  .child(Dateinfo.classs)
+                                  .child(Dateinfo.subject)
+                                  .child(Dateinfo.teachname)
+                                  .child(Dateinfo.date1)
+                                  .child(Dateinfo.stat)
+                                  .child(Alert1.batch)
+                                  .child(Dateinfo.lecnumber)
+                                  .child((Dateinfo.prnlist.elementAt(index).toString()).toString())
+                                  .set("1");
+                              setState(() {
+                                count=list.length;
+                                new Icon(Icons.check_box);
+                              });
+                              int a=0;
+                              String key;
+                              if(Dateinfo.stat=="Practical"){
+                                key=Dateinfo.subject + "_" +
+                                    Dateinfo.teachname + "_" + Alert1.batch;
+                              }else{
+                                key=Dateinfo.subject + "_" +
+                                    Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
+                              }
+                              try {
+                                await dbref.child("defaulter")
+                                    .child(Dateinfo.dept).child(Dateinfo.classs)
+                                    .child(Dateinfo.prnlist.elementAt(index)
+                                    .toString())
+                                    .child(key)
+                                    .once()
+                                    .then((value) {
+                                  if(value.value==null) throw Exception;
+                                  a = value.value;
+                                });
+                              }catch(Exception){}
+                              dbref.child("defaulter")
+                                  .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
+                                  .child(key).set(a+1);
+
+                              setcount();
+                            }
                           }
+                          // Dateinfo.b=!Dateinfo.b;
                         }else{
-                          if(Dateinfo.list.contains(Dateinfo.prnlist.elementAt(index).toString())||list.contains(Dateinfo.prnlist.elementAt(index).toString())){
-                            Dateinfo.list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                            list.remove(Dateinfo.prnlist.elementAt(index).toString());
-                            dbref.child("defaulter")
-                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
-
-                            await dbref.child("Attendance")
-                                .child(Dateinfo.dept)
-                                .child(Dateinfo.classs)
-                                .child(Dateinfo.subject)
-                                .child(Dateinfo.teachname)
-                                .child(Dateinfo.date1)
-                                .child(Dateinfo.stat)
-                                .child(Alert1.batch)
-                                .child(Dateinfo.lecnumber)
-                                .child((Dateinfo.prnlist.elementAt(index).toString()).toString()).remove();
-                            setState(() {
-                              count=list.length;
-                              obj=new Icon(Icons.check_box_outline_blank);
-                            });
-                            int a=0;
-                            String key;
-                            if(Dateinfo.stat=="Practical"){
-                              key=Dateinfo.subject + "_" +
-                                  Dateinfo.teachname + "_" + Alert1.batch;
-                            }else{
-                              key=Dateinfo.subject + "_" +
-                                  Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
-                            }
-                            try {
-                              await dbref.child("defaulter")
-                                  .child(Dateinfo.dept).child(Dateinfo.classs)
-                                  .child(Dateinfo.prnlist.elementAt(index)
-                                  .toString())
-                                  .child(key)
-                                  .once()
-                                  .then((value) {
-                                if(value.value==null) throw Exception;
-
-                                a = value.value;
-                              });
-                            }catch(Exception){
-                              a=0;
-                            }
-                            if(a>0)
-                              dbref.child("defaulter")
-                                  .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
-                                  .child(key).set(a-1);
-                            setcount();
-                          }
-                          else{
-                            list.add(Dateinfo.prnlist.elementAt(index).toString());
-                            dbref.child("defaulter")
-                                .child("modified").child(Dateinfo.prnlist.elementAt(index).toString()).set(1);
-                            await dbref.child("Attendance")
-                                .child(Dateinfo.dept)
-                                .child(Dateinfo.classs)
-                                .child(Dateinfo.subject)
-                                .child(Dateinfo.teachname)
-                                .child(Dateinfo.date1)
-                                .child(Dateinfo.stat)
-                                .child(Alert1.batch)
-                                .child(Dateinfo.lecnumber)
-                                .child((Dateinfo.prnlist.elementAt(index).toString()).toString())
-                                .set("1");
-                            setState(() {
-                              count=list.length;
-                              new Icon(Icons.check_box);
-                            });
-                            int a=0;
-                            String key;
-                            if(Dateinfo.stat=="Practical"){
-                              key=Dateinfo.subject + "_" +
-                                  Dateinfo.teachname + "_" + Alert1.batch;
-                            }else{
-                              key=Dateinfo.subject + "_" +
-                                  Dateinfo.teachname + "_" + Alert1.batch+"_Tutorial";
-                            }
-                            try {
-                              await dbref.child("defaulter")
-                                  .child(Dateinfo.dept).child(Dateinfo.classs)
-                                  .child(Dateinfo.prnlist.elementAt(index)
-                                  .toString())
-                                  .child(key)
-                                  .once()
-                                  .then((value) {
-                                if(value.value==null) throw Exception;
-                                a = value.value;
-                              });
-                            }catch(Exception){}
-                            dbref.child("defaulter")
-                                .child(Dateinfo.dept).child(Dateinfo.classs).child(Dateinfo.prnlist.elementAt(index).toString())
-                                .child(key).set(a+1);
-
-                            setcount();
-                          }
+                          Fluttertoast.showToast(
+                              msg: "You can't Modify here",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.BOTTOM,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 2.2*SizeConfig.textMultiplier);
                         }
-                        // Dateinfo.b=!Dateinfo.b;
-                      }else{
-                        Fluttertoast.showToast(
-                            msg: "You can't Modify here",
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.BOTTOM,
-                            backgroundColor: Colors.red,
-                            textColor: Colors.white,
-                            fontSize: 2.2*SizeConfig.textMultiplier);
-                      }
-                    })
-                ),
-              );
-            },
+                      })
+                  ),
+                );
+              },
+            ),
           ),
         ),
-      ),
 
+      ),
     );
     //);
   }

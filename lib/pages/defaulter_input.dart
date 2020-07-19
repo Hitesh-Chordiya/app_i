@@ -31,6 +31,8 @@ class defaulterState extends State<defaulter> {
     super.initState();
   }
 
+  total obj=new total();
+
   Map map, dates;
   var s1;
   Color dropcolor = Color(0xff996600);
@@ -41,7 +43,7 @@ class defaulterState extends State<defaulter> {
   List<String> classlist = ["Class"],
       subjectlist = ["Subject"];
   int group;
-  bool isloading = false,
+  bool isloading = false,toast=true,
       show = true;
   final dbref = FirebaseDatabase.instance.reference();
   FocusNode focusNode5 = new FocusNode();
@@ -50,7 +52,7 @@ class defaulterState extends State<defaulter> {
   void copy() async {
     classlist.clear();
     prefs = await SharedPreferences.getInstance();
-
+    Dateinfo.dept= prefs.getString("dept");
     setState(() {
       subjectlist = prefs.getStringList("scount");
       for (int i = 0; i < subjectlist.length; i++) {
@@ -68,12 +70,15 @@ class defaulterState extends State<defaulter> {
   String map1;
   var myFormat = DateFormat('yyyy_MM_dd');
 
-  Future<bool> _onbackpressed() {
+  Future<bool> _onbackpressed() async{
     if (isloading == true) {
-      setState(() {
-        isloading = false;
-        show = true;
-      });
+      if(mounted){
+        setState(() {
+          isloading = false;
+          show = true;
+        });
+      }
+
     } else {
       // if(isloading==false && show==true){
       Navigator.pushReplacement(
@@ -83,6 +88,8 @@ class defaulterState extends State<defaulter> {
           ));
       //}
     }
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    Dateinfo.dept= prefs.getString("dept");
   }
 
   @override
@@ -97,7 +104,7 @@ class defaulterState extends State<defaulter> {
         body: isloading
             ? show
             ? new SpinKitThreeBounce(
-          color: Color(0xff8a8a5c),
+          color: Color(0xff008080),
           size: 40.0,
           // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
         )
@@ -468,112 +475,135 @@ class defaulterState extends State<defaulter> {
             itemCount: classlist.length,
             itemBuilder: (BuildContext context, int index) {
               List<Color> cl1 = [
-                Color(0xffffd966),
-                Color(0xffadad85),
-                Color(0xffff8080),
-                Color(0xffccffff)
+                Color(0xff94b8b8),
+                Color(0xffd279793),
+
+                Color(0xff94b8b8),
+                Color(0xffd27979)
               ];
-              double leftsize = 2.5 * SizeConfig.heightMultiplier,
-                  rightsize = 2.2 * SizeConfig.heightMultiplier;
+              double leftsize = 2.8 * SizeConfig.heightMultiplier,
+                  rightsize = 2.4 * SizeConfig.heightMultiplier;
               List<Color> cl2 = [
-                Color(0xffcc0052),
-                Color(0xffcc0052),
-                Color(0xffcc0052),
-                Color(0xffcc0052)
+                Color(0xffff4d4d),
+                Color(0xffff4d4d),
+                Color(0xffff4d4d),
+                Color(0xffff4d4d),
               ];
               return Padding(
-                padding: EdgeInsets.all(2 * SizeConfig.heightMultiplier),
+                padding: EdgeInsets.symmetric(vertical:2 * SizeConfig.heightMultiplier,horizontal:2 * SizeConfig.widthMultiplier),
                 child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: new BorderRadius.circular(15.0),
+                    shape: BoxShape.rectangle,
+                    border:
+                    Border.all(width: 3.0, color: Colors.white),
+                  ),
                   height: 18 * SizeConfig.heightMultiplier,
-                  child: GradientCard(
+                  child: Card(
                     elevation: 50,
-                    gradient: LinearGradient(
-                      colors: [
-                        cl1[index % 4],
-                        cl1[index % 4]
-                      ],
-                    ),
                     shape: new RoundedRectangleBorder(
                         borderRadius: new BorderRadius.circular(15.0)),
-                    child: ListTile(
-                      //isThreeLine: false,
-                      title: RichText(
-                        text: TextSpan(
-                            text: "\n       Class : ",
-                            style: TextStyle(
-                                color: cl2[index % 4],
-                                fontFamily: "Roboto",
-                                fontSize:
-                                leftsize,
-                                fontWeight: FontWeight.bold),
-                            children: <TextSpan>[
-                              TextSpan(
-                                  text: classlist
-                                      .elementAt(index)
-                                      .toString().split("_")[0] +
-                                      "\t\t",
-                                  style: TextStyle(
-                                      fontSize: rightsize,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold)),
-                            ]),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: new AssetImage("assets/card1.jpg"),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: new BorderRadius.circular(15.0),
+                        shape: BoxShape.rectangle,
+                        border:
+                        Border.all(width: 3.0, color: Color(0xffff4d4d)),
                       ),
-                      subtitle: RichText(
+
+
+                      child: ListTile(
+                        //isThreeLine: false,
+                        title: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: RichText(
+                            text: TextSpan(
+                                text: "                  Class : ",
+                                style: TextStyle(
+                                    color: cl2[index % 3]
+                                    ,
+                                    fontFamily: "Roboto",
+                                    fontSize:
+                                    leftsize,
+                                    fontWeight: FontWeight.bold),
+                                children: <TextSpan>[
+                                  TextSpan(
+                                      text: classlist
+                                          .elementAt(index)
+                                          .toString().split("_")[0] +
+                                          "\t\t",
+                                      style: TextStyle(
+                                          fontSize: rightsize,
+                                          color: Color(0xff6d6d46),
+                                          fontWeight: FontWeight.bold)),
+                                ]),
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: RichText(
 //                      textAlign: TextAlign.justify,
 
-                        text: TextSpan(
-                          text: "\n               Subject : ",
-                          style: TextStyle(
-                              color: cl2[index % 3],
-                              fontFamily: "Roboto",
-                              fontSize: leftsize,
-                              fontWeight: FontWeight.bold),
-                          children: <TextSpan>[
-                            TextSpan(
-                                text: classlist.
-                                elementAt(index)
-                                    .toString().split("_")[1]
-                                ,
-                                style: TextStyle(
-                                    fontSize: rightsize,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold)),
-                          ],
+                            text: TextSpan(
+                              text: "                  Subject : ",
+                              style: TextStyle(
+                                  color: cl2[index % 3],
+                                  fontFamily: "Roboto",
+                                  fontSize: leftsize,
+                                  fontWeight: FontWeight.bold),
+                              children: <TextSpan>[
+                                TextSpan(
+                                    text: Dateinfo.dept.startsWith("FE") ?
+                                    classlist.elementAt(index)
+                                        .toString().split("_")[1].substring(0,classlist.elementAt(index).toString().split("_")[1].length-4)
+                                    :classlist.elementAt(index)
+                                .toString().split("_")[1],
+                                    style: TextStyle(
+                                        fontSize: rightsize,
+                                        color: Color(0xff6d6d46),
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                      onTap: () async {
-                        setState(() {
-                          isloading = true;
-                        });
-                        classs = classlist
-                            .elementAt(index)
-                            .toString().split("_")[0];
-                        _subject = classlist
-                            .elementAt(index)
-                            .toString().split("_")[1];
-                        try {
-                          await attendanceCalculator(classs, _subject);
+                        onTap: () async {
+                          setState(() {
+                            isloading = true;
+                          });
+                          classs = classlist
+                              .elementAt(index)
+                              .toString().split("_")[0];
+                          _subject = classlist
+                              .elementAt(index)
+                              .toString().split("_")[1];
+                          try {
+                            await attendanceCalculator(classs, _subject);
 //                          pr.hide();
-                          setState(() {
-                            show = false;
-                          });
-                        } catch (Ex) {
-                          // isloading=true;
+                            setState(() {
+                              show = false;
+                            });
+                          } catch (Ex) {
+                            if (toast) {
+                              Fluttertoast.showToast(
+                                  msg: "Generate defaulter list first!!",
+                                  toastLength: Toast.LENGTH_LONG,
+                                  gravity: ToastGravity.BOTTOM,
+                                  backgroundColor: Colors.red,
+                                  textColor: Colors.white,
+                                  fontSize: 2 * SizeConfig.textMultiplier);
+                            }
+                            setState(() {
+                              isloading = false;
+                              show = true;
+                            });
+                          }
+                        },
 
-                          Fluttertoast.showToast(
-                              msg: "Generate defaulter list first!!",
-                              toastLength: Toast.LENGTH_LONG,
-                              gravity: ToastGravity.BOTTOM,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 2 * SizeConfig.textMultiplier);
-                          setState(() {
-                            isloading = false;
-                            show = true;
-                          });
-                        }
-                      },
-
+                      ),
                     ),
                   ),
                 ),
@@ -584,32 +614,50 @@ class defaulterState extends State<defaulter> {
         bottomNavigationBar: FancyBottomNavigation(
           initialSelection: 2,
           activeIconColor: Colors.white,
-          inactiveIconColor: HexColor.fromHex("#008080"),
-          circleColor: HexColor.fromHex("#008080"),
+
+          inactiveIconColor: Color(0xff6d6d46),
+          circleColor: Color(0xff6d6d46),
           tabs: [
             TabData(iconData: Icons.home, title: "Home"),
             TabData(iconData: Icons.local_parking, title: "Parent Teacher"),
             TabData(iconData: Icons.assignment, title: "Remedial hr")
           ],
           onTabChangedListener: (position) {
-            setState(() {
-              // currentPage = position;
-              if (position == 1) {
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Parentteacherlist(),
-                    ));
-              }
-              if (position == 0) {
-                //remedial
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => thome(),
-                    ));
-              }
-            });
+            if(mounted) {
+              setState(() {
+                if (position == 2) {
+                  if (mounted) {
+                    setState(() {
+                      toast = true;
+                    });
+                  }
+                } else {
+                  if (mounted) {
+                    setState(() {
+                      toast = false;
+                    });
+                  }
+                }
+                // currentPage = position;
+                if (position == 1) {
+                  if (mounted) {
+                    Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Parentteacherlist(),
+                        ));
+                  }
+                }
+                if (position == 0) {
+                  //remedial
+                  Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => thome(),
+                      ));
+                }
+              });
+            }
           },
         ),
         appBar: new AppBar(
@@ -623,7 +671,7 @@ class defaulterState extends State<defaulter> {
                 color: Colors.white,
               )),
           title: new Text("Homepage\\check att"),
-          backgroundColor: Color(0xff008080),
+          backgroundColor: Color(0xff6d6d46),
         ),
       ),
     );
@@ -632,7 +680,9 @@ class defaulterState extends State<defaulter> {
   //Map emoji=new Map();
   Future<void> attendanceCalculator(String classs, String subject) async {
     final dbref = FirebaseDatabase.instance.reference();
-
+    if (Dateinfo.dept=="FE") {
+      Dateinfo.dept=subject.toString().substring(subject.length-4);
+    }
     Dateinfo.prnlist.add("hello");
     Dateinfo.prnlist.clear();
     var studbatch_name = new Map();
@@ -704,6 +754,8 @@ class defaulterState extends State<defaulter> {
               }
 //            print(studbatch_name[batch][k.toString()]);
 //            print(100*(stud["Total"] ~/totalt[batch]));
+//              print(studbatch_name[batch][k.toString()]);
+//              print((100 * (stud["Total"] / totalt[batch])));
               if ((100 * (stud["Total"] / totalt[batch])) >= 75) {
                 //print(k);
                 // print("rrr");
@@ -712,19 +764,18 @@ class defaulterState extends State<defaulter> {
                     "name": studbatch_name[batch][k.toString()],
                     "att": (stud[subject] / totalt[subject][batch]) * 100,
                     "work load": 0,
-                    "total": (stud["Total"] ~/ totalt[batch]) * 100
+                    "total": (stud["Total"] / totalt[batch]) * 100
                   }
                 });
-                print(studbatch_name[batch][k.toString()]);
+//                print("lol");
+//                print(studbatch_name[batch][k.toString()]);
+//                print((100 * (stud["Total"] / totalt[batch])));
                 continue;
               } else {
                 //print("got");
                 for (final key in stud.keys) {
                   if (key.toString() != "Total") {
-//                  print("got");
-//                  print(studbatch_name[batch][k.toString()]);
-                    // print(totalt);
-                    //print(k);print(key);print(stud[key]);print(totalt[key][batch]);print((100*(stud[key] / totalt[key][batch])));
+//                       //print(k);print(key);print(stud[key]);print(totalt[key][batch]);print((100*(stud[key] / totalt[key][batch])));
                     if ((100 * (stud[key] / totalt[key][batch])) >= 75) {
                       obj.studmap.addAll({
                         k.toString(): {
@@ -746,8 +797,7 @@ class defaulterState extends State<defaulter> {
               }
               int work = 0;
               if ((att.containsKey(subject))) {
-//              print(k);
-//              print(subject);
+//
                 int tot = 0;
 //                    attended = 0;
                 for (final k in totalt.keys) {
@@ -802,7 +852,7 @@ class defaulterState extends State<defaulter> {
 //  print(obj.studmap);
   }
 
-  total obj = new total();
+// total obj = new total();
 }
 
 class gendefaulter extends StatefulWidget {
@@ -842,9 +892,19 @@ class _gendefaulterState extends State with TickerProviderStateMixin {
     }
     spin = new List.filled(classlist.length, false);
     check = new List.filled(classlist.length, true);
+
+    assign();
     // print(check);
   }
-
+  void assign()async{
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    Dateinfo.dept= prefs.getString("dept");
+  }
+  Future<bool> assigndept()async{
+    SharedPreferences prefs=await SharedPreferences.getInstance();
+    Dateinfo.dept= prefs.getString("dept");
+    return true;
+  }
   generator(String classs) async {
     final dbref = FirebaseDatabase.instance.reference();
     int totallect = 0,
@@ -963,101 +1023,104 @@ class _gendefaulterState extends State with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: new AppBar(
-        title: new Text(
-          "Homepage\\gen_def",
-          style: TextStyle(
-              fontStyle: FontStyle.italic,
-              fontWeight: FontWeight.bold,
-              fontSize: 2.7 * SizeConfig.textMultiplier),
+    return WillPopScope(
+      onWillPop: assigndept,
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: new AppBar(
+            title: new Text(
+              "Homepage\\gen_def",
+              style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 2.7 * SizeConfig.textMultiplier),
+            ),
+            backgroundColor: Color(0xff6d6d46)
         ),
-        backgroundColor: HexColor.fromHex("#008080"),
-      ),
-      body: Container(
-        child: ListView.builder(
-          padding: kMaterialListPadding,
-          itemCount: classlist.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Container(
-              height: 9 * SizeConfig.heightMultiplier,
-              child: Card(
-                elevation: 50,
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(15.0)),
-                child: ListTile(
-                    isThreeLine: false,
-                    leading: Text(classlist.elementAt(index).toString(),
+        body: Container(
+          child: ListView.builder(
+            padding: kMaterialListPadding,
+            itemCount: classlist.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 9 * SizeConfig.heightMultiplier,
+                child: Card(
+                  elevation: 50,
+                  shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(15.0)),
+                  child: ListTile(
+                      isThreeLine: false,
+                      leading: Text(classlist.elementAt(index).toString(),
+                          style: TextStyle(
+                              fontSize: 2.5 * SizeConfig.textMultiplier,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xffac3973))),
+                      title: Text(
+                        "Defaulter",
                         style: TextStyle(
-                            fontSize: 2.5 * SizeConfig.textMultiplier,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xffac3973))),
-                    title: Text(
-                      "Defaulter",
-                      style: TextStyle(
-                          fontSize: 2.2 * SizeConfig.textMultiplier,
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    trailing: SizedBox(
-                      width: 30 * SizeConfig.widthMultiplier,
-                      height: 7 * SizeConfig.heightMultiplier,
-                      child: Center(
-                        child: Row(
-                          children: <Widget>[
-                            spin[index]
-                                ? check[index]
-                                ? SizedBox(
-                                width: 7.5 * SizeConfig.widthMultiplier,
-                                child: new IconButton(
-                                    color: Colors.black,
-                                    icon: new Icon(Icons.check),
-                                    onPressed: null))
-                                : Text(" ")
-                                : check[index]
-                                ? new Text(" ")
-                                : new SpinKitCircle(
-                              color: Colors.green,
-                              size: 20.0,
-                              // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(4.0),
-                            ),
-                            ButtonTheme(
-                              minWidth: 10 * SizeConfig.widthMultiplier,
-                              child: new RaisedButton(
-                                child: Text("generate"),
-                                onPressed: () async {
-                                  setState(() {
-                                    check[index] = false;
-                                  });
-                                  await generator(
-                                      classlist.elementAt(index).toString());
-                                  setState(() {
-                                    spin[index] = true;
-                                    check[index] = true;
-                                  });
-                                  //ht(index);
-                                },
-                                color: Color(0xfffffc266),
-                                textColor: Colors.black,
-                                padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
-                                splashColor: Colors.grey,
-                                shape: new RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.00)),
-                              ),
-                            ),
-                          ],
-                        ),
+                            fontSize: 2.2 * SizeConfig.textMultiplier,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold),
                       ),
-                    )
-                  //subtitle: const Text("hiiiii"),
+                      trailing: SizedBox(
+                        width: 30 * SizeConfig.widthMultiplier,
+                        height: 7 * SizeConfig.heightMultiplier,
+                        child: Center(
+                          child: Row(
+                            children: <Widget>[
+                              spin[index]
+                                  ? check[index]
+                                  ? SizedBox(
+                                  width: 7.5 * SizeConfig.widthMultiplier,
+                                  child: new IconButton(
+                                      color: Colors.black,
+                                      icon: new Icon(Icons.check),
+                                      onPressed: null))
+                                  : Text(" ")
+                                  : check[index]
+                                  ? new Text(" ")
+                                  : new SpinKitCircle(
+                                color: Colors.green,
+                                size: 20.0,
+                                // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(4.0),
+                              ),
+                              ButtonTheme(
+                                minWidth: 10 * SizeConfig.widthMultiplier,
+                                child: new RaisedButton(
+                                  child: Text("generate"),
+                                  onPressed: () async {
+                                    setState(() {
+                                      check[index] = false;
+                                    });
+                                    await generator(
+                                        classlist.elementAt(index).toString());
+                                    setState(() {
+                                      spin[index] = true;
+                                      check[index] = true;
+                                    });
+                                    //ht(index);
+                                  },
+                                  color: Color(0xfffffc266),
+                                  textColor: Colors.black,
+                                  padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+                                  splashColor: Colors.grey,
+                                  shape: new RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30.00)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    //subtitle: const Text("hiiiii"),
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

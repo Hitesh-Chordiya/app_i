@@ -54,6 +54,6 @@ static  int grp=0;
     widthMultiplier = blockWidth;
     print(blockHeight);
     print(blockWidth);
-    print("Hii");
+    print(grp);
   }
 }

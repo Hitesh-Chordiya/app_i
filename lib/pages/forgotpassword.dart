@@ -205,6 +205,8 @@ class MapScreenState extends State<profilestud>
   @override
   Widget build(BuildContext context) {
     int grp=SizeConfig.grp;
+    Color top=Color(0xff6d6d46);
+    Color bottom=Color(0xff800000);
     return new Scaffold(
         body: new Container(
           color: Colors.grey.shade500,
@@ -307,9 +309,10 @@ class MapScreenState extends State<profilestud>
                                     mainAxisSize: MainAxisSize.min,
                                     children: <Widget>[
                                       new Text(
-                                        'Personal Information',
+                                        '          Personal Information',
                                         style: TextStyle(
-                                            fontSize: 2.5*SizeConfig.heightMultiplier,
+                                            color: top,
+                                            fontSize: 3*SizeConfig.heightMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ],
@@ -336,6 +339,7 @@ class MapScreenState extends State<profilestud>
                                       new Text(
                                         'Email ID',
                                         style: TextStyle(
+                                            color:top,
                                             fontSize: 2.2*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -351,8 +355,13 @@ class MapScreenState extends State<profilestud>
                                 children: <Widget>[
                                   new Flexible(
                                     child: new TextField(
+
                                       decoration: const InputDecoration(
-                                          hintText: "Enter Email ID"),
+                                          hintText: "Enter Email ID",
+                                          hintStyle: TextStyle(color: Color(0xff800000)),
+                                          labelStyle: TextStyle(color: Color(0xff800000))
+
+                                      ),
                                       controller: _mailcontroller,
                                       enabled: false,
                                       onChanged: (val){
@@ -376,6 +385,7 @@ class MapScreenState extends State<profilestud>
                                       new Text(
                                         'Name',
                                         style: TextStyle(
+                                            color: top,
                                             fontSize: 2.2*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -387,7 +397,7 @@ class MapScreenState extends State<profilestud>
                               padding: EdgeInsets.only(
                                   left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?0.20*SizeConfig.heightMultiplier:0.25*SizeConfig.heightMultiplier),
                               child: new Row(
-                               // mainAxisSize: MainAxisSize.max,
+                                // mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Flexible(
                                     child: new TextField(
@@ -411,7 +421,7 @@ class MapScreenState extends State<profilestud>
                               padding: EdgeInsets.only(
                                   left: 7*SizeConfig.widthMultiplier, right: 7*SizeConfig.widthMultiplier, top: grp<=4?2.4*SizeConfig.heightMultiplier:3.5*SizeConfig.heightMultiplier),
                               child: new Row(
-                              //  mainAxisSize: MainAxisSize.max,
+                                //  mainAxisSize: MainAxisSize.max,
                                 children: <Widget>[
                                   new Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
@@ -420,6 +430,7 @@ class MapScreenState extends State<profilestud>
                                       new Text(
                                         'PRN',
                                         style: TextStyle(
+                                            color: top,
                                             fontSize: 2.28*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -459,6 +470,7 @@ class MapScreenState extends State<profilestud>
                                       new Text(
                                         'Branch',
                                         style: TextStyle(
+                                            color: top,
                                             fontSize: 2.2*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -498,6 +510,8 @@ class MapScreenState extends State<profilestud>
                                       child: new Text(
                                         'Class',
                                         style: TextStyle(
+                                            color: top,
+
                                             fontSize: 2.2*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -509,6 +523,8 @@ class MapScreenState extends State<profilestud>
                                       child: new Text(
                                         'Batch',
                                         style: TextStyle(
+                                            color: top,
+
                                             fontSize: 2.2*SizeConfig.textMultiplier,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -594,12 +610,13 @@ class _teachprofileState extends State<teachprofile> {
   List<String> cl=["nothing to show here"];
   Future<void> getprefs() async {
     prefs=await SharedPreferences.getInstance();
-    cl.clear();
-    cl.addAll(prefs.getStringList("scount"));
-    setState(() {
-      l=cl.length;
-    });
-
+    try {
+      cl.clear();
+      cl.addAll(prefs.getStringList("scount"));
+      setState(() {
+        l = cl.length;
+      });
+    }catch(Ex){print("jj");}
   }
   void initState() {
     // TODO: implement initState
@@ -619,7 +636,7 @@ class _teachprofileState extends State<teachprofile> {
               Column(
                 children: <Widget>[
                   new Container(
-                    height: 30 * SizeConfig.heightMultiplier,
+                    height: 35 * SizeConfig.heightMultiplier,
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: new AssetImage("assets/card1.jpg"),
@@ -946,7 +963,6 @@ class _teachprofileState extends State<teachprofile> {
               MaterialPageRoute(
                 builder: (context) => LoginPage(),
               ));
-          //log.clear();
           log.setBool("login", false);
           break;
         }

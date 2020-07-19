@@ -7,11 +7,14 @@ import 'package:flutter/widgets.dart';
 
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/pages/homepage.dart';
 import 'package:flutter_app/responsive/Screensize.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:rating_dialog/rating_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'TeacherHome.dart';
 extension HexColor on Color {
   /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
   static Color fromHex(String hexString) {
@@ -79,6 +82,7 @@ class user {
       date,
       lec,
       count = "0";
+  static bool clicked=false;
 }
 
 class total {
@@ -93,10 +97,9 @@ class total {
 class Dateinfo {
   static Map part1;
   static var parentteacherstud=new Map();
-
   static var studclass=new Map();
-  static List<String> list = List<String>();
-  static List<String> ydlist = ["hi"],
+  static List<String> list = List<String>(),
+      ydlist = List<String>(),
       prnlist = List<String>(),
       batches = List<String>(),parentteacherclass=List<String>(),
       parentteacherlist=List<String>();
@@ -165,7 +168,7 @@ class Studinfo {
       classs,
       batch,parentname,
       prn;
-  static bool fetch = false;
+  static bool fetch = false,on=true,off=true;
   static List<Studinfo> remediallist=List<Studinfo>();
   String subjectname;
   int workload;
@@ -177,28 +180,26 @@ class Studinfo {
     child(Studinfo.parentname).child(
         Studinfo.classs).child(Studinfo.roll).once()
         .then((onValue){
-          if(onValue.value==null){
-            throw Exception;
-          }
       datamap=onValue.value;
+      if(onValue.value==null){
+        throw Exception;
+      }
     });
   }
 
   Studinfo(String subjectname,int workload){
     this.subjectname=subjectname;
     if(workload<0){
-      this.workload=0;
+      workload=0;
     }
-    else {
-      this.workload = workload;
-    }
-    }
+    this.workload=workload;
+  }
   static void relist()async{
     remediallist.clear();
     SharedPreferences prefs =await SharedPreferences.getInstance();
     List<String> a=((prefs.getStringList("remedial")));//as List<Studinfo>;
+    //print(a);
     if(a==null) {throw Exception;}
-
     for (int i=0;i<a.length;i++){
       var b=a[i].split(" ");
       Studinfo s = new Studinfo(b[0], int.parse(b[1]));
@@ -314,19 +315,7 @@ class Studinfo {
         print("remedial");
       }
     } catch (Exception) {
-      Fluttertoast.showToast(
-          msg: "Defaulter is not generated!!",
-          toastLength: Toast
-              .LENGTH_LONG,
-          gravity: ToastGravity
-              .BOTTOM,
-          backgroundColor: Colors
-              .red,
-          textColor: Colors
-              .white,
-          fontSize: 2 *
-              SizeConfig
-                  .textMultiplier);
+      print("remedial");
     }
 
   }
@@ -347,21 +336,9 @@ class Alert1 {
         builder: (context) {
           return FittedBox(
             child: Theme(
-//              data: ThemeData(accentColor: Color(0xff666699),
-//                  primaryColor: Color(0xff666699),
-
-//                  TextTheme(
-//
-//                    body1: TextStyle(color: Colors.black),
-//                     button:TextStyle(color: Colors.black)
-//                  )),
-          data:ThemeData(
-          accentColor: Color(0xff666699),
-          buttonTheme: ButtonThemeData(
-          buttonColor: Colors.black87,
-          shape: RoundedRectangleBorder(),
-          textTheme: ButtonTextTheme.accent,
-          )),
+              data: ThemeData(accentColor: Colors.yellow,
+                  primaryColor: Colors.blue,
+                  textTheme: TextTheme(title: TextStyle(color: Colors.orange))),
               child: RatingDialog(
                 icon: Column(
                   children: <Widget>[
@@ -408,7 +385,7 @@ class Alert1 {
                 // optional
                 negativeComment: "We're sad to hear :(",
                 // optional
-               // accentColor: Colors.yellow,
+                accentColor: Colors.blue,
                 // optional
                 onSubmitPressed: (int rating) {
                   print("onSubmitPressed: rating = $rating");
@@ -424,26 +401,14 @@ class Alert1 {
           );
         });
   }
-  static yd(BuildContext context) async {
-    TextEditingController _controller = TextEditingController();
-    return showDialog(
-        context: context,
-        barrierDismissible: true, // set to false if you want to force a rating
-        builder: (context) {
-          return FittedBox(
-            child: Theme(
-              data: ThemeData(accentColor: Colors.yellow,
-                  primaryColor: Colors.yellow,
-                  textTheme: TextTheme()),
-              child:Text("sorry")
-            ),
-          );
-        });
-  }
 
   static String batch;
-
+  static Future<bool> _onbackpressed()async{
+    return false;
+  }
   static dialog(BuildContext context) async {
+//    SharedPreferences prefs=await SharedPreferences.getInstance();
+//    String dept=prefs.getString("dept");
     bool pcheck = false,
         qcheck = false,
         rcheck = false;
@@ -467,156 +432,285 @@ class Alert1 {
           final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
           return Transform(
             transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
-            child: Opacity(
-              opacity: a1.value,
-              child: AlertDialog(
-                shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0)),
-                title: Text("select batch"),
-                content: new FittedBox(
-                  child: Padding(
-                    padding: const EdgeInsets.all(0.0),
-                    child: Column(
-                      children: [
-                        new Row(
-                          children: <Widget>[
-                            SizedBox(
-                              child: pcheck ? RaisedButton(
-                                shape: CircleBorder(),
-                                color: Colors.blue,
-                                splashColor: Colors.red,
-                                child: SizedBox(
-                                    child: Text(
-                                      "P",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 20.0),
-                                    )),
+            child: WillPopScope(
+              onWillPop: _onbackpressed,
+              child: Opacity(
+                opacity: a1.value,
+                child: AlertDialog(
+                  shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0)),
+                  title: Text("select batch"),
+                  content: new FittedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: Column(
+                        children: [
+                          new Row(
+                            children: <Widget>[
+                              SizedBox(
+                                child: pcheck ? RaisedButton(
+                                  shape: CircleBorder(),
+                                  color: Colors.blue,
+                                  splashColor: Colors.red,
+                                  child: SizedBox(
+                                      child: Text(
+                                        "P",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 20.0),
+                                      )),
 
-                                onPressed: () async {
-                                  batch = "P";
-                                  if (inputlec == true) {
-                                    String cnt;
-                                    if(Dateinfo.stat=="Practical"){
-                                      cnt="practcount";
-                                    }else{
-                                      cnt="tutcount";
-                                    }
-                                    await FirebaseDatabase.instance
-                                        .reference()
-                                        .child("Attendance")
-                                        .child(Dateinfo.dept)
-                                        .child(Dateinfo.classs)
-                                        .child(Dateinfo.subject)
-                                        .child(Dateinfo.teachname)
-                                        .child(Dateinfo.date1)
-                                        .child(Dateinfo.stat)
-                                        .child(Alert1.batch)
-                                        .child(cnt)
-                                        .once()
-                                        .then((snap) async {
-                                      Dateinfo.part = snap.value;
-                                    });
-                                  }
-
-                                  Navigator.pop(context);
-                                },
-
-                                //color: const Color(0xFF1BC0C5),
-                              ) : SizedBox(),
-                            ),
-                            SizedBox(
-                              child: qcheck ? RaisedButton(
-                                shape: CircleBorder(),
-                                color: Colors.blue,
-                                // button color
-                                splashColor: Colors.red,
-                                // inkwell color
-                                child: SizedBox(
-                                    child: Text(
-                                      "Q",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 20.0),
-                                    )),
-                                onPressed: () async {
-                                  batch = "Q";
-                                  if (inputlec == true) {
-                                    String cnt;
-                                    if(Dateinfo.stat=="Practical"){
-                                      cnt="practcount";
-                                    }else{
-                                      cnt="tutcount";
+                                  onPressed: () async {
+                                    batch = "P";
+                                    if (inputlec == true) {
+                                      String cnt;
+                                      if(Dateinfo.stat=="Practical"){
+                                        cnt="practcount";
+                                      }else{
+                                        cnt="tutcount";
+                                      }
+                                      await FirebaseDatabase.instance
+                                          .reference()
+                                          .child("Attendance")
+                                          .child(Dateinfo.dept)
+                                          .child(Dateinfo.classs)
+                                          .child(Dateinfo.subject)
+                                          .child(Dateinfo.teachname)
+                                          .child(Dateinfo.date1)
+                                          .child(Dateinfo.stat)
+                                          .child(Alert1.batch)
+                                          .child(cnt)
+                                          .once()
+                                          .then((snap) async {
+                                        Dateinfo.part = snap.value;
+                                      });
                                     }
 
-                                    await FirebaseDatabase.instance
-                                        .reference()
-                                        .child("Attendance")
-                                        .child(Dateinfo.dept)
-                                        .child(Dateinfo.classs)
-                                        .child(Dateinfo.subject)
-                                        .child(Dateinfo.teachname)
-                                        .child(Dateinfo.date1)
-                                        .child(Dateinfo.stat)
-                                        .child(Alert1.batch)
-                                        .child(cnt)
-                                        .once()
-                                        .then((snap) async {
-                                      Dateinfo.part = snap.value;
-                                    });
-                                  }
-                                  Navigator.pop(context);
-                                },
-                              ) : SizedBox(),
-                            ),
-                            SizedBox(
-                              child: rcheck ? RaisedButton(
-                                shape: CircleBorder(),
-                                color: Colors.blue,
+                                    Navigator.pop(context);
+                                  },
 
-                                // button color
-                                splashColor: Colors.red,
-                                // inkwell color
-                                child: SizedBox(
-                                    child: Text(
-                                      "R",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 20.0),
-                                    )),
-                                onPressed: () async {
-                                  batch = "R";
-                                  if (inputlec == true) {
-                                    String cnt;
-                                    if(Dateinfo.stat=="Practical"){
-                                      cnt="practcount";
-                                    }else{
-                                      cnt="tutcount";
+                                  //color: const Color(0xFF1BC0C5),
+                                ) : SizedBox(),
+                              ),
+                              SizedBox(
+                                child: qcheck ? RaisedButton(
+                                  shape: CircleBorder(),
+                                  color: Colors.blue,
+                                  // button color
+                                  splashColor: Colors.red,
+                                  // inkwell color
+                                  child: SizedBox(
+                                      child: Text(
+                                        "Q",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 20.0),
+                                      )),
+                                  onPressed: () async {
+                                    batch = "Q";
+                                    if (inputlec == true) {
+                                      String cnt;
+                                      if(Dateinfo.stat=="Practical"){
+                                        cnt="practcount";
+                                      }else{
+                                        cnt="tutcount";
+                                      }
+
+                                      await FirebaseDatabase.instance
+                                          .reference()
+                                          .child("Attendance")
+                                          .child(Dateinfo.dept)
+                                          .child(Dateinfo.classs)
+                                          .child(Dateinfo.subject)
+                                          .child(Dateinfo.teachname)
+                                          .child(Dateinfo.date1)
+                                          .child(Dateinfo.stat)
+                                          .child(Alert1.batch)
+                                          .child(cnt)
+                                          .once()
+                                          .then((snap) async {
+                                        Dateinfo.part = snap.value;
+                                      });
                                     }
+                                    Navigator.pop(context);
+                                  },
+                                ) : SizedBox(),
+                              ),
+                              SizedBox(
+                                child: rcheck ? RaisedButton(
+                                  shape: CircleBorder(),
+                                  color: Colors.blue,
 
-                                    await FirebaseDatabase.instance
-                                        .reference()
-                                        .child("Attendance")
-                                        .child(Dateinfo.dept)
-                                        .child(Dateinfo.classs)
-                                        .child(Dateinfo.subject)
-                                        .child(Dateinfo.teachname)
-                                        .child(Dateinfo.date1)
-                                        .child(Dateinfo.stat)
-                                        .child(Alert1.batch)
-                                        .child(cnt)
-                                        .once()
-                                        .then((snap) async {
-                                      Dateinfo.part = snap.value;
-                                    });
-                                  }
-                                  Navigator.pop(context);
+                                  // button color
+                                  splashColor: Colors.red,
+                                  // inkwell color
+                                  child: SizedBox(
+                                      child: Text(
+                                        "R",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 20.0),
+                                      )),
+                                  onPressed: () async {
+                                    batch = "R";
+                                    if (inputlec == true) {
+                                      String cnt;
+                                      if(Dateinfo.stat=="Practical"){
+                                        cnt="practcount";
+                                      }else{
+                                        cnt="tutcount";
+                                      }
+
+                                      await FirebaseDatabase.instance
+                                          .reference()
+                                          .child("Attendance")
+                                          .child(Dateinfo.dept)
+                                          .child(Dateinfo.classs)
+                                          .child(Dateinfo.subject)
+                                          .child(Dateinfo.teachname)
+                                          .child(Dateinfo.date1)
+                                          .child(Dateinfo.stat)
+                                          .child(Alert1.batch)
+                                          .child(cnt)
+                                          .once()
+                                          .then((snap) async {
+                                        Dateinfo.part = snap.value;
+                                      });
+                                    }
+                                    Navigator.pop(context);
+                                  },
+                                ) : SizedBox(),
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+        transitionDuration: Duration(milliseconds: 1000),
+        barrierDismissible: false,
+        barrierLabel: '',
+        context: context,
+        pageBuilder: (context, animation1, animation2) {});
+  }
+  static selectdept(BuildContext context) async {
+    return showGeneralDialog(
+        barrierColor: Colors.black.withOpacity(0.5),
+        transitionBuilder: (context, a1, a2, widget) {
+          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+          return Transform(
+            transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+            child: WillPopScope(
+              onWillPop: _onbackpressed,
+              child: Opacity(
+                opacity: a1.value,
+                child: AlertDialog(
+                  shape: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.0)),
+                  title: Text("          Select Department",style: TextStyle(fontWeight: FontWeight.bold),),
+                  content: new FittedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.all(0.0),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+
+                            children: <Widget>[
+                              new Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 0 *
+                                          SizeConfig.widthMultiplier)),
+                              IconButton(
+                                icon: Icon(Icons.settings, color:Color(0xff00004d) ),
+                                onPressed: () {
+
                                 },
-                              ) : SizedBox(),
-                            )
-                          ],
-                        )
-                      ],
+                              ),
+                              new Padding(
+                                padding: EdgeInsets.only(
+                                  left: 5 *
+                                      SizeConfig.widthMultiplier,
+                                ),
+
+                              ),
+                              IconButton(
+                                  icon: Icon(Icons.laptop_mac,
+                                      color: Color(0xff00004d)),
+                                  onPressed: () {
+
+                                  }),
+                              new Padding(
+                                  padding: EdgeInsets.only(
+                                      left: 5 *
+                                          SizeConfig.widthMultiplier)),
+                              IconButton(
+                                  icon: Icon(
+                                      Icons.tap_and_play,
+                                      color:Color(0xff00004d) ),
+                                  onPressed: () {
+
+                                  }),
+                            ],
+                          ),
+                          Row(
+                            children: <Widget>[
+                              new MaterialButton(
+                                onPressed: () => {
+                                  Dateinfo.dept="MECH",
+                                  Navigator.pop(context)
+                                },
+                                shape: new RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50.00)),
+                                child: new Text("Mech",
+                                    style: TextStyle(
+                                        fontFamily: 'BalooChettan2',
+                                        color: HexColor.fromHex("#00004d"),
+                                        fontSize: 2.8 * SizeConfig.textMultiplier,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                              new MaterialButton(
+                                onPressed: () => {
+                                  Dateinfo.dept="COMP",
+                                  Navigator.pop(context)
+                                },
+                                shape: new RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50.00)),
+                                child: new Text("Comp",
+                                    style: TextStyle(
+                                        fontFamily: 'BalooChettan2',
+                                        color: HexColor.fromHex("#00004d"),
+                                        fontSize: 2.8 * SizeConfig.textMultiplier,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                              new MaterialButton(
+                                onPressed: () => {
+                                  Dateinfo.dept="ENTC",
+                                  Navigator.pop(context),
+
+//                                Alert1.selectdept(context)
+//                            FocusScope.of(context)
+//                                .requestFocus(new FocusNode()),
+//                            fun(context),
+                                },
+                                shape: new RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(50.00)),
+                                child: new Text("Entc",
+                                    style: TextStyle(
+                                        fontFamily: 'BalooChettan2',
+                                        color: HexColor.fromHex("#00004d"),
+                                        fontSize: 2.8 * SizeConfig.textMultiplier,
+                                        fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -653,290 +747,301 @@ class Attendance {
     atut=false;
     subjectList.clear();
     subjectList.add("Overall");
-    await FirebaseDatabase.instance
-        .reference()
-        .child('defaulter')
-        .child(Studinfo.branch)
-        .child(Studinfo.classs)
-        .child("AATotal")
-        .once()
-        .then((snapshot) async {
-      Map data = snapshot.value;
-      List<String> lectlist = [" "];
-      lectlist.clear();
-      List<String> practlist = [" "];
-      practlist.clear();
-      List<String> tlectlist = [" "];
-      tlectlist.clear();
-      List<String> tpractlist = [" "];
-      tpractlist.clear();
-      List<String> tutlist = [" "];
-      tutlist.clear();
-      List<String> ttutlist = [" "];
-      ttutlist.clear();
+    try{
+      await FirebaseDatabase.instance
+          .reference()
+          .child('defaulter')
+          .child(Studinfo.branch)
+          .child(Studinfo.classs)
+          .child("AATotal")
+          .once()
+          .then((snapshot) async {
+        Map data = snapshot.value;
+        List<String> lectlist = [" "];
+        lectlist.clear();
+        List<String> practlist = [" "];
+        practlist.clear();
+        List<String> tlectlist = [" "];
+        tlectlist.clear();
+        List<String> tpractlist = [" "];
+        tpractlist.clear();
+        List<String> tutlist = [" "];
+        tutlist.clear();
+        List<String> ttutlist = [" "];
+        ttutlist.clear();
 
-      for (final key in data.keys) {
-        if (!(key.toString() == "Total")) {
-          Studinfo.fetch = true;
-          var a = key.toString().split("_");
-          String subject = a[0];
-          if (a.length == 2) {
-            alect=true;
-            subjectList.add(subject);
-            tlectlist.add("t" + a[0].toString());
-            lectlist.add(a[0].toString());
-            // print("lol");
-            try {
-              List<String>tteacher = prefs.getStringList(
-                  "t" + a[0].toString());
-              tteacher.add("t" + a[1].toString());
-              prefs.setStringList(
-                  "t" + a[0].toString(), tteacher.toSet().toList());
-              List<String>teacher = prefs.getStringList(a[0].toString());
-              teacher.add(a[1].toString());
-              prefs.setStringList(a[0].toString(), teacher.toSet().toList());
-            } catch (Exception) {
-              List<String>tteacher = [" "];
-              tteacher.clear();
-              tteacher.add("t" + a[1].toString());
-              prefs.setStringList(
-                  "t" + a[0].toString(), tteacher.toSet().toList());
-              List<String>teacher = [" "];
-              teacher.clear();
-              teacher.add(a[1].toString());
-              prefs.setStringList(a[0].toString(), teacher.toSet().toList());
-            }
-            prefs.setInt("t" + a[0].toString() + a[1].toString(), data[key]);
-            try {
-              if(!(prefs.containsKey(a[0].toString() + a[1].toString()))) {
-                throw Exception;
+        for (final key in data.keys) {
+          if (!(key.toString() == "Total")) {
+            Studinfo.fetch = true;
+            var a = key.toString().split("_");
+            String subject = a[0];
+            if (a.length == 2) {
+              alect=true;
+              subjectList.add(subject);
+              tlectlist.add("t" + a[0].toString());
+              lectlist.add(a[0].toString());
+              // print("lol");
+              try {
+                List<String>tteacher = prefs.getStringList(
+                    "t" + a[0].toString());
+                tteacher.add("t" + a[1].toString());
+                prefs.setStringList(
+                    "t" + a[0].toString(), tteacher.toSet().toList());
+                List<String>teacher = prefs.getStringList(a[0].toString());
+                teacher.add(a[1].toString());
+                prefs.setStringList(a[0].toString(), teacher.toSet().toList());
+              } catch (Exception) {
+                List<String>tteacher = [" "];
+                tteacher.clear();
+                tteacher.add("t" + a[1].toString());
+                prefs.setStringList(
+                    "t" + a[0].toString(), tteacher.toSet().toList());
+                List<String>teacher = [" "];
+                teacher.clear();
+                teacher.add(a[1].toString());
+                prefs.setStringList(a[0].toString(), teacher.toSet().toList());
               }
-              // print(prefs.getInt(a[0].toString() + a[1].toString()));
-            }
-            catch
-            (Exception) {
-              prefs.setInt(a[0].toString() + a[1].toString(), 0);
-              // print("saved");
-            }
-          } else {
-            if (a.length == 3){
-              if (a[2] == Studinfo.batch) {
-                apract = true;
-                subjectList.add(subject);
-                tpractlist.add("t" + a[0].toString() + "L");
-                practlist.add(a[0].toString() + "L");
-                try {
-                  List<String>tteacher = prefs.getStringList("t" +
-                      a[0].toString() + "L");
-                  tteacher.add("t" + a[1].toString() + "L");
-                  prefs.setStringList(
-                      "t" + a[0].toString() + "L", tteacher.toSet().toList());
-
-                  List<String>teacher = prefs.getStringList(
-                      a[0].toString() + "L");
-                  teacher.add(a[1].toString() + "L");
-                  prefs.setStringList(
-                      a[0].toString() + "L", teacher.toSet().toList());
-                } catch (Exception) {
-                  List<String>tteacher = [" "];
-                  tteacher.clear();
-                  tteacher.add("t" + a[1].toString() + "L");
-                  prefs.setStringList(
-                      "t" + a[0].toString() + "L", tteacher.toSet().toList());
-
-                  List<String>teacher = [" "];
-                  teacher.clear();
-                  teacher.add(a[1].toString() + "L");
-
-                  prefs.setStringList(
-                      a[0].toString() + "L", teacher.toSet().toList());
+              prefs.setInt("t" + a[0].toString() + a[1].toString(), data[key]);
+              try {
+                if(!(prefs.containsKey(a[0].toString() + a[1].toString()))) {
+                  throw Exception;
                 }
-                prefs.setInt(
-                    "t" + a[0].toString() + a[1].toString() + "L", data[key]);
-                try {
-                  if (!(prefs.containsKey(
-                      a[0].toString() + a[1].toString() + "L"))) {
-                    throw Exception;
-                  }
-                } catch (Exception) {
-                  prefs.setInt(a[0].toString() + a[1].toString() + "L", 0);
-                }
+                // print(prefs.getInt(a[0].toString() + a[1].toString()));
               }
-            }else{
-              if (a[2] == Studinfo.batch) {
-                atut = true;
-                subjectList.add(subject);
-                ttutlist.add("t" + a[0].toString() + "T");
-                tutlist.add(a[0].toString() + "T");
-                try {
-                  List<String>tteacher = prefs.getStringList("t" +
-                      a[0].toString() + "T");
-                  tteacher.add("t" + a[1].toString() + "T");
-                  prefs.setStringList(
-                      "t" + a[0].toString() + "T", tteacher.toSet().toList());
+              catch
+              (Exception) {
+                prefs.setInt(a[0].toString() + a[1].toString(), 0);
+                // print("saved");
+              }
+            } else {
+              if (a.length == 3){
+                if (a[2] == Studinfo.batch) {
+                  apract = true;
+                  subjectList.add(subject);
+                  tpractlist.add("t" + a[0].toString() + "L");
+                  practlist.add(a[0].toString() + "L");
+                  try {
+                    List<String>tteacher = prefs.getStringList("t" +
+                        a[0].toString() + "L");
+                    tteacher.add("t" + a[1].toString() + "L");
+                    prefs.setStringList(
+                        "t" + a[0].toString() + "L", tteacher.toSet().toList());
 
-                  List<String>teacher = prefs.getStringList(
-                      a[0].toString() + "T");
-                  teacher.add(a[1].toString() + "T");
-                  prefs.setStringList(
-                      a[0].toString() + "T", teacher.toSet().toList());
-                } catch (Exception) {
-                  List<String>tteacher = [" "];
-                  tteacher.clear();
-                  tteacher.add("t" + a[1].toString() + "T");
-                  prefs.setStringList(
-                      "t" + a[0].toString() + "T", tteacher.toSet().toList());
+                    List<String>teacher = prefs.getStringList(
+                        a[0].toString() + "L");
+                    teacher.add(a[1].toString() + "L");
+                    prefs.setStringList(
+                        a[0].toString() + "L", teacher.toSet().toList());
+                  } catch (Exception) {
+                    List<String>tteacher = [" "];
+                    tteacher.clear();
+                    tteacher.add("t" + a[1].toString() + "L");
+                    prefs.setStringList(
+                        "t" + a[0].toString() + "L", tteacher.toSet().toList());
 
-                  List<String>teacher = [" "];
-                  teacher.clear();
-                  teacher.add(a[1].toString() + "T");
+                    List<String>teacher = [" "];
+                    teacher.clear();
+                    teacher.add(a[1].toString() + "L");
 
-                  prefs.setStringList(
-                      a[0].toString() + "T", teacher.toSet().toList());
-                }
-                prefs.setInt(
-                    "t" + a[0].toString() + a[1].toString() + "T", data[key]);
-                try {
-                  if (!(prefs.containsKey(
-                      a[0].toString() + a[1].toString() + "T"))) {
-                    throw Exception;
+                    prefs.setStringList(
+                        a[0].toString() + "L", teacher.toSet().toList());
                   }
-                } catch (Exception) {
-                  prefs.setInt(a[0].toString() + a[1].toString() + "T", 0);
+                  prefs.setInt(
+                      "t" + a[0].toString() + a[1].toString() + "L", data[key]);
+                  try {
+                    if (!(prefs.containsKey(
+                        a[0].toString() + a[1].toString() + "L"))) {
+                      throw Exception;
+                    }
+                  } catch (Exception) {
+                    prefs.setInt(a[0].toString() + a[1].toString() + "L", 0);
+                  }
+                }
+              }else{
+                if (a[2] == Studinfo.batch) {
+                  atut = true;
+                  subjectList.add(subject);
+                  ttutlist.add("t" + a[0].toString() + "T");
+                  tutlist.add(a[0].toString() + "T");
+                  try {
+                    List<String>tteacher = prefs.getStringList("t" +
+                        a[0].toString() + "T");
+                    tteacher.add("t" + a[1].toString() + "T");
+                    prefs.setStringList(
+                        "t" + a[0].toString() + "T", tteacher.toSet().toList());
+
+                    List<String>teacher = prefs.getStringList(
+                        a[0].toString() + "T");
+                    teacher.add(a[1].toString() + "T");
+                    prefs.setStringList(
+                        a[0].toString() + "T", teacher.toSet().toList());
+                  } catch (Exception) {
+                    List<String>tteacher = [" "];
+                    tteacher.clear();
+                    tteacher.add("t" + a[1].toString() + "T");
+                    prefs.setStringList(
+                        "t" + a[0].toString() + "T", tteacher.toSet().toList());
+
+                    List<String>teacher = [" "];
+                    teacher.clear();
+                    teacher.add(a[1].toString() + "T");
+
+                    prefs.setStringList(
+                        a[0].toString() + "T", teacher.toSet().toList());
+                  }
+                  prefs.setInt(
+                      "t" + a[0].toString() + a[1].toString() + "T", data[key]);
+                  try {
+                    if (!(prefs.containsKey(
+                        a[0].toString() + a[1].toString() + "T"))) {
+                      throw Exception;
+                    }
+                  } catch (Exception) {
+                    prefs.setInt(a[0].toString() + a[1].toString() + "T", 0);
+                  }
                 }
               }
             }
           }
         }
-      }
-      if(alect==true||apract==true || atut==true){
-        prefs.setStringList("tlecture", tlectlist.toSet().toList());
-        prefs.setStringList("tPractical", tpractlist.toSet().toList());
-        prefs.setStringList("lecture", lectlist.toSet().toList());
-        prefs.setStringList("Practical", practlist.toSet().toList());
-        prefs.setStringList("ttutlist", ttutlist.toSet().toList());
-        prefs.setStringList("tutlist", tutlist.toSet().toList());
-        prefs.setStringList("subjectlist", subjectList.toSet().toList());
-      }
-      else{
-        throw Exception;
-      }
-//      } catch (Exception) {
-//        print("goooot");
-//      }
-    });
+        if(alect==true||apract==true || atut==true){
+          prefs.setStringList("tlecture", tlectlist.toSet().toList());
+          prefs.setStringList("tPractical", tpractlist.toSet().toList());
+          prefs.setStringList("lecture", lectlist.toSet().toList());
+          prefs.setStringList("Practical", practlist.toSet().toList());
+          prefs.setStringList("ttutlist", ttutlist.toSet().toList());
+          prefs.setStringList("tutlist", tutlist.toSet().toList());
+          prefs.setStringList("subjectlist", subjectList.toSet().toList());
+        }
+        else{
+          throw Exception;
+        }
+//
+      });
+    } catch (Exception) {
+      throw Exception;
+    }
   }
   static void owndata()async{
     SharedPreferences prefs=await SharedPreferences.getInstance();
-    await FirebaseDatabase.instance
-        .reference()
-        .child('defaulter')
-        .child(Studinfo.branch)
-        .child(Studinfo.classs)
-        .child(Studinfo.roll)
-        .once()
-        .then((snapshot) async {
-      try {
-        Map data = snapshot.value;
+    try{
+      await FirebaseDatabase.instance
+          .reference()
+          .child('defaulter')
+          .child(Studinfo.branch)
+          .child(Studinfo.classs)
+          .child(Studinfo.roll)
+          .once()
+          .then((snapshot) async {
         try {
-          for (final key in data.keys) {
-            if (!(key.toString() == "Total")) {
-              try{
-                var a = key.toString().split("_");
+          Map data = snapshot.value;
+          try {
+            for (final key in data.keys) {
+              if (!(key.toString() == "Total")) {
+                try{
+                  var a = key.toString().split("_");
 
-                if (a.length == 2) {
-                  prefs.setInt(a[0].toString() + a[1].toString(), data[key]);
-                } else {
-                  if (a.length == 3) {
-                    prefs.setInt(
-                        a[0].toString() + a[1].toString() + "L", data[key]);
+                  if (a.length == 2) {
+                    prefs.setInt(a[0].toString() + a[1].toString(), data[key]);
                   } else {
-                    prefs.setInt(
-                        a[0].toString() + a[1].toString() + "T", data[key]);
+                    if (a.length == 3) {
+                      prefs.setInt(
+                          a[0].toString() + a[1].toString() + "L", data[key]);
+                    } else {
+                      prefs.setInt(
+                          a[0].toString() + a[1].toString() + "T", data[key]);
+                    }
                   }
+                }catch(Exception){
+                  prefs.setInt(key.toString(), data[key]);
+                  print(data[key]);
                 }
-              }catch(Exception){
-                prefs.setInt(key.toString(), data[key]);
-                print(data[key]);
               }
             }
+          } catch (Exception) {
+            print("inside");
           }
         } catch (Exception) {
-          print("inside");
+          print("object");
         }
-      } catch (Exception) {
-        print("object");
-      }
-      // getlist();
-    });
+        // getlist();
+      });
+    } catch (Exception) {
+      throw Exception;
+    }
   }
 
   static void getlist() async {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 //    print(prefs.getKeys());
-    List<String> subject = prefs.getStringList("subjectlist");
-    List<String> lecttList = prefs.getStringList("lecture");
-    List<String> practList = prefs.getStringList("Practical");
-    List<String> tutlist = prefs.getStringList("tutlist");
+    try{
 
-    attendanceDataList.clear();
-    subjectList.clear();
+      List<String> subject = prefs.getStringList("subjectlist");
+      List<String> lecttList = prefs.getStringList("lecture");
+      List<String> practList = prefs.getStringList("Practical");
+      List<String> tutlist = prefs.getStringList("tutlist");
+      if(subject==null) throw Exception;
+      attendanceDataList.clear();
+      subjectList.clear();
 //    print(subject);
-    subjectList.addAll(subject);
+      subjectList.addAll(subject);
 //    print(subject.length);
-    for (int i = 1; i < subject.length; i++) {
-      attended_lect = 0;
-      total_lect = 0;
-      attended_pract = 0;
-      total_pract = 0;
-      attended_tut=0;
-      total_tut=0;
-      if (lecttList.contains(subject[i])) {
-        List<String> Adata = prefs.getStringList(subject[i]);
-        List<String>Tdata = prefs.getStringList("t" + subject[i]);
-        for (int j = 0; j < Adata.length; j++) {
-          // print(subject[i]+Adata[j]);
-          attended_lect += prefs.getInt(subject[i] + Adata[j]);
-          total_lect += prefs.getInt("t" + subject[i] + Adata[j]);
+      for (int i = 1; i < subject.length; i++) {
+        attended_lect = 0;
+        total_lect = 0;
+        attended_pract = 0;
+        total_pract = 0;
+        attended_tut=0;
+        total_tut=0;
+        if (lecttList.contains(subject[i])) {
+          List<String> Adata = prefs.getStringList(subject[i]);
+          List<String>Tdata = prefs.getStringList("t" + subject[i]);
+          for (int j = 0; j < Adata.length; j++) {
+            // print(subject[i]+Adata[j]);
+            attended_lect += prefs.getInt(subject[i] + Adata[j]);
+            total_lect += prefs.getInt("t" + subject[i] + Adata[j]);
+          }
         }
-      }
-      if (practList.contains(subject[i] + "L")) {
-        List<String> Adata = prefs.getStringList(subject[i] + "L");
-        List<String>Tdata = prefs.getStringList("t" + subject[i] + "L");
-        //print(Adata);
-        for (int j = 0; j < Adata.length; j++) {
-          attended_pract += prefs.getInt(subject[i] + Adata[j]);
-          total_pract += prefs.getInt("t" + subject[i] + Adata[j]);
+        if (practList.contains(subject[i] + "L")) {
+          List<String> Adata = prefs.getStringList(subject[i] + "L");
+          List<String>Tdata = prefs.getStringList("t" + subject[i] + "L");
+          //print(Adata);
+          for (int j = 0; j < Adata.length; j++) {
+            attended_pract += prefs.getInt(subject[i] + Adata[j]);
+            total_pract += prefs.getInt("t" + subject[i] + Adata[j]);
+          }
         }
-      }
-      if (tutlist.contains(subject[i] + "T")) {
-        List<String> Adata = prefs.getStringList(subject[i] + "T");
-        List<String>Tdata = prefs.getStringList("t" + subject[i] + "T");
-        //print(Adata);
-        for (int j = 0; j < Adata.length; j++) {
-          attended_tut += prefs.getInt(subject[i] + Adata[j]);
-          total_tut += prefs.getInt("t" + subject[i] + Adata[j]);
+        if (tutlist.contains(subject[i] + "T")) {
+          List<String> Adata = prefs.getStringList(subject[i] + "T");
+          List<String>Tdata = prefs.getStringList("t" + subject[i] + "T");
+          //print(Adata);
+          for (int j = 0; j < Adata.length; j++) {
+            attended_tut += prefs.getInt(subject[i] + Adata[j]);
+            total_tut += prefs.getInt("t" + subject[i] + Adata[j]);
+          }
         }
+        AttendanceData a = new AttendanceData(subject[i], total_lect,
+            attended_lect, total_pract, attended_pract,total_tut,attended_tut);
+        attendanceDataList.add(a);
       }
-      AttendanceData a = new AttendanceData(subject[i], total_lect,
-          attended_lect, total_pract, attended_pract,total_tut,attended_tut);
-      attendanceDataList.add(a);
-    }
-    if(prefs.getInt("other")==null){
-      others=0;
-    }else{
-      others=prefs.getInt("other");
-    }
-    if(prefs.getInt("sports")==null){
-      sports=0;
-    }else{
-      sports=prefs.getInt("sports");
-    }
-    if(prefs.getInt("medical")==null){
-      medical=0;
-    }else{
-      medical=prefs.getInt("medical");
+      if(prefs.getInt("other")==null){
+        others=0;
+      }else{
+        others=prefs.getInt("other");
+      }
+      if(prefs.getInt("sports")==null){
+        sports=0;
+      }else{
+        sports=prefs.getInt("sports");
+      }
+      if(prefs.getInt("medical")==null){
+        medical=0;
+      }else{
+        medical=prefs.getInt("medical");
+      }
+    } catch (Exception) {
+      throw Exception;
     }
   }
 
@@ -1141,34 +1246,88 @@ class warddata{
 }
 class Teacher {
   static List<String> lectlist = ["Select Class"],
-      practlist = ["Select Class"],Tutlist=["Select"];
+      practlist = ["Select Class"],Tutlist=["Select"],daynames=["Select"];
   static String className, total;
   static String subjectName = "";
   static String batch = "";
   static List<AttendanceData> attendanceDataList = List<AttendanceData>();
-  static bool alect,apract,atut;
+  static bool alect,apract,atut,callerpage=false;
   static int attended_lect, total_lect, attended_pract, total_pract,sports,other,medical,attended_tut,total_tut;
   static var subjectList = ['Overall'];
   static String studprn,studclass,studbatch;
 
+  static Future<void>daylist()async{
+    print("daylist");
+    var map=new Map();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      int total=0;
+      for (int i = 0; i < daynames.length; i++) {
+        if (prefs.getInt(daynames[i]) == null) continue;
 
+        map.addAll({daynames[i]:("0/"+(prefs.getInt(daynames[i])).toString())});
+        total+=prefs.getInt(daynames[i]);
+      }
+      map.addAll({"ztotal":("0/"+(total.toString()))});
+      var cdate;
+      var ford = new DateFormat("dd_MM_yyyy");
+      var now = ford.format(new DateTime.now());
+//    SharedPreferences prefs = await SharedPreferences.getInstance();
+      try {
+        cdate = prefs.getString("cdate").split("_");
+      }
+      catch (Exception) {
+        FirebaseDatabase.instance.reference().child("cdate").once().then((
+            onValue) {
+          if (onValue.value == null) {
+            FirebaseDatabase.instance.reference().child("cdate").set(
+                now.toString());
+          }
+          else {
+            prefs.setString("cdate", onValue.value);
+            cdate = prefs.getString("cdate").split("_");
+          }
+        });
+      }
+
+      int weekcount=0;
+      final birthday = DateTime(
+          int.parse(cdate[2]), int.parse(cdate[1]), int.parse(cdate[0]));
+      final date2 = DateTime.now();
+      // print(date2.difference(birthday).inDays);
+      weekcount = (date2
+          .difference(birthday)
+          .inDays / 7).ceil();
+      if (weekcount == 0) {
+        weekcount = 1;
+      }
+      final dbref=FirebaseDatabase.instance.reference();
+      for(int i=weekcount+1;i<=18;i++){
+        dbref.child("week_tt").child(prefs.getString("dept")).child(i.toString()).child("teacher_report").child(Dateinfo.teachname).set(map);
+      }
+    }catch(Exception){}
+  }
 
   static Future<void> classlist() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     lectlist.clear();
     practlist.clear();
     Tutlist.clear();
+    daynames.clear();
     final databaseReference = FirebaseDatabase.instance.reference();
+    print(Dateinfo.dept);
     await databaseReference.child("personal_tt")
-        .child(Dateinfo.dept)
+        .child(prefs.getString("dept"))
         .child(Dateinfo.teachname)
         .once().then((snap) {
       try {
         Map days = snap.value;
+        print(days);
         //int tot=0;
         for (final k in days.keys) {
           try {
             String dname = k.toString();
+            daynames.add(dname);
             int cnt=0;
             Map data = days[k];
             String value;
@@ -1269,8 +1428,13 @@ class Teacher {
 
       } catch (Exception) {
         print("outside");
+//        print(Exception);
       }
     });
+    if(prefs.getBool("callerpage")==true) {
+      await daylist();
+      prefs.setBool("callerpage", false);
+    }
   }
 
 
@@ -1316,7 +1480,6 @@ class Teacher {
                 var a = key.toString().split("_");
                 if(a.length==1) throw Exception;
                 if (a.length == 2) {
-//                  prefs.setInt(a[0].toString() + a[1].toString(), data[key]);
                   values.addAll({a[0].toString() + a[1].toString(): data[key]});
                 } else {
 //                  prefs.setInt(
@@ -1335,14 +1498,15 @@ class Teacher {
             }
           }
         } catch (Exception) {
-          print("inside");
+          throw Exception;
         }
       } catch (Exception) {
         print("object");
+        throw Exception;
       }
       // getlist();
     });
-
+//print(values);
 
     try {
       await FirebaseDatabase.instance
@@ -1370,14 +1534,17 @@ class Teacher {
               tlectlist.add("t" + a[0].toString());
               lectlist.add(a[0].toString());
               // print("lol");
+              // List<String>tteacher =List<String>();
               try {
-                List<String>tteacher = prefs.getStringList(
-                    "t" + a[0].toString());
+                if(!(tmap.containsKey("t" + a[0].toString()))) throw Exception;
+                List<String>tteacher = tmap["t" + a[0].toString()];
+//                    "t" + a[0].toString());
                 tteacher.add("t" + a[1].toString());
 //                prefs.setStringList(
 //                    "t" + a[0].toString(), tteacher.toSet().toList());
                 tmap.addAll({"t" + a[0].toString(): tteacher.toSet().toList()});
-                List<String>teacher = prefs.getStringList(a[0].toString());
+                if(!(map.containsKey(a[0].toString()))) throw Exception;
+                List<String>teacher = map[a[0].toString()];
                 teacher.add(a[1].toString());
 //                prefs.setStringList(a[0].toString(), teacher.toSet().toList());
                 map.addAll({a[0].toString(): teacher.toSet().toList()});
@@ -1392,6 +1559,7 @@ class Teacher {
                 List<String>teacher = [" "];
                 teacher.clear();
                 teacher.add(a[1].toString());
+                //print(a[1].toString());
 //                prefs.setStringList(a[0].toString(), teacher.toSet().toList());
                 map.addAll({a[0].toString(): teacher.toSet().toList()});
               }
@@ -1421,8 +1589,8 @@ class Teacher {
                   tpractlist.add("t" + a[0].toString() + "L");
                   practlist.add(a[0].toString() + "L");
                   try {
-                    List<String>tteacher = prefs.getStringList("t" +
-                        a[0].toString() + "L");
+                    if(!(tmap.containsKey("t" + a[0].toString()+"L"))) throw Exception;
+                    List<String>tteacher = tmap["t" + a[0].toString()+"L"];
                     tteacher.add("t" + a[1].toString() + "L");
 //                  prefs.setStringList(
 //                      "t" + a[0].toString() + "L", tteacher.toSet().toList());
@@ -1430,8 +1598,9 @@ class Teacher {
                         {
                           "t" + a[0].toString() + "L": tteacher.toSet().toList()
                         });
-                    List<String>teacher = prefs.getStringList(
-                        a[0].toString() + "L");
+                    if(!(map.containsKey(a[0].toString()+"L"))) throw Exception;
+                    List<String>teacher = map[a[0].toString()+"L"];
+
                     teacher.add(a[1].toString() + "L");
 //                  prefs.setStringList(
 //                      a[0].toString() + "L", teacher.toSet().toList());
@@ -1451,7 +1620,7 @@ class Teacher {
                     List<String>teacher = [" "];
                     teacher.clear();
                     teacher.add(a[1].toString() + "L");
-
+                    //print(a[1]);
 //                  prefs.setStringList(
 //                      a[0].toString() + "L", teacher.toSet().toList());
                     map.addAll(
@@ -1485,8 +1654,8 @@ class Teacher {
                   ttutlist.add("t" + a[0].toString() + "T");
                   tutlist.add(a[0].toString() + "T");
                   try {
-                    List<String>tteacher = prefs.getStringList("t" +
-                        a[0].toString() + "T");
+                    if(!(tmap.containsKey("t" + a[0].toString()+"T"))) throw Exception;
+                    List<String>tteacher = tmap["t" + a[0].toString()+"T"];
                     tteacher.add("t" + a[1].toString() + "T");
 //                  prefs.setStringList(
 //                      "t" + a[0].toString() + "L", tteacher.toSet().toList());
@@ -1494,8 +1663,8 @@ class Teacher {
                         {
                           "t" + a[0].toString() + "T": tteacher.toSet().toList()
                         });
-                    List<String>teacher = prefs.getStringList(
-                        a[0].toString() + "T");
+                    if(!(map.containsKey(a[0].toString()+"T"))) throw Exception;
+                    List<String>teacher = map[a[0].toString()+"T"];
                     teacher.add(a[1].toString() + "T");
 //                  prefs.setStringList(
 //                      a[0].toString() + "L", teacher.toSet().toList());
@@ -1547,11 +1716,6 @@ class Teacher {
           }
         }
         if (alect == true || apract == true|| atut==true) {
-//          prefs.setStringList("tlecture", tlectlist.toSet().toList());
-//          prefs.setStringList("tPractical", tpractlist.toSet().toList());
-//          prefs.setStringList("lecture", lectlist.toSet().toList());
-//          prefs.setStringList("Practical", practlist.toSet().toList());
-//          prefs.setStringList("subjectlist", subjectList.toSet().toList());
           subjectList = subjectList.toSet().toList();
           tlectlist = tlectlist.toSet().toList();
           tpractlist = tpractlist.toSet().toList();
@@ -1566,6 +1730,7 @@ class Teacher {
       });
     }catch(Exception){
       print("sdc");
+      throw Exception;
     }
     attendanceDataList.clear();
     sports=0;
@@ -1578,12 +1743,12 @@ class Teacher {
       total_pract = 0;
       attended_tut=0;
       total_tut=0;
-
+      print(map);
       if (lectlist.contains(subjectList[i])) {
         List<String> Adata = map[subjectList[i]];
         List<String>Tdata = tmap["t" + subjectList[i]];
         for (int j = 0; j < Adata.length; j++) {
-          print(subjectList[i]+Adata[j]);
+          // print(subjectList[i]+Adata[j]);
           attended_lect += values[subjectList[i] + Adata[j]];
           total_lect += tvalues["t" + subjectList[i] + Adata[j]];
         }
@@ -1620,20 +1785,13 @@ class Teacher {
       other=values["other"];
     }
   }
+
   static Future<void> data() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (prefs.getBool("check") == false) {
       classlist();
       prefs.setBool("check", true);
       final databaseReference = FirebaseDatabase.instance.reference();
-      databaseReference
-          .child("Registration")
-          .child(
-          'Teacher_account')
-          .child(Dateinfo.email)
-          .child("slot").remove();
-        List<String> slot=new List<String>();
-        prefs.setStringList("slot", slot);
       await databaseReference.child("teach_att")
           .child(Dateinfo.dept).child(Dateinfo.teachname).once().then((snap) {
         try {
@@ -1653,6 +1811,9 @@ class Teacher {
         }
       });
     }
+//    Passcode p=new Passcode();
+//    _PasscodeState po=new _PasscodeState();
+//    p.get();
   }
   static void update()async{
     var ford = new DateFormat("yyyy_MM_dd");
@@ -1670,6 +1831,7 @@ class Teacher {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
+//      print(prefs.getInt("week_no"));
       if (prefs.getInt("week_no") == weekno) {
         prefs.setBool("reset_week", false);
       } else {
@@ -1677,9 +1839,7 @@ class Teacher {
         prefs.setBool("reset_week", true);
         prefs.setInt("weekc", 0);
       }
-//      print(date);
-//      print(prefs.getString("today_date"));
-      //print(date);
+
       if ((prefs.getString("today_date") == date)) {
         prefs.setBool("reset", false);
       } else {
@@ -1690,12 +1850,31 @@ class Teacher {
 
         if (prefs.getStringList("scount") != null) {
           // print("get");
+          FirebaseDatabase.instance.reference()
+              .child("Registration")
+              .child('Teacher_account')
+              .child(Dateinfo.email)
+              .child("slot").remove();
+          var map=new Map();
           List<String> scount = prefs.getStringList("scount");
           for (int i = 0; i < scount.length; i++) {
             //print("kk");
             var dummy = prefs.getString(scount[i]).split(" ");
             prefs.setString(scount[i], dummy[0].toString() + " " + "0");
+            map.addAll({scount[i]: dummy[0].toString() + " " + "0"});
           }
+          FirebaseDatabase.instance.reference()
+              .child("teach_att")
+              .child(Dateinfo.dept)
+              .child(Dateinfo.teachname)
+              .set(map);
+          FirebaseDatabase.instance.reference()
+              .child("Registration")
+              .child('Teacher_account')
+              .child(Dateinfo.email)
+              .child("slot").remove();
+          List<String> demo=new List<String>();
+          prefs.setStringList("slot", demo);
         }
       }
     } catch (exception) {

@@ -73,8 +73,8 @@ class _SpalshState extends State<Spalsh> {
                                     child: new Image(
                                       image: new AssetImage("assets/college_logo.png"),
                                       alignment: Alignment.topCenter,
-                                      height: 30*SizeConfig.heightMultiplier,
-                                      width: 45*SizeConfig.widthMultiplier,
+                                      height: 35*SizeConfig.heightMultiplier,
+                                      width: 43*SizeConfig.widthMultiplier,
                                     ),
                                   ),
                                 ],
@@ -105,7 +105,7 @@ Future<bool> check(BuildContext context) async {
       }
     }
     runApp(MaterialApp(
-        home: !(type=="student") ? thome() : Demopage()));
+        home: !(type=="student") ? thome() : shome()));
   } else {
     runApp(MaterialApp(
         home:LoginPage()));

@@ -14,6 +14,7 @@ import 'package:flutter_app/pages/homepage.dart';
 import 'package:flutter_app/pages/parentteacherlist.dart';
 import 'package:flutter_app/pages/subject.dart';
 import 'package:flutter_app/responsive/Screensize.dart';
+import 'package:flutter_offline/flutter_offline.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gradient_app_bar/gradient_app_bar.dart';
 import 'package:gradient_widgets/gradient_widgets.dart';
@@ -35,22 +36,28 @@ class _PasscodeState extends State<Passcode>
     with SingleTickerProviderStateMixin {
   TabController controller;
   GlobalKey<FlipCardState> cardKey = GlobalKey<FlipCardState>();
-  double srating=0,arating=0;
-  int rat=0;
+  double srating = 0,
+      arating = 0;
+  int rat = 0;
   dynamic value;
   int defaulercount;
   var ford = new DateFormat("yyyy_MM_dd");
   Timer _timer;
   DateFormat format = new DateFormat("HH:mm:ss");
   DateTime time;
-  bool drop = false, down = true;
+  bool drop = false,
+      down = true;
   String cur_time;
   String att_cnt = "";
-  String classs = 'Class', sub = "Subject", stat = "Status";
+  String classs = 'Class',
+      sub = "Subject",
+      stat = "Status";
   String lec = "";
   int lec_count = 0;
-  List<String> classlist = ["Class"], subjectlist = ["Subject"];
-  List<String> fclasslist = ["Class"], fsubjectlist = ["Subject"];
+  List<String> classlist = ["Class"],
+      subjectlist = ["Subject"];
+  List<String> fclasslist = ["Class"],
+      fsubjectlist = ["Subject"];
 
   FocusNode focusNode1 = new FocusNode();
   FocusNode focusNode2 = new FocusNode();
@@ -64,7 +71,9 @@ class _PasscodeState extends State<Passcode>
   //var status = ['Status', 'lecture', 'Practical'];
   SharedPreferences prefs;
   final databaseReference = FirebaseDatabase.instance.reference();
-  int code = 1000, exdayc = 0, exweekc = 0;
+  int code = 1000,
+      exdayc = 0,
+      exweekc = 0;
   String str = "";
   Color clr = Colors.white;
   bool isSwitched = false;
@@ -104,21 +113,52 @@ class _PasscodeState extends State<Passcode>
   final TextEditingController _ccontroller = TextEditingController();
   final TextEditingController _scontroller = TextEditingController();
   final TextEditingController _controller = TextEditingController();
+  int weekcount = 1;
 
   @override
   void initState() {
     // TODO: implement initState
     controller = new TabController(length: 1, vsync: this);
-    //_lcontroller.text = lec;
     _ccontroller.text = " ";
     _scontroller.text = " ";
-    //print(DateTime.now().month);
-    get();
+    print("get");
+    //  get();
     super.initState();
   }
 
   void get() async {
+    var cdate;
+    var ford = new DateFormat("dd_MM_yyyy");
+    var now = ford.format(new DateTime.now());
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      cdate = prefs.getString("cdate").split("_");
+    }
+    catch (Exception) {
+      FirebaseDatabase.instance.reference().child("cdate").once().then((
+          onValue) {
+        if (onValue.value == null) {
+          FirebaseDatabase.instance.reference().child("cdate").set(
+              now.toString());
+        }
+        else {
+          prefs.setString("cdate", onValue.value);
+          cdate = prefs.getString("cdate").split("_");
+        }
+      });
+    }
+
+    //int count=0;
+    final birthday = DateTime(
+        int.parse(cdate[2]), int.parse(cdate[1]), int.parse(cdate[0]));
+    final date2 = DateTime.now();
+    // print(date2.difference(birthday).inDays);
+    weekcount = (date2
+        .difference(birthday)
+        .inDays / 7).ceil();
+    if (weekcount == 0) {
+      weekcount = 1;
+    }
     setState(() {
       for (int i = 0; i < weekNames.length; i++) {
         if (prefs.getInt(weekNames[i]) == null)
@@ -126,13 +166,14 @@ class _PasscodeState extends State<Passcode>
         else
           exweekc += prefs.getInt(weekNames[i]);
       }
-      int n = DateTime.now().weekday - 1;
+      int n = DateTime
+          .now()
+          .weekday - 1;
 
       exdayc = prefs.getInt(weekNames[n]);
+//      print(exdayc);
     });
     Teacher.update();
-
-
   }
 
   void startTimer() {
@@ -140,33 +181,34 @@ class _PasscodeState extends State<Passcode>
     _start = 40;
     _timer = new Timer.periodic(
       new Duration(milliseconds: 1000),
-          (Timer timer) => setState(
-            () {
-          if (_start < 1) {
-            if (card == "front") {
-              fclass = _ccontroller.text;
-              fsub = _scontroller.text;
-            } else {
-              fclass = classs;
-              fsub = sub;
-            }
+          (Timer timer) =>
+          setState(
+                () {
+              if (_start < 1) {
+                if (card == "front") {
+                  fclass = _ccontroller.text;
+                  fsub = _scontroller.text;
+                } else {
+                  fclass = classs;
+                  fsub = sub;
+                }
 
-            enabled = true;
-            drop = false;
-            clr = Colors.white;
-            radio_on = true;
-            clock(fclass, fsub);
-            _timer.cancel();
-            str = "";
+                enabled = true;
+                drop = false;
+                clr = Colors.white;
+                radio_on = true;
+                clock(fclass, fsub);
+                _timer.cancel();
+                str = "";
 
-            //  workhr(1);
-          } else {
-            setState(() {
-              _start = _start - 1;
-            });
-          }
-        },
-      ),
+                //  workhr(1);
+              } else {
+                setState(() {
+                  _start = _start - 1;
+                });
+              }
+            },
+          ),
     );
   }
 
@@ -195,7 +237,7 @@ class _PasscodeState extends State<Passcode>
     user.count = "0";
     String date = ford.format(now);
     if (stat == "lecture") {
-      print("hello");
+//      print("hello");
       await getLUserAmount(fclass, fsub, date);
       await databaseReference
           .child("Attendance")
@@ -222,15 +264,8 @@ class _PasscodeState extends State<Passcode>
         "total": user.count
       });
     } else {
-      print("hii");
+//      print("hii");
       await getPUserAmount(fclass, fsub, date);
-      Fluttertoast.showToast(
-          msg: user.count,
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
       await databaseReference
           .child("Attendance")
           .child(Dateinfo.dept)
@@ -243,7 +278,7 @@ class _PasscodeState extends State<Passcode>
           .child(lec.toString())
           .child("a_total")
           .set(user.count);
-      print(user.count);
+//      print(user.count);
       databaseReference
           .child("time_table")
           .child(Dateinfo.dept)
@@ -259,6 +294,7 @@ class _PasscodeState extends State<Passcode>
     }
     setState(() {
       att_cnt = user.count;
+      Dateinfo.dept=prefs.getString("dept");
     });
   }
 
@@ -281,7 +317,7 @@ class _PasscodeState extends State<Passcode>
       for (final k in users.keys) {
         if (!(k.toString() == "a_total")) len.add(k);
       }
-      print(len.length);
+//      print(len.length);
       user.count = len.length.toString();
       return len.length;
     } catch (Exception) {
@@ -296,8 +332,8 @@ class _PasscodeState extends State<Passcode>
   }
 
   Future<int> getLUserAmount(String fclass, String fsub, String date) async {
-    print(user.classs);
-    print(user.lec);
+//    print(user.classs);
+//    print(user.lec);
     final response = await FirebaseDatabase.instance
         .reference()
         .child("Attendance")
@@ -312,15 +348,15 @@ class _PasscodeState extends State<Passcode>
     await Future.delayed(Duration(seconds: 3));
     try {
       Map users = response.value;
-      print(users);
+//      print(users);
       var len = [];
       for (final k in users.keys) {
         if (!(k.toString() == "a_total")) {
           len.add(k);
         }
       }
-      print(users);
-      print(len);
+//      print(users);
+//      print(len);
       user.count = len.length.toString();
       return len.length;
     } catch (Exception) {
@@ -352,18 +388,19 @@ class _PasscodeState extends State<Passcode>
     controller.dispose();
     super.dispose();
   }
-  Future<bool> _onbackpressed(){
-    if(enabled==true){
-      Navigator. pop(context);
-    }
 
+  Future<bool> _onbackpressed() {
+    if (enabled == true) {
+      Navigator.pop(context);
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     copy();
     Color righttxtclr = Color(0xff997a00);
     Color lefttxtclr = Color(0xff00004d);
-    double lefttxtsize=2.5*SizeConfig.heightMultiplier;
+    double lefttxtsize = 2.5 * SizeConfig.heightMultiplier;
     ProgressDialog pr = ProgressDialog(context,
         type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: " Wait");
@@ -371,8 +408,8 @@ class _PasscodeState extends State<Passcode>
     return WillPopScope(
       onWillPop: _onbackpressed,
       child: new Scaffold(
-          resizeToAvoidBottomInset: false,
-          resizeToAvoidBottomPadding: false,
+          resizeToAvoidBottomInset: true,
+          resizeToAvoidBottomPadding: true,
           appBar: new GradientAppBar(
             title: new Text("Homepage\\Take att",
                 style: TextStyle(
@@ -385,1960 +422,2130 @@ class _PasscodeState extends State<Passcode>
               ),
               onPressed: () {
                 _onbackpressed();
-
               },
             ),
             backgroundColorStart: Color(0xff6d6d46),
             backgroundColorEnd: Color(0xff6d6d46),
-            actions: <Widget>[
-//              PopupMenuButton<String>(
-//                onSelected: handleClick,
-//                itemBuilder: (BuildContext context) {
-//                  return {'Subject registration', 'Monitor session'}
-//                      .map((String choice) {
-//                    return PopupMenuItem<String>(
-//                      value: choice,
-//                      child: Text(choice),
-//                    );
-//                  }).toList();
-//                },
-//              ),
-            ],
+
           ),
-          body: new Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topRight,
-                end: Alignment.bottomLeft,
+          body: OfflineBuilder(
+            connectivityBuilder: (BuildContext context,
+                ConnectivityResult connectivity,
+                Widget child,) {
+              final bool connected =
+                  connectivity != ConnectivityResult.none;
+
+              return SingleChildScrollView(
+                child: new Container(
+                  height: SizeConfig.grp <= 4 ? 100 *
+                      SizeConfig.heightMultiplier : 90 *
+                      SizeConfig.heightMultiplier,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topRight,
+                      end: Alignment.bottomLeft,
 //                  stops: [0,0.5,1],
-                colors: [Color(0xff000000), Color(0xff000000)],
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: 4 * SizeConfig.heightMultiplier,
-                      bottom: 2 * SizeConfig.heightMultiplier),
-                  child: new Text(
-                    "Session passcode : " + str,
-                    style: TextStyle(
-                        color: clr, fontSize: 3 * SizeConfig.textMultiplier),
+                      colors: [Color(0xff000000), Color(0xff000000)],
+                    ),
                   ),
-                ),
-
-                new Text(
-                  " Countdown: $_start",
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 2.8 * SizeConfig.textMultiplier),
-                ),
-                new Padding(
-                    padding: EdgeInsets.only(
-                        bottom: 0 * SizeConfig.heightMultiplier)),
-
-                Padding(
-                  padding:
-                  EdgeInsets.only(top: 0 * SizeConfig.heightMultiplier),
-                  child: FlipCard(
-                    direction: FlipDirection.HORIZONTAL,
-                    key: cardKey,
-                    flipOnTouch: false,
-                    front: new GradientCard(
-                      margin: new EdgeInsets.only(
-                        left: 5 * SizeConfig.widthMultiplier,
-                        right: 5 * SizeConfig.widthMultiplier,
-                        top: 5 * SizeConfig.heightMultiplier,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: 4 * SizeConfig.heightMultiplier,
+                            bottom: 2 * SizeConfig.heightMultiplier
+                        ),
+                        child: new Text(
+                          "Session passcode : " + str,
+                          style: TextStyle(
+                              color: clr,
+                              fontSize: 3 * SizeConfig.textMultiplier),
+                        ),
                       ),
-                      elevation: 5.0,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        // stops: [0,0.5,1],
-                        colors: [
+
+                      new Text(
+                        " Countdown: $_start",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 2.8 * SizeConfig.textMultiplier),
+                      ),
+                      new Padding(
+                          padding: EdgeInsets.only(
+                              bottom: 0 * SizeConfig.heightMultiplier)),
+
+                      Padding(
+                        padding:
+                        EdgeInsets.only(top: 0 * SizeConfig.heightMultiplier),
+                        child: FlipCard(
+                          direction: FlipDirection.HORIZONTAL,
+                          key: cardKey,
+                          flipOnTouch: false,
+                          front: new GradientCard(
+                            margin: new EdgeInsets.only(
+                              left: 5 * SizeConfig.widthMultiplier,
+                              right: 5 * SizeConfig.widthMultiplier,
+                              top: 5 * SizeConfig.heightMultiplier,
+                            ),
+                            elevation: 5.0,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              // stops: [0,0.5,1],
+                              colors: [
 //                          HexColor.fromHex("#DAD299"),
 //                          HexColor.fromHex("#DAD299")
-                          Color(0xffDAD299),
-                          Color(0xffDAD299)
-                        ],
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 2 * SizeConfig.heightMultiplier,
-                                left: 5 * SizeConfig.widthMultiplier,
-                                bottom: 2 * SizeConfig.heightMultiplier),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Self",
-                                  style: TextStyle(
-                                    fontSize: 2.5 * SizeConfig.textMultiplier,
-                                    fontWeight: FontWeight.bold,
-                                    color: lefttxtclr,
-                                  ),
-                                ),
-                                Switch(
-                                  value: isSwitched,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (enabled) {
-                                        init();
-                                        isSwitched = value;
-                                        cardKey.currentState.toggleCard();
-                                      }
-                                    });
-                                  },
-                                  activeTrackColor: Colors.black87,
-                                  activeColor: Colors.black87,
-                                  inactiveThumbColor: Colors.black87,
-                                ),
-                                Text(
-                                  "Adjusted",
-                                  style: TextStyle(
-                                    fontSize: 2.7 * SizeConfig.textMultiplier,
-                                    fontWeight: FontWeight.bold,
-                                    color: lefttxtclr,
-                                  ),
-                                ),
+                                Color(0xffDAD299),
+                                Color(0xffDAD299)
                               ],
                             ),
-                          ),
-                          SliderTheme(
-                            child: Slider(
-                                activeColor: Color(0xff999966),
-                                inactiveColor: Color(0xffc2c2a3),
-                                label: (srating.toInt()).toString(),
-                                value: srating,
-                                divisions: 8,
-
-                                min: 0,
-                                max:8,
-                                onChanged: enabled ?(newrating){
-                                  setState(() {
-                                    srating=newrating;
-                                    _ncontroller.text=srating.toInt().toString();
-                                    timetable();
-                                    workhr(_ccontroller.text,
-                                        _scontroller.text);
-                                  });
-                                }
-                                    :null
-                            ),
-                            data: SliderTheme.of(context).copyWith(
-                                trackHeight:3,
-                                inactiveTickMarkColor: lefttxtclr,
-                                valueIndicatorColor: Colors.blue,
-                                activeTickMarkColor: lefttxtclr,
-                                valueIndicatorTextStyle: TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.bold)
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 2 * SizeConfig.heightMultiplier),
-                            child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Enter Work hour :",
-                                  style: TextStyle(
-                                    fontSize: lefttxtsize,
-                                    color: lefttxtclr,
-                                    fontWeight: FontWeight.bold,
-
-                                  ),
-                                ),
-                                new Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 4 * SizeConfig.widthMultiplier),
-                                ),
-                                new Flexible(
-                                  child: Container(
-                                    width: 50,
-                                    child: TextField(
-
-                                        decoration: new InputDecoration(
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.greenAccent, width: 5.0),
-                                          ),
-                                          enabledBorder: OutlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.red, width: 5.0),
-                                          ),
-                                          disabledBorder:  UnderlineInputBorder(
-                                            borderSide: BorderSide(color: lefttxtclr, width: 2.0),
-                                          ),
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        focusNode: focusNode3,
-                                        enableSuggestions: true,
-                                        autofocus: false,
-                                        showCursor: true,
-                                        controller: _ncontroller,
-                                        style: TextStyle(
-                                            fontFamily: 'BalooChettan2',
-                                            color: righttxtclr,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 2.2 *
-                                                SizeConfig.heightMultiplier),
-                                        cursorColor: righttxtclr,
-                                        keyboardType:
-                                        TextInputType.emailAddress,
-                                        //validator: validateEmail,
-                                        enabled: false,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            srating=double.parse(val);
-                                            timetable();
-                                            workhr(_ccontroller.text,
-                                                _scontroller.text);
-                                          });
-                                        }),
-                                  ),
-//
-                                )],
-                            ),
-                          ),
-//                          Padding(
-//                            padding: EdgeInsets.only(
-//                                top: 4 * SizeConfig.heightMultiplier,
-//                                left: 13 * SizeConfig.widthMultiplier),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                top: 5 * SizeConfig.heightMultiplier),
-                            child: new Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Your  class:",
-                                  style: TextStyle(
-                                      fontSize: lefttxtsize,
-                                      color: lefttxtclr,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                new Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 6 * SizeConfig.widthMultiplier)),
-                                Container(
-                                    width: 22 * SizeConfig.widthMultiplier,
-                                    child: TextField(
-                                      focusNode: focusNode4,
-                                      textAlign: TextAlign.center,
-                                      enableSuggestions: true,
-                                      controller: _ccontroller,
-                                      style: TextStyle(
-                                          fontFamily: 'BalooChettan2',
-                                          color: righttxtclr,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 2.2 *
-                                              SizeConfig.heightMultiplier),
-                                      cursorColor: righttxtclr,
-                                      decoration: new InputDecoration(
-                                        disabledBorder:  UnderlineInputBorder(
-                                          borderSide: BorderSide(color: lefttxtclr, width: 2.0),
-                                        ),
-                                      ),
-                                      enabled: false,
-                                    )),
-                              ],
-                            ),
-                          ),
-//
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 5 * SizeConfig.heightMultiplier,
-                              //    left: 13 * SizeConfig.widthMultiplier
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Your   subject:",
-                                  style: TextStyle(
-                                      fontSize: lefttxtsize,
-                                      color: lefttxtclr,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                new Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 6 * SizeConfig.widthMultiplier)),
-                                Container(
-                                  width: 25 * SizeConfig.widthMultiplier,
-                                  child: TextField(
-                                    focusNode: focusNode5,
-                                    textAlign: TextAlign.center,
-                                    enableSuggestions: true,
-                                    controller: _scontroller,
-                                    style: TextStyle(
-                                        fontFamily: 'BalooChettan2',
-                                        color: righttxtclr,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize:
-                                        2.2 * SizeConfig.heightMultiplier),
-                                    cursorColor: lefttxtclr,
-                                    decoration: new InputDecoration(
-                                      disabledBorder:  UnderlineInputBorder(
-                                        borderSide: BorderSide(color: lefttxtclr, width: 2.0),
-                                      ),
-                                    ),
-                                    enabled: false,
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: dist,
-                                top: 4 * SizeConfig.heightMultiplier),
-                            child: Column(
-                              children: <Widget>[
-                                new RaisedButton(
-                                  shape: new RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(80.00)),
-                                  splashColor: HexColor.fromHex("#ffffff"),
-                                  disabledColor: Color(0xffff9999),
-                                  onPressed: enabled
-                                      ? () async {
-                                    prefs = await SharedPreferences
-                                        .getInstance();
-                                    FocusScope.of(context)
-                                        .requestFocus(new FocusNode());
-                                    var rng = new Random();
-                                    var slot=prefs.getStringList("slot");
-
-                                    code = code +
-                                        rng.nextInt(20000) +
-                                        rng.nextInt(30000);
-                                    if (_ccontroller.text == "Class" ||
-                                        _scontroller.text == "Subject" ||
-                                        stat == "Status" ||
-                                        lec == "") {
-                                      Fluttertoast.showToast(
-                                          msg: "fill all fields",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.BOTTOM,
-                                          backgroundColor: Colors.red,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0);
-                                    }else if((slot.contains(_ncontroller.text+"h"))){
-                                      bool click=true;
-                                      await Alert(
-                                        context: context,
-                                        type: AlertType.warning,
-                                        title: "Attendance already taken",
-                                        style: AlertStyle(
-                                            animationType: AnimationType.fromTop,
-                                            isCloseButton: false,
-                                            isOverlayTapDismiss: false,
-                                            descStyle: TextStyle(fontWeight: FontWeight.bold),
-                                            animationDuration: Duration(milliseconds: 400),
-                                            titleStyle: TextStyle(
-                                                color: Color(0xff00004d)
-                                            ),
-                                            alertBorder: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.0),
-                                              side: BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            )
-                                        ),
-
-                                        buttons: [
-                                          DialogButton(
-                                            child: Text(
-                                              "ok",
-                                              style: TextStyle(color: Colors.white, fontSize: 2.5*SizeConfig.textMultiplier),
-                                            ),
-                                            onPressed:click? (){ Navigator.pop(context);
-                                            setState(() {
-                                              click=false;
-                                            });
-                                            }:null,
-                                            color: Color.fromRGBO(0, 179, 134, 1.0),
-                                          )
-                                        ],
-                                      ).show();
-                                    } else {
-                                      radio_on = false;
-                                      setState(() {
-                                        clr = Color(0xffff9999);
-                                        str = code.toString();
-                                        card = "front";
-                                      });
-                                      startTimer();
-                                      //var slot=prefs.getStringList("slot");
-                                      slot.add(_ncontroller.text+"h");
-                                      prefs.setStringList("slot",slot);
-                                      var now = new DateTime.now();
-                                      String date = ford.format(now);
-                                      Dateinfo.classs = _ccontroller.text;
-                                      Dateinfo.subject =
-                                          _scontroller.text;
-                                      Dateinfo.date1 = date;
-                                      Dateinfo.stat = stat;
-                                      databaseReference
-                                          .child('c_teacher')
-                                          .child(Dateinfo.dept)
-                                          .child(_ccontroller.text)
-                                          .child("status")
-                                          .set(stat);
-                                      setState(() {
-                                        user.classs = _ccontroller.text;
-                                        user.sub = _scontroller.text
-                                            .toUpperCase();
-                                        user.date = date;
-                                        user.lec = lec.toString();
-                                        user.stat = stat;
-                                      });
-                                      //  workhr(1);
-                                      int current = DateTime.utc(
-                                          now.year, now.month, 1)
-                                          .weekday;
-                                      int weekno = 0;
-                                      int i = 9 - current;
-                                      for (; i < 30; i += 7) {
-                                        weekno += 1;
-                                        if (now.day < i) {
-                                          break;
-                                        }
-                                      }
-                                      int dayc = prefs.getInt("dayc");
-                                      int weekc = prefs.getInt("weekc");
-
-                                      if (stat == "lecture") {
-                                        dayc += 1;
-                                        weekc += 1;
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child("leccount")
-                                            .set(lec.toString());
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(stat)
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec,
-                                          "Subject": _scontroller.text
-                                              .toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-
-                                        var varcount = prefs
-                                            .getString(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase())
-                                            .split(" ");
-
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        print(defaulercount);
-                                        defaulter(_ccontroller.text,
-                                            _scontroller.text);
-                                        databaseReference
-                                            .child("week_tt")
-                                            .child(Dateinfo.dept)
-                                            .child(
-                                            monthNames[now.month - 1])
-                                            .child(weekno.toString())
-                                            .child(_ccontroller.text)
-                                            .child(weekNames[
-                                        now.weekday - 1])
-                                            .child(_ncontroller.text +
-                                            " " +
-                                            "lec")
-                                            .set(Dateinfo.teachname +
-                                            " class:" +
-                                            _ccontroller.text +
-                                            " sub:" +
-                                            _scontroller.text);
-
-                                        await prefs.setString(
-                                            _ccontroller.text
-                                                .toUpperCase() +
-                                                "_" +
-                                                _scontroller.text
-                                                    .toUpperCase(),
-                                            val.toString());
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase())
-                                            .set(val.toString());
-                                      } else if (stat == "Practical") {
-                                        dayc += 2;
-                                        weekc += 2;
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(stat)
-                                            .child(Alert1.batch
-                                          ..toUpperCase())
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec.toString(),
-                                          "Subject": _scontroller.text
-                                              .toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child("practcount")
-                                            .set(lec.toString());
-
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-                                        var varcount = prefs
-                                            .getString(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase() +
-                                            "_" +
-                                            Alert1.batch.toUpperCase())
-                                            .split(" ");
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        defaulter(_ccontroller.text,
-                                            _scontroller.text);
-                                        try {
-                                          String valu;
-                                          await databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .once()
-                                              .then((snap) {
-                                            valu = snap.value;
-                                          });
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .set(valu +
-                                              "(" +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              _ccontroller.text +
-                                              " sub:" +
-                                              _scontroller.text +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              ")");
-//
-                                        } catch (Exception) {
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .set("(" +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              _ccontroller.text +
-                                              " sub:" +
-                                              _scontroller.text +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              ")");
-                                        }
-
-                                        prefs.setString(
-                                            _ccontroller.text
-                                                .toUpperCase() +
-                                                "_" +
-                                                _scontroller.text +
-                                                "_" +
-                                                Alert1.batch.toUpperCase(),
-                                            val.toString());
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase() +
-                                            "_" +
-                                            Alert1.batch.toUpperCase())
-                                            .set(prefs.getString(
-                                            _ccontroller.text
-                                                .toUpperCase() +
-                                                "_" +
-                                                _scontroller.text
-                                                    .toUpperCase() +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase()));
-                                      } else {
-                                        dayc += 1;
-                                        weekc += 1;
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec.toString(),
-                                          "Subject": _scontroller.text
-                                              .toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child("tutcount")
-                                            .set(lec.toString());
-
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(_ccontroller.text)
-                                            .child(_scontroller.text
-                                            .toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-                                        var varcount = prefs
-                                            .getString(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase() +
-                                            "_" +
-                                            Alert1.batch
-                                                .toUpperCase() +
-                                            "_Tutorial")
-                                            .split(" ");
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        defaulter(_ccontroller.text,
-                                            _scontroller.text);
-                                        try {
-                                          String valu;
-                                          await databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .once()
-                                              .then((snap) {
-                                            if (snap.value == null)
-                                              throw Exception;
-                                            valu = snap.value;
-                                          });
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .set(valu +
-                                              "(" +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              _ccontroller.text +
-                                              " sub:" +
-                                              _scontroller.text +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              " tut)");
-                                        } catch (Exception) {
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(_ccontroller.text)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_ncontroller.text +
-                                              " " +
-                                              "lec")
-                                              .set("(" +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              _ccontroller.text +
-                                              " sub:" +
-                                              _scontroller.text +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              " tut)");
-                                        }
-
-                                        prefs.setString(
-                                            _ccontroller.text
-                                                .toUpperCase() +
-                                                "_" +
-                                                _scontroller.text +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase() +
-                                                "_Tutorial",
-                                            val.toString());
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(_ccontroller.text
-                                            .toUpperCase() +
-                                            "_" +
-                                            _scontroller.text
-                                                .toUpperCase() +
-                                            "_" +
-                                            Alert1.batch
-                                                .toUpperCase() +
-                                            "_Tutorial")
-                                            .set(prefs.getString(
-                                            _ccontroller.text
-                                                .toUpperCase() +
-                                                "_" +
-                                                _scontroller.text
-                                                    .toUpperCase() +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase() +
-                                                "_Tutorial"));
-                                      }
-
-                                      prefs.setInt("dayc", dayc);
-                                      prefs.setInt("weekc", weekc);
-                                      databaseReference
-                                          .child("week_tt")
-                                          .child(Dateinfo.dept)
-                                          .child(
-                                          monthNames[now.month - 1])
-                                          .child(weekno.toString())
-                                          .child("teacher_report")
-                                          .child(Dateinfo.teachname)
-                                          .child(
-                                          weekNames[now.weekday - 1])
-                                          .set(dayc.toString() +
-                                          "/" +
-                                          exdayc.toString());
-                                      databaseReference
-                                          .child("week_tt")
-                                          .child(Dateinfo.dept)
-                                          .child(
-                                          monthNames[now.month - 1])
-                                          .child(weekno.toString())
-                                          .child("teacher_report")
-                                          .child(Dateinfo.teachname)
-                                          .child("ztotal")
-                                          .set((100 * (weekc / exweekc))
-                                          .toStringAsFixed(2) +
-                                          "%");
-                                      databaseReference
-                                          .child("Registration")
-                                          .child('Teacher_account')
-                                          .child(Dateinfo.email)
-                                          .child("work_hr")
-                                          .set({
-                                        "dayc": dayc,
-                                        "weekc": weekc,
-                                        "date": date.toString(),
-                                        "weekno": weekno
-                                      });
-                                      databaseReference
-                                          .child("Registration")
-                                          .child('Teacher_account')
-                                          .child(Dateinfo.email)
-                                          .child("slot")
-                                          .child(_ncontroller.text+"h")
-                                          .set(1);
-                                    }
-                                    // _start=40;
-                                  }
-                                      : null,
-                                  color: butclr,
-                                  //Color(0xff996600),
-                                  child: new Text("Passcode",
-                                      style: TextStyle(
-                                          fontFamily: 'BalooChettan2',
-                                          color: HexColor.fromHex("#ffffff"),
-                                          fontSize:
-                                          2.4 * SizeConfig.textMultiplier,
-                                          fontWeight: FontWeight.bold)),
-                                ), //For
-                                // got password button
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 3 * SizeConfig.heightMultiplier,
-                              //  horizontal: 5 * SizeConfig.widthMultiplier),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
                             child: Column(
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    new Text("Attendees count:  ",
-                                        style: TextStyle(
-                                            fontFamily: 'BalooChettan2',
-                                            color: lefttxtclr,
-                                            fontSize:
-                                            2.8 * SizeConfig.textMultiplier,
-                                            fontWeight: FontWeight.bold)),
-                                    new Text(
-                                      att_cnt,
-                                      style: TextStyle(
-                                          decoration: TextDecoration.underline,
-                                          fontFamily: 'BalooChettan2',
-                                          color: righttxtclr,
-                                          fontSize:
-                                          2.8 * SizeConfig.textMultiplier,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    back: new GradientCard(
-                      margin: new EdgeInsets.only(
-                        left: 5 * SizeConfig.widthMultiplier,
-                        right: 5 * SizeConfig.widthMultiplier,
-                        top: 1 * SizeConfig.heightMultiplier,
-                      ),
-                      elevation: 5.0,
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        // stops: [0,0.5,1],
-                        colors: [
-                          //HexColor.fromHex("#DAD299"),
-                          // HexColor.fromHex("#B0DAB9"),
-                          HexColor.fromHex("#DAD299"),
-                          HexColor.fromHex("#DAD299")
-                        ],
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: 3 * SizeConfig.widthMultiplier,
-                                bottom: 1.2 * SizeConfig.heightMultiplier),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Self",
-                                  style: TextStyle(
-                                      fontSize: 2.5 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Switch(
-                                  value: isSwitched,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (enabled) {
-                                        isSwitched = value;
-                                        cardKey.currentState.toggleCard();
-                                      }
-                                    });
-                                  },
-                                  activeTrackColor: Colors.black45,
-                                  activeColor: Colors.black87,
-                                  inactiveThumbColor: Colors.black87,
-                                ),
-                                Text(
-                                  "Adjusted",
-                                  style: TextStyle(
-                                      fontSize: 2.5 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                          new Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              new Radio(
-                                activeColor: HexColor.fromHex("#996600"),
-                                value: 0,
-                                groupValue: group,
-                                onChanged: _handleRadioValueChange1,
-                              ),
-                              new Text(
-                                'Theory',
-                                style: TextStyle(
-                                    fontSize: 2.2 * SizeConfig.textMultiplier,
-                                    color: HexColor.fromHex("#00004d"),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                              // new Padding(padding: EdgeInsets.only(left: 10)),
-                              new Radio(
-                                activeColor: HexColor.fromHex("#996600"),
-                                value: 1,
-                                groupValue: group,
-                                onChanged: _handleRadioValueChange1,
-                              ),
-                              new Padding(
-                                  padding: EdgeInsets.only(
-                                      left: 2 * SizeConfig.widthMultiplier)),
-                              new Text(
-                                'Practical',
-                                style: TextStyle(
-                                    fontSize: 2.2 * SizeConfig.textMultiplier,
-                                    color: HexColor.fromHex("#00004d"),
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              bottom: 2 * SizeConfig.heightMultiplier,
-                              //  left: 23 * SizeConfig.widthMultiplier
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                new Radio(
-                                  activeColor: HexColor.fromHex("#996600"),
-                                  value: 2,
-                                  groupValue: group,
-                                  onChanged: _handleRadioValueChange1,
-                                ),
-                                new Text(
-                                  'Tutorial',
-                                  style: TextStyle(
-                                      fontSize: 2.2 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SliderTheme(
-                            data: SliderTheme.of(context).copyWith(
-                                trackHeight:3,
-                                inactiveTickMarkColor: lefttxtclr,
-                                valueIndicatorColor: Colors.blue,
-                                activeTickMarkColor: lefttxtclr,
-                                valueIndicatorTextStyle: TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.bold)
-                            ),
-                            child: Slider(
-                                activeColor: Color(0xff999966),
-                                inactiveColor: Color(0xffc2c2a3),
-                                // valueIndicatorColor: Colors.blue,
-                                label: (arating.toInt()).toString(),
-                                value: arating,
-
-                                divisions: 8,
-                                min: 0,
-                                max:8,
-                                onChanged: enabled ?(newrating){
-                                  setState(() {
-                                    arating=newrating;
-                                    _controller.text=arating.toInt().toString();
-                                  });
-                                }
-                                    :null
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 1 * SizeConfig.heightMultiplier,
-                              // left: 7 * SizeConfig.widthMultiplier
-                            ),
-                            child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  "Enter work hour:",
-                                  style: TextStyle(
-                                      fontSize: 2.2 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                new Padding(
+                                Padding(
                                   padding: EdgeInsets.only(
-                                      left: 4 * SizeConfig.widthMultiplier),
+                                      left: 5 * SizeConfig.widthMultiplier),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Self",
+                                        style: TextStyle(
+                                          fontSize: 2.5 *
+                                              SizeConfig.textMultiplier,
+                                          fontWeight: FontWeight.bold,
+                                          color: lefttxtclr,
+                                        ),
+                                      ),
+                                      Switch(
+                                        value: isSwitched,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (enabled) {
+                                              init();
+                                              isSwitched = value;
+                                              cardKey.currentState.toggleCard();
+                                            }
+                                          });
+                                        },
+                                        activeTrackColor: Colors.black87,
+                                        activeColor: Colors.black87,
+                                        inactiveThumbColor: Colors.black87,
+                                      ),
+                                      Text(
+                                        "Adjusted",
+                                        style: TextStyle(
+                                          fontSize: 2.7 *
+                                              SizeConfig.textMultiplier,
+                                          fontWeight: FontWeight.bold,
+                                          color: lefttxtclr,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                new Flexible(
-                                  child: Container(
-                                      width: 22 * SizeConfig.widthMultiplier,
+                                SliderTheme(
+                                  child: Slider(
+                                      activeColor: Color(0xff999966),
+                                      inactiveColor: Color(0xffc2c2a3),
+                                      label: (srating.toInt()).toString(),
+                                      value: srating,
+                                      divisions: 8,
+
+                                      min: 0,
+                                      max: 8,
+                                      onChanged: enabled ? (newrating) {
+                                        setState(() {
+                                          srating = newrating;
+                                          _ncontroller.text =
+                                              srating.toInt().toString();
+                                          timetable();
+                                          workhr(_ccontroller.text,
+                                              _scontroller.text);
+                                        });
+                                      }
+                                          : null
+                                  ),
+                                  data: SliderTheme.of(context).copyWith(
+                                      trackHeight: 3,
+                                      inactiveTickMarkColor: lefttxtclr,
+                                      valueIndicatorColor: Colors.blue,
+                                      activeTickMarkColor: lefttxtclr,
+                                      valueIndicatorTextStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)
+                                  ),
+                                ),
+                                new Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      "Enter Work hour :",
+                                      style: TextStyle(
+                                        fontSize: lefttxtsize,
+                                        color: lefttxtclr,
+                                        fontWeight: FontWeight.bold,
+
+                                      ),
+                                    ),
+                                    new Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 4 * SizeConfig.widthMultiplier),
+
+                                    ),
+                                    Container(
+                                      width: 12.5 * SizeConfig.widthMultiplier,
                                       child: TextFormField(
-                                          focusNode: focusNode1,
-                                          enableSuggestions: true,
-                                          controller: _controller,
-                                          style: TextStyle(
-                                              fontFamily: 'BalooChettan2',
-                                              color: righttxtclr,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 2.2 *
-                                                  SizeConfig.heightMultiplier),
-                                          cursorColor: righttxtclr,
+
                                           decoration: new InputDecoration(
                                               fillColor: Colors.white,
-                                              focusedBorder: OutlineInputBorder(
-                                                borderRadius: BorderRadius.all(
-                                                    Radius.circular(10)),
-                                                borderSide: BorderSide(
-                                                    width: 2,
-                                                    color: HexColor.fromHex(
-                                                        "#ffffff")),
-                                              ),
-                                              contentPadding: EdgeInsets.only(
+                                              contentPadding: EdgeInsets
+                                                  .only(
                                                   left: 5 *
                                                       SizeConfig
                                                           .widthMultiplier,
                                                   right: 5 *
                                                       SizeConfig
                                                           .widthMultiplier),
-                                              enabledBorder: OutlineInputBorder(
+                                              disabledBorder: OutlineInputBorder(
                                                   borderSide: BorderSide(
                                                       width: 2,
-                                                      color: HexColor.fromHex(
+                                                      color: HexColor
+                                                          .fromHex(
                                                           "#ffffff")),
                                                   borderRadius:
                                                   BorderRadius.circular(
                                                       10.00)),
-                                              labelText: "Enter",
+                                              // labelText: "Enter",
                                               labelStyle: new TextStyle(
                                                   color: HexColor.fromHex(
                                                       "#00004d"),
                                                   fontSize: 2.2 *
                                                       SizeConfig
                                                           .textMultiplier)),
-                                          keyboardType: TextInputType.phone,
+                                          textAlign: TextAlign.center,
+                                          focusNode: focusNode3,
+                                          enableSuggestions: true,
+                                          autofocus: false,
+                                          showCursor: true,
+                                          controller: _ncontroller,
+                                          style: TextStyle(
+                                              fontFamily: 'BalooChettan2',
+                                              color: righttxtclr,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 2.2 *
+                                                  SizeConfig
+                                                      .heightMultiplier),
+                                          cursorColor: righttxtclr,
+                                          keyboardType:
+                                          TextInputType.emailAddress,
                                           //validator: validateEmail,
-                                          enabled: enabled,
+                                          enabled: false,
                                           onChanged: (val) {
                                             setState(() {
-                                              if(int.parse(val)>8){
-                                                arating=8.0;
-                                              }else{
-                                                arating=double.parse(val);
-                                              }
+                                              srating = double.parse(val);
+                                              timetable();
+                                              workhr(_ccontroller.text,
+                                                  _scontroller.text);
                                             });
-
-                                          })),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 4 * SizeConfig.heightMultiplier,
-                              //  left: 7 * SizeConfig.widthMultiplier
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Select Class:",
-                                  style: TextStyle(
-                                      fontSize: 2.2 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                new Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 6 * SizeConfig.widthMultiplier)),
-                                Container(
-                                  height: 4.9 * SizeConfig.heightMultiplier,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal:
-                                      3.1 * SizeConfig.widthMultiplier,
-                                      vertical:
-                                      0.7 * SizeConfig.heightMultiplier),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(5)),
-                                  child: new IgnorePointer(
-                                    ignoring: drop,
-                                    child: DropdownButton<String>(
-                                      iconEnabledColor: righttxtclr,
-                                      items: classlist.map((String listvalue) {
-                                        return DropdownMenuItem<String>(
-                                          value: listvalue,
-                                          child: Text(
-                                            listvalue,
-                                            style: TextStyle(
-                                                fontSize: 2 *
-                                                    SizeConfig.textMultiplier,
-                                                color: righttxtclr,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (val) {
-                                        setState(() {
-                                          classs = val;
-                                          subjectlist.clear();
-                                          sub = "Subject";
-                                          subjectlist = ["Subject"];
-                                          if (!(stat == "Status" &&
-                                              sub == "Subject")) {
-                                            subjectlist.addAll(
-                                                prefs.getStringList(
-                                                    classs + "_" + stat[0]));
-                                          }
-                                          FocusScope.of(context)
-                                              .requestFocus(new FocusNode());
-                                        });
-                                      },
-                                      value: classs,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: 3.5 * SizeConfig.heightMultiplier,
-                              // left: 7 * SizeConfig.widthMultiplier
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Text(
-                                  "Select Subject:",
-                                  style: TextStyle(
-                                      fontSize: 2.2 * SizeConfig.textMultiplier,
-                                      color: HexColor.fromHex("#00004d"),
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                new Padding(
-                                    padding: EdgeInsets.only(
-                                        left: 6 * SizeConfig.widthMultiplier)),
-                                Container(
-                                  height: 4.9 * SizeConfig.heightMultiplier,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal:
-                                      3.1 * SizeConfig.widthMultiplier,
-                                      vertical:
-                                      0.7 * SizeConfig.heightMultiplier),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(8)),
-                                  child: new IgnorePointer(
-                                    ignoring: drop,
-                                    child: DropdownButton<String>(
-                                      iconEnabledColor: righttxtclr,
-                                      items:
-                                      subjectlist.map((String listvalue) {
-                                        return DropdownMenuItem<String>(
-                                          value: listvalue,
-                                          child: Text(
-                                            listvalue,
-                                            style: TextStyle(
-                                                fontSize: 2 *
-                                                    SizeConfig.textMultiplier,
-                                                color: righttxtclr,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                        );
-                                      }).toList(),
-                                      onChanged: (val) {
-                                        setState(() => sub = val);
-                                        FocusScope.of(context)
-                                            .requestFocus(new FocusNode());
-                                      },
-                                      value: sub,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(
-                                left: dist,
-                                top: 4 * SizeConfig.heightMultiplier),
-                            child: Column(
-                              children: <Widget>[
-                                new RaisedButton(
-                                  shape: new RoundedRectangleBorder(
-                                      borderRadius:
-                                      BorderRadius.circular(80.00)),
-                                  splashColor: HexColor.fromHex("#ffffff"),
-                                  disabledColor: Color(0xffff9999),
-                                  onPressed: enabled
-                                      ? () async {
-                                    prefs = await SharedPreferences
-                                        .getInstance();
-                                    var slot=prefs.getStringList("slot");
-
-                                    FocusScope.of(context)
-                                        .requestFocus(new FocusNode());
-                                    var rng = new Random();
-                                    code = code +
-                                        rng.nextInt(20000) +
-                                        rng.nextInt(30000);
-                                    if (classs == "Class" ||
-                                        sub == "Subject" ||
-                                        stat == "Status" ||
-                                        _controller.text == "") {
-                                      Fluttertoast.showToast(
-                                          msg: "fill all fields",
-                                          toastLength: Toast.LENGTH_SHORT,
-                                          gravity: ToastGravity.BOTTOM,
-                                          backgroundColor: Colors.red,
-                                          textColor: Colors.white,
-                                          fontSize: 16.0);
-                                    } else if((slot.contains(_controller.text+"h"))){
-                                      bool click=true;
-                                      await Alert(
-                                        context: context,
-                                        type: AlertType.warning,
-                                        style: AlertStyle(
-                                            animationType: AnimationType.fromTop,
-                                            isCloseButton: false,
-                                            isOverlayTapDismiss: false,
-                                            descStyle: TextStyle(fontWeight: FontWeight.bold),
-                                            animationDuration: Duration(milliseconds: 400),
-                                            titleStyle: TextStyle(
-                                                color: Color(0xff00004d)
-                                            ),
-                                            alertBorder: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.0),
-                                              side: BorderSide(
-                                                color: Colors.grey,
-                                              ),
-                                            )
-                                        ),
-
-                                        buttons: [
-                                          DialogButton(
-                                            child: Text(
-                                              "ok",
-                                              style: TextStyle(color: Colors.white, fontSize: 2.5*SizeConfig.textMultiplier),
-                                            ),
-                                            onPressed:click? (){ Navigator.pop(context);
-                                            setState(() {
-                                              click=false;
-                                            });
-                                            }:null,
-                                            gradient: LinearGradient(colors: [
-                                              Color(0xffe63900),
-                                              Color(0xffe63900)
-                                            ]),
-                                          )
-                                        ],
-                                      ).show();
-
-                                    }else{
-                                      radio_on = false;
-                                      setState(() {
-                                        clr = Color(0xffff9999);
-                                        str = code.toString();
-                                        card = "back";
-                                      });
-                                      //var slot=prefs.getStringList("slot");
-                                      slot.add(_controller.text+"h");
-                                      prefs.setStringList("slot",slot);
-                                      startTimer();
-                                      drop = true;
-                                      var now = new DateTime.now();
-                                      String date = ford.format(now);
-
-                                      Dateinfo.classs = classs;
-                                      Dateinfo.subject = sub;
-                                      Dateinfo.date1 = date;
-                                      Dateinfo.stat = stat;
-                                      databaseReference
-                                          .child('c_teacher')
-                                          .child(Dateinfo.dept)
-                                          .child(classs)
-                                          .child("status")
-                                          .set(stat);
-                                      setState(() {
-                                        user.classs = classs;
-                                        user.sub = sub.toUpperCase();
-                                        user.date = date;
-                                        user.lec = lec.toString();
-                                        user.stat = stat;
-                                      });
-                                      int current = DateTime.utc(
-                                          now.year, now.month, 1)
-                                          .weekday;
-                                      int weekno = 0;
-                                      int i = 9 - current;
-                                      for (; i < 30; i += 7) {
-                                        weekno += 1;
-                                        if (now.day < i) {
-                                          break;
-                                        }
-                                      }
-                                      int dayc = prefs.getInt("dayc");
-                                      int weekc = prefs.getInt("weekc");
-                                      if (stat == "lecture") {
-                                        dayc += 1;
-                                        weekc += 1;
-                                        workhr(classs, sub);
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child("leccount")
-                                            .set(lec.toString());
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(stat)
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec,
-                                          "Subject": sub.toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-                                        var varcount = prefs
-                                            .getString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub.toUpperCase())
-                                            .split(" ");
-
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        defaulter(classs.toString(),
-                                            sub.toString());
-                                        databaseReference
-                                            .child("week_tt")
-                                            .child(Dateinfo.dept)
-                                            .child(
-                                            monthNames[now.month - 1])
-                                            .child(weekno.toString())
-                                            .child(classs)
-                                            .child(weekNames[
-                                        now.weekday - 1])
-                                            .child(_controller.text +
-                                            " " +
-                                            "lec")
-                                            .set("Adj " +
-                                            Dateinfo.teachname +
-                                            " class:" +
-                                            classs +
-                                            " sub:" +
-                                            sub.toUpperCase());
-
-                                        await prefs.setString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub.toUpperCase(),
-                                            val.toString());
-
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(classs.toUpperCase() +
-                                            "_" +
-                                            sub.toUpperCase())
-                                            .set(val.toString());
-                                      } else if (stat == "Practical") {
-                                        Alert1.check = true;
-                                        Dateinfo.batches.clear();
-                                        Dateinfo.batches =
-                                            prefs.getStringList(
-                                                Dateinfo.subject);
-                                        await Alert1.dialog(context);
-
-                                        dayc += 2;
-                                        weekc += 2;
-                                        workhr(classs, sub);
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(stat)
-                                            .child(Alert1.batch
-                                          ..toUpperCase())
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec.toString(),
-                                          "Subject": sub.toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child("practcount")
-                                            .set(lec.toString());
-
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-                                        var varcount = prefs
-                                            .getString(classs
-                                            .toUpperCase() +
-                                            "_" +
-                                            sub.toUpperCase() +
-                                            "_" +
-                                            Alert1.batch.toUpperCase())
-                                            .split(" ");
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        defaulter(classs.toString(),
-                                            sub.toString());
-                                        try {
-                                          String valu;
-                                          print("df");
-                                          await databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1]
-                                              .toString())
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1]
-                                              .toString())
-                                              .child(_controller.text
-                                              .toString() +
-                                              " " +
-                                              "lec")
-                                              .once()
-                                              .then((snap) {
-                                            print(snap.value);
-                                            valu = snap.value;
-                                          });
-//                                          if (map.containsKey(_controller.text)) {
-//                                            String val = map[_controller.text];
-                                          print(val);
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_controller.text +
-                                              " " +
-                                              "lec")
-                                              .set(valu +
-                                              "(Adj " +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              classs +
-                                              " sub:" +
-                                              sub +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              ")");
-                                        } catch (Exception) {
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_controller.text +
-                                              " " +
-                                              "lec")
-                                              .set("(Adj " +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              classs +
-                                              " sub:" +
-                                              sub +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              ")");
-                                        }
-
-                                        prefs.setString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub +
-                                                "_" +
-                                                Alert1.batch.toUpperCase(),
-                                            val.toString());
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(classs.toUpperCase() +
-                                            "_" +
-                                            sub.toUpperCase() +
-                                            "_" +
-                                            Alert1.batch.toUpperCase())
-                                            .set(prefs.getString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub.toUpperCase() +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase()));
-                                      } else {
-                                        Alert1.check = true;
-                                        Alert1.inputlec = false;
-                                        Dateinfo.batches.clear();
-                                        Dateinfo.batches =
-                                            prefs.getStringList(
-                                                Dateinfo.subject + "T");
-                                        await Alert1.dialog(context);
-
-                                        dayc += 1;
-                                        weekc += 1;
-                                        workhr(classs, sub);
-                                        databaseReference
-                                            .child("c_teacher")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(stat)
-                                            .child(Alert1.batch
-                                          ..toUpperCase())
-                                            .set({
-                                          "passcode": str,
-                                          "count": lec.toString(),
-                                          "Subject": sub.toUpperCase(),
-                                          "Teacher": Dateinfo.teachname
-                                        });
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child("tutcount")
-                                            .set(lec.toString());
-
-                                        databaseReference
-                                            .child("Attendance")
-                                            .child(Dateinfo.dept)
-                                            .child(classs)
-                                            .child(sub.toUpperCase())
-                                            .child(Dateinfo.teachname)
-                                            .child(date)
-                                            .child(stat)
-                                            .child(
-                                            Alert1.batch.toUpperCase())
-                                            .child(lec.toString())
-                                            .child("a_total")
-                                            .set("0");
-                                        var varcount = prefs
-                                            .getString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub.toUpperCase() +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase() +
-                                                "_Tutorial")
-                                            .split(" ");
-                                        String val =
-                                            (int.parse(varcount[0]) + 1)
-                                                .toString() +
-                                                " " +
-                                                (int.parse(varcount[1]) +
-                                                    1)
-                                                    .toString();
-                                        defaulercount =
-                                            int.parse(varcount[0]) + 1;
-                                        defaulter(classs.toString(),
-                                            sub.toString());
-                                        try {
-                                          String valu;
-                                          print("df");
-                                          await databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1]
-                                              .toString())
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1]
-                                              .toString())
-                                              .child(_controller.text
-                                              .toString() +
-                                              " " +
-                                              "lec")
-                                              .once()
-                                              .then((snap) {
-                                            print(snap.value);
-                                            valu = snap.value;
-                                            if (valu == null)
-                                              throw Exception;
-                                          });
-//                                          if (map.containsKey(_controller.text)) {
-//                                            String val = map[_controller.text];
-                                          print(val);
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_controller.text +
-                                              " " +
-                                              "lec")
-                                              .set(valu +
-                                              "(Adj " +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              classs +
-                                              " sub:" +
-                                              sub +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              " tut)");
-                                        } catch (Exception) {
-                                          databaseReference
-                                              .child("week_tt")
-                                              .child(Dateinfo.dept)
-                                              .child(monthNames[
-                                          now.month - 1])
-                                              .child(weekno.toString())
-                                              .child(classs)
-                                              .child(weekNames[
-                                          now.weekday - 1])
-                                              .child(_controller.text +
-                                              " " +
-                                              "lec")
-                                              .set("(Adj " +
-                                              Dateinfo.teachname +
-                                              " class:" +
-                                              classs +
-                                              " sub:" +
-                                              sub +
-                                              " batch:" +
-                                              Alert1.batch +
-                                              " tut)");
-                                        }
-
-                                        prefs.setString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase() +
-                                                "_Tutorial",
-                                            val.toString());
-                                        databaseReference
-                                            .child("teach_att")
-                                            .child(Dateinfo.dept)
-                                            .child(Dateinfo.teachname)
-                                            .child(classs.toUpperCase() +
-                                            "_" +
-                                            sub.toUpperCase() +
-                                            "_" +
-                                            Alert1.batch
-                                                .toUpperCase() +
-                                            "_Tutorial")
-                                            .set(prefs.getString(
-                                            classs.toUpperCase() +
-                                                "_" +
-                                                sub.toUpperCase() +
-                                                "_" +
-                                                Alert1.batch
-                                                    .toUpperCase() +
-                                                "_Tutorial"));
-//
-                                      }
-                                      prefs.setInt("dayc", dayc);
-                                      prefs.setInt("weekc", weekc);
-                                      databaseReference
-                                          .child("week_tt")
-                                          .child(Dateinfo.dept)
-                                          .child(
-                                          monthNames[now.month - 1])
-                                          .child(weekno.toString())
-                                          .child("teacher_report")
-                                          .child(Dateinfo.teachname)
-                                          .child(
-                                          weekNames[now.weekday - 1])
-                                          .set(dayc.toString() +
-                                          "/" +
-                                          exdayc.toString());
-                                      databaseReference
-                                          .child("week_tt")
-                                          .child(Dateinfo.dept)
-                                          .child(
-                                          monthNames[now.month - 1])
-                                          .child(weekno.toString())
-                                          .child("teacher_report")
-                                          .child(Dateinfo.teachname)
-                                          .child("ztotal")
-                                          .set((100 * (weekc / exweekc))
-                                          .toStringAsFixed(2) +
-                                          "%");
-                                      databaseReference
-                                          .child("Registration")
-                                          .child('Teacher_account')
-                                          .child(Dateinfo.email)
-                                          .child("work_hr")
-                                          .set({
-                                        "dayc": dayc,
-                                        "weekc": weekc,
-                                        "date": date.toString(),
-                                        "weekno": weekno
-                                      });
-                                      databaseReference
-                                          .child("Registration")
-                                          .child('Teacher_account')
-                                          .child(Dateinfo.email)
-                                          .child("slot")
-                                          .child(_controller.text+"h")
-                                          .set(1);
-                                    }
-                                    // _start=40;
-                                  }
-                                      : null,
-                                  color: butclr,
-                                  //Color(0xff996600),
-                                  child: new Text("Passcode",
-                                      style: TextStyle(
-                                          fontFamily: 'BalooChettan2',
-                                          color: HexColor.fromHex("#ffffff"),
-                                          fontSize:
-                                          2.4 * SizeConfig.textMultiplier,
-                                          fontWeight: FontWeight.bold)),
-                                ), //For
-                                // got password button
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(
-                                vertical: 2 * SizeConfig.heightMultiplier),
-                            child: Column(
-                              children: <Widget>[
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    new Text("Attendees count:  ",
-                                        style: TextStyle(
-                                            fontFamily: 'BalooChettan2',
-                                            color: HexColor.fromHex("#00004d"),
-                                            fontSize:
-                                            2.8 * SizeConfig.textMultiplier,
-                                            fontWeight: FontWeight.bold)),
-                                    new Text(
-                                      att_cnt,
-                                      style: TextStyle(
-                                          decoration: TextDecoration.underline,
-                                          fontFamily: 'BalooChettan2',
-                                          color: righttxtclr,
-                                          fontSize:
-                                          2.8 * SizeConfig.textMultiplier,
-                                          fontWeight: FontWeight.bold),
+                                          }),
                                     )
                                   ],
                                 ),
+//                          Padding(
+//                            padding: EdgeInsets.only(
+//                                top: 4 * SizeConfig.heightMultiplier,
+//                                left: 13 * SizeConfig.widthMultiplier),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 3 * SizeConfig.heightMultiplier
+                                  ),
+                                  child: new Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Your  class:",
+                                        style: TextStyle(
+                                            fontSize: lefttxtsize,
+                                            color: lefttxtclr,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      new Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 6 *
+                                                  SizeConfig.widthMultiplier)),
+                                      Container(
+                                          width: 22 *
+                                              SizeConfig.widthMultiplier,
+                                          child: TextFormField(
+                                            focusNode: focusNode4,
+                                            textAlign: TextAlign.center,
+                                            enableSuggestions: true,
+                                            controller: _ccontroller,
+                                            style: TextStyle(
+                                                fontFamily: 'BalooChettan2',
+                                                color: righttxtclr,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 2.2 *
+                                                    SizeConfig
+                                                        .heightMultiplier),
+                                            cursorColor: righttxtclr,
+                                            decoration: new InputDecoration(
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets
+                                                  .only(
+                                                  left: 5 *
+                                                      SizeConfig
+                                                          .widthMultiplier,
+                                                  right: 5 *
+                                                      SizeConfig
+                                                          .widthMultiplier),
+                                              disabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      width: 2,
+                                                      color: HexColor
+                                                          .fromHex(
+                                                          "#ffffff")),
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10.00)),
+                                              // labelText: "Enter",
+                                            ),
+                                            enabled: false,
+                                          )),
+                                    ],
+                                  ),
+                                ),
+//
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 3 * SizeConfig.heightMultiplier,
+                                    //    left: 13 * SizeConfig.widthMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Your   subject:",
+                                        style: TextStyle(
+                                            fontSize: lefttxtsize,
+                                            color: lefttxtclr,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      new Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 6 *
+                                                  SizeConfig.widthMultiplier)),
+                                      Container(
+                                        width: 25 * SizeConfig.widthMultiplier,
+                                        child: TextFormField(
+                                          focusNode: focusNode5,
+                                          textAlign: TextAlign.center,
+                                          enableSuggestions: true,
+                                          controller: _scontroller,
+                                          style: TextStyle(
+                                              fontFamily: 'BalooChettan2',
+                                              color: righttxtclr,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize:
+                                              2.2 *
+                                                  SizeConfig.heightMultiplier),
+                                          cursorColor: lefttxtclr,
+                                          decoration: new InputDecoration(
+                                              fillColor: Colors.white,
+                                              contentPadding: EdgeInsets
+                                                  .only(
+                                                  left: 5 *
+                                                      SizeConfig
+                                                          .widthMultiplier,
+                                                  right: 5 *
+                                                      SizeConfig
+                                                          .widthMultiplier),
+                                              disabledBorder: OutlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      width: 2,
+                                                      color: HexColor
+                                                          .fromHex(
+                                                          "#ffffff")),
+                                                  borderRadius:
+                                                  BorderRadius.circular(
+                                                      10.00)),
+                                              // labelText: "Enter",
+                                              labelStyle: new TextStyle(
+                                                  color: HexColor.fromHex(
+                                                      "#00004d"),
+                                                  fontSize: 2.2 *
+                                                      SizeConfig
+                                                          .textMultiplier)),
+                                          enabled: false,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      left: dist,
+                                      top: SizeConfig.grp <= 4 ? 2 *
+                                          SizeConfig.heightMultiplier : 4 *
+                                          SizeConfig.heightMultiplier),
+                                  child: Column(
+                                    children: <Widget>[
+                                      new RaisedButton(
+                                        shape: new RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(80.00)),
+                                        splashColor: HexColor.fromHex(
+                                            "#ffffff"),
+                                        disabledColor: Color(0xffff9999),
+                                        onPressed: !connected ? () async {
+                                          Fluttertoast.showToast(
+                                              msg: "Check internet Connectivity");
+                                        } : enabled
+                                            ? () async {
+                                          await get();
+                                          prefs = await SharedPreferences
+                                              .getInstance();
+                                          FocusScope.of(context)
+                                              .requestFocus(new FocusNode());
+                                          var rng = new Random();
+                                          var slot = prefs.getStringList(
+                                              "slot");
+
+                                          code = code +
+                                              rng.nextInt(20000) +
+                                              rng.nextInt(30000);
+                                          if (_ccontroller.text == "Class" ||
+                                              _scontroller.text == "Subject" ||
+                                              stat == "Status" ||
+                                              lec == "") {
+                                            Fluttertoast.showToast(
+                                                msg: "fill all fields",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0);
+                                          } else if ((slot.contains(
+                                              _ncontroller.text + "h"))) {
+                                            bool click = true;
+                                            await Alert(
+                                              context: context,
+                                              type: AlertType.warning,
+                                              title: "Atttendance already taken",
+                                              style: AlertStyle(
+                                                  animationType: AnimationType
+                                                      .fromTop,
+                                                  isCloseButton: false,
+                                                  isOverlayTapDismiss: false,
+                                                  descStyle: TextStyle(
+                                                      fontWeight: FontWeight
+                                                          .bold),
+                                                  animationDuration: Duration(
+                                                      milliseconds: 400),
+                                                  titleStyle: TextStyle(
+                                                      color: Color(0xff00004d)
+                                                  ),
+                                                  alertBorder: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius
+                                                        .circular(10.0),
+                                                    side: BorderSide(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  )
+                                              ),
+
+                                              buttons: [
+                                                DialogButton(
+                                                  child: Text(
+                                                    "ok",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 2.5 *
+                                                            SizeConfig
+                                                                .textMultiplier),
+                                                  ),
+                                                  onPressed: click ? () {
+                                                    Navigator.pop(context);
+                                                    setState(() {
+                                                      click = false;
+                                                    });
+                                                  } : null,
+                                                  color: Color.fromRGBO(
+                                                      0, 179, 134, 1.0),
+                                                )
+                                              ],
+                                            ).show();
+                                          } else {
+                                            if (Dateinfo.dept=="FE") {
+                                              Dateinfo.dept=_scontroller.text.toString().substring(_scontroller.text.length-4);
+                                            }
+                                            radio_on = false;
+
+                                            setState(() {
+                                              clr = Color(0xffff9999);
+                                              str = code.toString();
+                                              card = "front";
+                                            });
+                                            startTimer();
+                                            //var slot=prefs.getStringList("slot");
+                                            slot.add(_ncontroller.text + "h");
+                                            prefs.setStringList("slot", slot);
+                                            var now = new DateTime.now();
+                                            String date = ford.format(now);
+                                            Dateinfo.classs = _ccontroller.text;
+                                            Dateinfo.subject =
+                                                _scontroller.text;
+                                            Dateinfo.date1 = date;
+                                            Dateinfo.stat = stat;
+                                            databaseReference
+                                                .child('c_teacher')
+                                                .child(Dateinfo.dept)
+                                                .child(_ccontroller.text)
+                                                .child("status")
+                                                .set(stat);
+                                            setState(() {
+                                              user.classs = _ccontroller.text;
+                                              user.sub = _scontroller.text
+                                                  .toUpperCase();
+                                              user.date = date;
+                                              user.lec = lec.toString();
+                                              user.stat = stat;
+                                            });
+                                            //  workhr(1);
+                                            int current = DateTime
+                                                .utc(
+                                                now.year, now.month, 1)
+                                                .weekday;
+                                            int weekno = 0;
+                                            int i = 9 - current;
+                                            for (; i < 30; i += 7) {
+                                              weekno += 1;
+                                              if (now.day < i) {
+                                                break;
+                                              }
+                                            }
+                                            int dayc = prefs.getInt("dayc");
+                                            int weekc = prefs.getInt("weekc");
+
+                                            if (stat == "lecture") {
+                                              dayc += 1;
+                                              weekc += 1;
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child("leccount")
+                                                  .set(lec.toString());
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(stat)
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec,
+                                                "Subject": _scontroller.text
+                                                    .toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+
+                                              var varcount = prefs
+                                                  .getString(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase())
+                                                  .split(" ");
+
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+//                                              print(defaulercount);
+                                              defaulter(_ccontroller.text,
+                                                  _scontroller.text);
+                                              databaseReference
+                                                  .child("week_tt")
+                                                  .child(Dateinfo.dept)
+//                                                  .child(
+//                                                  monthNames[now.month - 1])
+                                                  .child(weekcount.toString())
+                                                  .child(_ccontroller.text)
+                                                  .child(weekNames[
+                                              now.weekday - 1])
+                                                  .child(_ncontroller.text +
+                                                  " " +
+                                                  "lec")
+                                                  .set(Dateinfo.teachname +
+                                                  " class:" +
+                                                  _ccontroller.text +
+                                                  " sub:" +
+                                                  _scontroller.text);
+
+                                              await prefs.setString(
+                                                  _ccontroller.text
+                                                      .toUpperCase() +
+                                                      "_" +
+                                                      _scontroller.text
+                                                          .toUpperCase(),
+                                                  val.toString());
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase())
+                                                  .set(val.toString());
+                                            } else if (stat == "Practical") {
+                                              dayc += 2;
+                                              weekc += 2;
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(stat)
+                                                  .child(Alert1.batch
+                                                ..toUpperCase())
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec.toString(),
+                                                "Subject": _scontroller.text
+                                                    .toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child("practcount")
+                                                  .set(lec.toString());
+
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+                                              var varcount = prefs
+                                                  .getString(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch.toUpperCase())
+                                                  .split(" ");
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+                                              defaulter(_ccontroller.text,
+                                                  _scontroller.text);
+                                              try {
+                                                String valu;
+                                                await databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .once()
+                                                    .then((snap) {
+                                                  valu = snap.value;
+                                                });
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set(valu +
+                                                    "(" +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    _ccontroller.text +
+                                                    " sub:" +
+                                                    _scontroller.text +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    ")");
+//
+                                              } catch (Exception) {
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set("(" +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    _ccontroller.text +
+                                                    " sub:" +
+                                                    _scontroller.text +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    ")");
+                                              }
+
+                                              prefs.setString(
+                                                  _ccontroller.text
+                                                      .toUpperCase() +
+                                                      "_" +
+                                                      _scontroller.text +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase(),
+                                                  val.toString());
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch.toUpperCase())
+                                                  .set(prefs.getString(
+                                                  _ccontroller.text
+                                                      .toUpperCase() +
+                                                      "_" +
+                                                      _scontroller.text
+                                                          .toUpperCase() +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase()));
+                                            } else {
+                                              dayc += 1;
+                                              weekc += 1;
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec.toString(),
+                                                "Subject": _scontroller.text
+                                                    .toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child("tutcount")
+                                                  .set(lec.toString());
+
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(_ccontroller.text)
+                                                  .child(_scontroller.text
+                                                  .toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+                                              var varcount = prefs
+                                                  .getString(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch
+                                                      .toUpperCase() +
+                                                  "_Tutorial")
+                                                  .split(" ");
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+                                              defaulter(_ccontroller.text,
+                                                  _scontroller.text);
+                                              try {
+                                                String valu;
+                                                await databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .once()
+                                                    .then((snap) {
+                                                  if (snap.value == null)
+                                                    throw Exception;
+                                                  valu = snap.value;
+                                                });
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set(valu +
+                                                    "(" +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    _ccontroller.text +
+                                                    " sub:" +
+                                                    _scontroller.text +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    " tut)");
+                                              } catch (Exception) {
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(_ccontroller.text)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_ncontroller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set("(" +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    _ccontroller.text +
+                                                    " sub:" +
+                                                    _scontroller.text +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    " tut)");
+                                              }
+
+                                              prefs.setString(
+                                                  _ccontroller.text
+                                                      .toUpperCase() +
+                                                      "_" +
+                                                      _scontroller.text +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase() +
+                                                      "_Tutorial",
+                                                  val.toString());
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(_ccontroller.text
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  _scontroller.text
+                                                      .toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch
+                                                      .toUpperCase() +
+                                                  "_Tutorial")
+                                                  .set(prefs.getString(
+                                                  _ccontroller.text
+                                                      .toUpperCase() +
+                                                      "_" +
+                                                      _scontroller.text
+                                                          .toUpperCase() +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase() +
+                                                      "_Tutorial"));
+                                            }
+
+                                            prefs.setInt("dayc", dayc);
+                                            prefs.setInt("weekc", weekc);
+                                            databaseReference
+                                                .child("week_tt")
+                                                .child(prefs.getString("dept"))
+//                                                .child(
+//                                                monthNames[now.month - 1])
+                                                .child(weekcount.toString())
+                                                .child("teacher_report")
+                                                .child(Dateinfo.teachname)
+                                                .child(
+                                                weekNames[now.weekday - 1])
+                                                .set(dayc.toString() +
+                                                "/" +
+                                                exdayc.toString());
+                                            databaseReference
+                                                .child("week_tt")
+                                                .child(prefs.getString("dept"))
+//                                                .child(
+//                                                monthNames[now.month - 1])
+                                                .child(weekcount.toString())
+                                                .child("teacher_report")
+                                                .child(Dateinfo.teachname)
+                                                .child("ztotal")
+                                                .set((100 * (weekc / exweekc))
+                                                .toStringAsFixed(2) +
+                                                "%");
+                                            databaseReference
+                                                .child("Registration")
+                                                .child('Teacher_account')
+                                                .child(Dateinfo.email)
+                                                .child("work_hr")
+                                                .set({
+                                              "dayc": dayc,
+                                              "weekc": weekc,
+                                              "date": date.toString(),
+                                              "weekno": weekno
+                                            });
+                                            databaseReference
+                                                .child("Registration")
+                                                .child('Teacher_account')
+                                                .child(Dateinfo.email)
+                                                .child("slot")
+                                                .child(_ncontroller.text + "h")
+                                                .set(1);
+                                          }
+                                          // _start=40;
+                                        }
+                                            : null,
+                                        color: butclr,
+                                        child: new Text("Passcode",
+                                            style: TextStyle(
+                                                fontFamily: 'BalooChettan2',
+                                                color: HexColor.fromHex(
+                                                    "#ffffff"),
+                                                fontSize:
+                                                2.4 * SizeConfig.textMultiplier,
+                                                fontWeight: FontWeight.bold)),
+                                      ), //For
+                                      // got password button
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 1 * SizeConfig.heightMultiplier,
+                                      bottom: SizeConfig.grp <= 4 ? 2 *
+                                          SizeConfig.heightMultiplier : 3 *
+                                          SizeConfig.heightMultiplier
+                                    //  horizontal: 5 * SizeConfig.widthMultiplier),
+                                  ),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        children: <Widget>[
+                                          new Text("Attendees count:  ",
+                                              style: TextStyle(
+                                                  fontFamily: 'BalooChettan2',
+                                                  color: lefttxtclr,
+                                                  fontSize:
+                                                  2.8 *
+                                                      SizeConfig.textMultiplier,
+                                                  fontWeight: FontWeight.bold)),
+                                          new Text(
+                                            att_cnt,
+                                            style: TextStyle(
+                                                decoration: TextDecoration
+                                                    .underline,
+                                                fontFamily: 'BalooChettan2',
+                                                color: righttxtclr,
+                                                fontSize:
+                                                2.8 * SizeConfig.textMultiplier,
+                                                fontWeight: FontWeight.bold),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                        ],
+                          back: new GradientCard(
+                            margin: new EdgeInsets.only(
+                              left: 5 * SizeConfig.widthMultiplier,
+                              right: 5 * SizeConfig.widthMultiplier,
+                              top: 1 * SizeConfig.heightMultiplier,
+                            ),
+                            elevation: 5.0,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              // stops: [0,0.5,1],
+                              colors: [
+                                //HexColor.fromHex("#DAD299"),
+                                // HexColor.fromHex("#B0DAB9"),
+                                HexColor.fromHex("#DAD299"),
+                                HexColor.fromHex("#DAD299")
+                              ],
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 3 * SizeConfig.widthMultiplier,
+                                    //    bottom: 0.5 * SizeConfig.heightMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Self",
+                                        style: TextStyle(
+                                            fontSize: 2.5 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Switch(
+                                        value: isSwitched,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            if (enabled) {
+                                              isSwitched = value;
+                                              cardKey.currentState.toggleCard();
+                                            }
+                                          });
+                                        },
+                                        activeTrackColor: Colors.black45,
+                                        activeColor: Colors.black87,
+                                        inactiveThumbColor: Colors.black87,
+                                      ),
+                                      Text(
+                                        "Adjusted",
+                                        style: TextStyle(
+                                            fontSize: 2.5 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                new Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    new Radio(
+                                      activeColor: HexColor.fromHex("#996600"),
+                                      value: 0,
+                                      groupValue: group,
+                                      onChanged: _handleRadioValueChange1,
+                                    ),
+                                    new Text(
+                                      'Theory',
+                                      style: TextStyle(
+                                          fontSize: 2.2 *
+                                              SizeConfig.textMultiplier,
+                                          color: HexColor.fromHex("#00004d"),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    // new Padding(padding: EdgeInsets.only(left: 10)),
+                                    new Radio(
+                                      activeColor: HexColor.fromHex("#996600"),
+                                      value: 1,
+                                      groupValue: group,
+                                      onChanged: _handleRadioValueChange1,
+                                    ),
+                                    new Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 2 *
+                                                SizeConfig.widthMultiplier)),
+                                    new Text(
+                                      'Practical',
+                                      style: TextStyle(
+                                          fontSize: 2.2 *
+                                              SizeConfig.textMultiplier,
+                                          color: HexColor.fromHex("#00004d"),
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    // bottom: 2 * SizeConfig.heightMultiplier,
+                                    //  left: 23 * SizeConfig.widthMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      new Radio(
+                                        activeColor: HexColor.fromHex(
+                                            "#996600"),
+                                        value: 2,
+                                        groupValue: group,
+                                        onChanged: _handleRadioValueChange1,
+                                      ),
+                                      new Text(
+                                        'Tutorial',
+                                        style: TextStyle(
+                                            fontSize: 2.2 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SliderTheme(
+                                  data: SliderTheme.of(context).copyWith(
+                                      trackHeight: 3,
+                                      inactiveTickMarkColor: lefttxtclr,
+                                      valueIndicatorColor: Colors.blue,
+                                      activeTickMarkColor: lefttxtclr,
+                                      valueIndicatorTextStyle: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold)
+                                  ),
+                                  child: Slider(
+                                      activeColor: Color(0xff999966),
+                                      inactiveColor: Color(0xffc2c2a3),
+                                      // valueIndicatorColor: Colors.blue,
+                                      label: (arating.toInt()).toString(),
+                                      value: arating,
+
+                                      divisions: 8,
+                                      min: 0,
+                                      max: 8,
+                                      onChanged: enabled ? (newrating) {
+                                        setState(() {
+                                          arating = newrating;
+                                          _controller.text =
+                                              arating.toInt().toString();
+                                        });
+                                      }
+                                          : null
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    // top: 1 * SizeConfig.heightMultiplier,
+                                    // left: 7 * SizeConfig.widthMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Enter work hour:",
+                                        style: TextStyle(
+                                            fontSize: 2.2 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      new Padding(
+                                        padding: EdgeInsets.only(
+                                            left: 4 *
+                                                SizeConfig.widthMultiplier),
+                                      ),
+                                      new Flexible(
+                                        child: Container(
+                                            width: 22 *
+                                                SizeConfig.widthMultiplier,
+                                            child: TextFormField(
+                                                focusNode: focusNode1,
+                                                enableSuggestions: true,
+                                                controller: _controller,
+                                                style: TextStyle(
+                                                    fontFamily: 'BalooChettan2',
+                                                    color: righttxtclr,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 2.2 *
+                                                        SizeConfig
+                                                            .heightMultiplier),
+                                                cursorColor: righttxtclr,
+                                                decoration: new InputDecoration(
+                                                    fillColor: Colors.white,
+                                                    focusedBorder: OutlineInputBorder(
+                                                      borderRadius: BorderRadius
+                                                          .all(
+                                                          Radius.circular(10)),
+                                                      borderSide: BorderSide(
+                                                          width: 2,
+                                                          color: HexColor
+                                                              .fromHex(
+                                                              "#ffffff")),
+                                                    ),
+                                                    contentPadding: EdgeInsets
+                                                        .only(
+                                                        left: 5 *
+                                                            SizeConfig
+                                                                .widthMultiplier,
+                                                        right: 5 *
+                                                            SizeConfig
+                                                                .widthMultiplier),
+                                                    enabledBorder: OutlineInputBorder(
+                                                        borderSide: BorderSide(
+                                                            width: 2,
+                                                            color: HexColor
+                                                                .fromHex(
+                                                                "#ffffff")),
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                            10.00)),
+                                                    labelText: "Enter",
+                                                    labelStyle: new TextStyle(
+                                                        color: HexColor.fromHex(
+                                                            "#00004d"),
+                                                        fontSize: 2.2 *
+                                                            SizeConfig
+                                                                .textMultiplier)),
+                                                keyboardType: TextInputType
+                                                    .phone,
+                                                //validator: validateEmail,
+                                                enabled: enabled,
+                                                onChanged: (val) {
+                                                  setState(() {
+                                                    if (int.parse(val) > 8) {
+                                                      arating = 8.0;
+                                                    } else {
+                                                      arating =
+                                                          double.parse(val);
+                                                    }
+                                                  });
+                                                })),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 3 * SizeConfig.heightMultiplier,
+                                    //  left: 7 * SizeConfig.widthMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Select Class:",
+                                        style: TextStyle(
+                                            fontSize: 2.2 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      new Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 6 *
+                                                  SizeConfig.widthMultiplier)),
+                                      Container(
+                                        height: 4.9 *
+                                            SizeConfig.heightMultiplier,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                            3.1 * SizeConfig.widthMultiplier,
+                                            vertical:
+                                            0.7 * SizeConfig.heightMultiplier),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                                5)),
+                                        child: new IgnorePointer(
+                                          ignoring: drop,
+                                          child: DropdownButton<String>(
+                                            iconEnabledColor: righttxtclr,
+                                            items: classlist.map((
+                                                String listvalue) {
+                                              return DropdownMenuItem<String>(
+                                                value: listvalue,
+                                                child: Text(
+                                                  listvalue,
+                                                  style: TextStyle(
+                                                      fontSize: 2 *
+                                                          SizeConfig
+                                                              .textMultiplier,
+                                                      color: righttxtclr,
+                                                      fontWeight: FontWeight
+                                                          .bold),
+                                                ),
+                                              );
+                                            }).toList(),
+                                            onChanged: (val) {
+                                              setState(() {
+                                                classs = val;
+                                                subjectlist.clear();
+                                                sub = "Subject";
+                                                subjectlist = ["Subject"];
+                                                if (!(stat == "Status" &&
+                                                    sub == "Subject")) {
+                                                  subjectlist.addAll(
+                                                      prefs.getStringList(
+                                                          classs + "_" +
+                                                              stat[0]));
+                                                }
+                                                FocusScope.of(context)
+                                                    .requestFocus(
+                                                    new FocusNode());
+                                              });
+                                            },
+                                            value: classs,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 3 * SizeConfig.heightMultiplier,
+                                    // left: 7 * SizeConfig.widthMultiplier
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Text(
+                                        "Select Subject:",
+                                        style: TextStyle(
+                                            fontSize: 2.2 *
+                                                SizeConfig.textMultiplier,
+                                            color: HexColor.fromHex("#00004d"),
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      new Padding(
+                                          padding: EdgeInsets.only(
+                                              left: 6 *
+                                                  SizeConfig.widthMultiplier)),
+                                      Container(
+                                        height: 4.9 *
+                                            SizeConfig.heightMultiplier,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal:
+                                            3.1 * SizeConfig.widthMultiplier,
+                                            vertical:
+                                            0.7 * SizeConfig.heightMultiplier),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(
+                                                8)),
+                                        child: new IgnorePointer(
+                                          ignoring: drop,
+                                          child: DropdownButton<String>(
+                                            iconEnabledColor: righttxtclr,
+                                            items:
+                                            subjectlist.map((String listvalue) {
+                                              return DropdownMenuItem<String>(
+                                                value: listvalue,
+                                                child: Text(
+                                                  listvalue,
+                                                  style: TextStyle(
+                                                      fontSize: 2 *
+                                                          SizeConfig
+                                                              .textMultiplier,
+                                                      color: righttxtclr,
+                                                      fontWeight: FontWeight
+                                                          .bold),
+                                                ),
+                                              );
+                                            }).toList(),
+                                            onChanged: (val) {
+                                              setState(() => sub = val);
+                                              FocusScope.of(context)
+                                                  .requestFocus(
+                                                  new FocusNode());
+                                            },
+                                            value: sub,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      left: dist,
+                                      top: 3 * SizeConfig.heightMultiplier),
+                                  child: Column(
+                                    children: <Widget>[
+                                      new RaisedButton(
+                                        shape: new RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius.circular(80.00)),
+                                        splashColor: HexColor.fromHex(
+                                            "#ffffff"),
+                                        disabledColor: Color(0xffff9999),
+                                        onPressed: !connected ? () async {
+                                          Fluttertoast.showToast(
+                                              msg: "Check internet Connectivity");
+                                        } : enabled
+                                            ? () async {
+                                          await get();
+                                          prefs = await SharedPreferences
+                                              .getInstance();
+                                          var slot = prefs.getStringList(
+                                              "slot");
+
+                                          FocusScope.of(context)
+                                              .requestFocus(new FocusNode());
+                                          var rng = new Random();
+                                          code = code +
+                                              rng.nextInt(20000) +
+                                              rng.nextInt(30000);
+                                          if (classs == "Class" ||
+                                              sub == "Subject" ||
+                                              stat == "Status" ||
+                                              _controller.text == "") {
+                                            Fluttertoast.showToast(
+                                                msg: "fill all fields",
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                backgroundColor: Colors.red,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0);
+                                          } else if ((slot.contains(
+                                              _controller.text + "h"))) {
+                                            bool click = true;
+                                            await Alert(
+                                              context: context,
+                                              type: AlertType.warning,
+                                              title: "Atttendance already taken",
+                                              style: AlertStyle(
+                                                  animationType: AnimationType
+                                                      .fromTop,
+                                                  isCloseButton: false,
+                                                  isOverlayTapDismiss: false,
+                                                  descStyle: TextStyle(
+                                                      fontWeight: FontWeight
+                                                          .bold),
+                                                  animationDuration: Duration(
+                                                      milliseconds: 400),
+                                                  titleStyle: TextStyle(
+                                                      color: Color(0xff00004d)
+                                                  ),
+                                                  alertBorder: RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius
+                                                        .circular(10.0),
+                                                    side: BorderSide(
+                                                      color: Colors.grey,
+                                                    ),
+                                                  )
+                                              ),
+
+                                              buttons: [
+                                                DialogButton(
+                                                  child: Text(
+                                                    "ok",
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 2.5 *
+                                                            SizeConfig
+                                                                .textMultiplier),
+                                                  ),
+                                                  onPressed: click ? () {
+                                                    Navigator.pop(context);
+                                                    setState(() {
+                                                      click = false;
+                                                    });
+                                                  } : null,
+                                                  gradient: LinearGradient(
+                                                      colors: [
+                                                        Color(0xffe63900),
+                                                        Color(0xffe63900)
+                                                      ]),
+                                                )
+                                              ],
+                                            ).show();
+                                          } else {
+                                            radio_on = false;
+                                            if (Dateinfo.dept=="FE") {
+                                              Dateinfo.dept =
+                                                  _scontroller.text.toString()
+                                                      .substring(
+                                                      _scontroller.text.length -
+                                                          4);
+                                            }
+
+                                            setState(() {
+                                              clr = Color(0xffff9999);
+                                              str = code.toString();
+                                              card = "back";
+                                            });
+                                            //var slot=prefs.getStringList("slot");
+                                            slot.add(_controller.text + "h");
+                                            prefs.setStringList("slot", slot);
+                                            startTimer();
+                                            drop = true;
+                                            var now = new DateTime.now();
+                                            String date = ford.format(now);
+
+                                            Dateinfo.classs = classs;
+                                            Dateinfo.subject = sub;
+                                            Dateinfo.date1 = date;
+                                            Dateinfo.stat = stat;
+                                            databaseReference
+                                                .child('c_teacher')
+                                                .child(Dateinfo.dept)
+                                                .child(classs)
+                                                .child("status")
+                                                .set(stat);
+                                            setState(() {
+                                              user.classs = classs;
+                                              user.sub = sub.toUpperCase();
+                                              user.date = date;
+                                              user.lec = lec.toString();
+                                              user.stat = stat;
+                                            });
+                                            int current = DateTime
+                                                .utc(
+                                                now.year, now.month, 1)
+                                                .weekday;
+                                            int weekno = 0;
+                                            int i = 9 - current;
+                                            for (; i < 30; i += 7) {
+                                              weekno += 1;
+                                              if (now.day < i) {
+                                                break;
+                                              }
+                                            }
+                                            int dayc = prefs.getInt("dayc");
+                                            int weekc = prefs.getInt("weekc");
+                                            if (stat == "lecture") {
+                                              dayc += 1;
+                                              weekc += 1;
+                                              workhr(classs, sub);
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child("leccount")
+                                                  .set(lec.toString());
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(stat)
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec,
+                                                "Subject": sub.toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+                                              var varcount = prefs
+                                                  .getString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub.toUpperCase())
+                                                  .split(" ");
+
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+                                              defaulter(classs.toString(),
+                                                  sub.toString());
+                                              databaseReference
+                                                  .child("week_tt")
+                                                  .child(Dateinfo.dept)
+//                                                  .child(
+//                                                  monthNames[now.month - 1])
+                                                  .child(weekcount.toString())
+                                                  .child(classs)
+                                                  .child(weekNames[
+                                              now.weekday - 1])
+                                                  .child(_controller.text +
+                                                  " " +
+                                                  "lec")
+                                                  .set("Adj " +
+                                                  Dateinfo.teachname +
+                                                  " class:" +
+                                                  classs +
+                                                  " sub:" +
+                                                  sub.toUpperCase());
+
+                                              await prefs.setString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub.toUpperCase(),
+                                                  val.toString());
+
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(classs.toUpperCase() +
+                                                  "_" +
+                                                  sub.toUpperCase())
+                                                  .set(val.toString());
+                                            } else if (stat == "Practical") {
+                                              Alert1.check = true;
+                                              Dateinfo.batches.clear();
+                                              Dateinfo.batches =
+                                                  prefs.getStringList(
+                                                      Dateinfo.subject);
+                                              await Alert1.dialog(context);
+
+                                              dayc += 2;
+                                              weekc += 2;
+                                              workhr(classs, sub);
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(stat)
+                                                  .child(Alert1.batch
+                                                ..toUpperCase())
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec.toString(),
+                                                "Subject": sub.toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child("practcount")
+                                                  .set(lec.toString());
+
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+                                              var varcount = prefs
+                                                  .getString(classs
+                                                  .toUpperCase() +
+                                                  "_" +
+                                                  sub.toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch.toUpperCase())
+                                                  .split(" ");
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+                                              defaulter(classs.toString(),
+                                                  sub.toString());
+                                              try {
+                                                String valu;
+//                                                print("df");
+                                                await databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1]
+//                                                    .toString())
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1]
+                                                    .toString())
+                                                    .child(_controller.text
+                                                    .toString() +
+                                                    " " +
+                                                    "lec")
+                                                    .once()
+                                                    .then((snap) {
+//                                                  print(snap.value);
+                                                  valu = snap.value;
+                                                });
+//                                          if (map.containsKey(_controller.text)) {
+//                                            String val = map[_controller.text];
+//                                                print(val);
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_controller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set(valu +
+                                                    "(Adj " +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    classs +
+                                                    " sub:" +
+                                                    sub +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    ")");
+                                              } catch (Exception) {
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_controller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set("(Adj " +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    classs +
+                                                    " sub:" +
+                                                    sub +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    ")");
+                                              }
+
+                                              prefs.setString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase(),
+                                                  val.toString());
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(classs.toUpperCase() +
+                                                  "_" +
+                                                  sub.toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch.toUpperCase())
+                                                  .set(prefs.getString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub.toUpperCase() +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase()));
+                                            } else {
+                                              Alert1.check = true;
+                                              Alert1.inputlec = false;
+                                              Dateinfo.batches.clear();
+                                              Dateinfo.batches =
+                                                  prefs.getStringList(
+                                                      Dateinfo.subject + "T");
+                                              await Alert1.dialog(context);
+
+                                              dayc += 1;
+                                              weekc += 1;
+                                              workhr(classs, sub);
+                                              databaseReference
+                                                  .child("c_teacher")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(stat)
+                                                  .child(Alert1.batch
+                                                ..toUpperCase())
+                                                  .set({
+                                                "passcode": str,
+                                                "count": lec.toString(),
+                                                "Subject": sub.toUpperCase(),
+                                                "Teacher": Dateinfo.teachname
+                                              });
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child("tutcount")
+                                                  .set(lec.toString());
+
+                                              databaseReference
+                                                  .child("Attendance")
+                                                  .child(Dateinfo.dept)
+                                                  .child(classs)
+                                                  .child(sub.toUpperCase())
+                                                  .child(Dateinfo.teachname)
+                                                  .child(date)
+                                                  .child(stat)
+                                                  .child(
+                                                  Alert1.batch.toUpperCase())
+                                                  .child(lec.toString())
+                                                  .child("a_total")
+                                                  .set("0");
+                                              var varcount = prefs
+                                                  .getString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub.toUpperCase() +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase() +
+                                                      "_Tutorial")
+                                                  .split(" ");
+                                              String val =
+                                                  (int.parse(varcount[0]) + 1)
+                                                      .toString() +
+                                                      " " +
+                                                      (int.parse(varcount[1]) +
+                                                          1)
+                                                          .toString();
+                                              defaulercount =
+                                                  int.parse(varcount[0]) + 1;
+                                              defaulter(classs.toString(),
+                                                  sub.toString());
+                                              try {
+                                                String valu;
+//                                                print("df");
+                                                await databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1]
+//                                                    .toString())
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1]
+                                                    .toString())
+                                                    .child(_controller.text
+                                                    .toString() +
+                                                    " " +
+                                                    "lec")
+                                                    .once()
+                                                    .then((snap) {
+//                                                  print(snap.value);
+                                                  valu = snap.value;
+                                                  if (valu == null)
+                                                    throw Exception;
+                                                });
+//                                          if (map.containsKey(_controller.text)) {
+//                                            String val = map[_controller.text];
+//                                                print(val);
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_controller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set(valu +
+                                                    "(Adj " +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    classs +
+                                                    " sub:" +
+                                                    sub +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    " tut)");
+                                              } catch (Exception) {
+                                                databaseReference
+                                                    .child("week_tt")
+                                                    .child(Dateinfo.dept)
+//                                                    .child(monthNames[
+//                                                now.month - 1])
+                                                    .child(weekcount.toString())
+                                                    .child(classs)
+                                                    .child(weekNames[
+                                                now.weekday - 1])
+                                                    .child(_controller.text +
+                                                    " " +
+                                                    "lec")
+                                                    .set("(Adj " +
+                                                    Dateinfo.teachname +
+                                                    " class:" +
+                                                    classs +
+                                                    " sub:" +
+                                                    sub +
+                                                    " batch:" +
+                                                    Alert1.batch +
+                                                    " tut)");
+                                              }
+
+                                              prefs.setString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase() +
+                                                      "_Tutorial",
+                                                  val.toString());
+                                              databaseReference
+                                                  .child("teach_att")
+                                                  .child(prefs.getString("dept"))
+                                                  .child(Dateinfo.teachname)
+                                                  .child(classs.toUpperCase() +
+                                                  "_" +
+                                                  sub.toUpperCase() +
+                                                  "_" +
+                                                  Alert1.batch
+                                                      .toUpperCase() +
+                                                  "_Tutorial")
+                                                  .set(prefs.getString(
+                                                  classs.toUpperCase() +
+                                                      "_" +
+                                                      sub.toUpperCase() +
+                                                      "_" +
+                                                      Alert1.batch
+                                                          .toUpperCase() +
+                                                      "_Tutorial"));
+//
+                                            }
+                                            prefs.setInt("dayc", dayc);
+                                            prefs.setInt("weekc", weekc);
+                                            databaseReference
+                                                .child("week_tt")
+                                                .child(prefs.getString("dept"))
+//                                                .child(
+//                                                monthNames[now.month - 1])
+                                                .child(weekcount.toString())
+                                                .child("teacher_report")
+                                                .child(Dateinfo.teachname)
+                                                .child(
+                                                weekNames[now.weekday - 1])
+                                                .set(dayc.toString() +
+                                                "/" +
+                                                exdayc.toString());
+                                            databaseReference
+                                                .child("week_tt")
+                                                .child(prefs.getString("dept"))
+//                                                .child(
+//                                                monthNames[now.month - 1])
+                                                .child(weekcount.toString())
+                                                .child("teacher_report")
+                                                .child(Dateinfo.teachname)
+                                                .child("ztotal")
+                                                .set((100 * (weekc / exweekc))
+                                                .toStringAsFixed(2) +
+                                                "%");
+                                            databaseReference
+                                                .child("Registration")
+                                                .child('Teacher_account')
+                                                .child(Dateinfo.email)
+                                                .child("work_hr")
+                                                .set({
+                                              "dayc": dayc,
+                                              "weekc": weekc,
+                                              "date": date.toString(),
+                                              "weekno": weekno
+                                            });
+                                            databaseReference
+                                                .child("Registration")
+                                                .child('Teacher_account')
+                                                .child(Dateinfo.email)
+                                                .child("slot")
+                                                .child(_controller.text + "h")
+                                                .set(1);
+                                          }
+                                          // _start=40;
+                                        }
+                                            : null,
+                                        color: butclr,
+                                        //Color(0xff996600),
+                                        child: new Text("Passcode",
+                                            style: TextStyle(
+                                                fontFamily: 'BalooChettan2',
+                                                color: HexColor.fromHex(
+                                                    "#ffffff"),
+                                                fontSize:
+                                                2.4 * SizeConfig.textMultiplier,
+                                                fontWeight: FontWeight.bold)),
+                                      ), //For
+                                      // got password button
+                                    ],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                      top: 2 * SizeConfig.heightMultiplier,
+                                      bottom: 3 * SizeConfig.heightMultiplier),
+                                  child: Column(
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        children: <Widget>[
+                                          new Text("Attendees count:  ",
+                                              style: TextStyle(
+                                                  fontFamily: 'BalooChettan2',
+                                                  color: HexColor.fromHex(
+                                                      "#00004d"),
+                                                  fontSize:
+                                                  2.8 *
+                                                      SizeConfig.textMultiplier,
+                                                  fontWeight: FontWeight.bold)),
+                                          new Text(
+                                            att_cnt,
+                                            style: TextStyle(
+                                                decoration: TextDecoration
+                                                    .underline,
+                                                fontFamily: 'BalooChettan2',
+                                                color: righttxtclr,
+                                                fontSize:
+                                                2.8 * SizeConfig.textMultiplier,
+                                                fontWeight: FontWeight.bold),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
+                      //new Padding(padding: EdgeInsets.only(bottom: 60))
+                      // new Padding(padding: EdgeInsets.only(bottom:8*SizeConfig.heightMultiplier))
+                    ],
                   ),
                 ),
-                //new Padding(padding: EdgeInsets.only(bottom: 60))
-                // new Padding(padding: EdgeInsets.only(bottom:8*SizeConfig.heightMultiplier))
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(
+                  'There are no bottons to push :)',
+                ),
+                new Text(
+                  'Just turn off your internet.',
+                ),
               ],
             ),
           )),
@@ -2385,7 +2592,7 @@ class _PasscodeState extends State<Passcode>
           sub = "Subject";
           if (!(stat == "Status") && classs == "Class")
             classlist.addAll(prefs.getStringList(stat));
-          print("Tutorial class list:" + classlist.toString());
+//          print("Tutorial class list:" + classlist.toString());
         });
       }
     }
@@ -2413,7 +2620,7 @@ class _PasscodeState extends State<Passcode>
 //  }
 
   void workhr(String classs, String subject) async {
-    try{
+    try {
       if (stat == "lecture") {
         var varcount = prefs
             .getString(classs.toUpperCase() + "_" + subject.toUpperCase())
@@ -2458,7 +2665,7 @@ class _PasscodeState extends State<Passcode>
           }
         });
       }
-    }catch(Exception){}
+    } catch (Exception) {}
   }
 
   void defaulter(String cl, String subject) async {
@@ -2504,7 +2711,9 @@ class _PasscodeState extends State<Passcode>
   }
 
   void timetable() async {
-    int dayn = DateTime.now().weekday - 1;
+    int dayn = DateTime
+        .now()
+        .weekday - 1;
     String day = weekNames[dayn];
 
     try {
@@ -2512,7 +2721,7 @@ class _PasscodeState extends State<Passcode>
       setState(() {
         _ccontroller.text = a[0];
         _scontroller.text = a[1];
-        att_cnt="";
+        att_cnt = "";
         if (a.length == 2) {
           stat = "lecture";
         } else if (a.length == 3) {
@@ -2542,11 +2751,12 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
   TabController controller;
   dynamic value;
   SharedPreferences prefs;
-  ProgressDialog pr;
   Color txtclr;
   DateTime currentBackPressTime;
+
   Future<String> getname() async {
     prefs = await SharedPreferences.getInstance();
+    print("lol");
     setState(() {
       Dateinfo.teachemail = prefs.getString("email");
       Dateinfo.teachname = prefs.getString("name");
@@ -2572,10 +2782,10 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
   void dispose() {
     // TODO: implement dispose
     controller.dispose();
-
     super.dispose();
   }
-  Future<bool> _onbackpressed()async{
+
+  Future<bool> _onbackpressed() async {
     DateTime now = DateTime.now();
     if (currentBackPressTime == null ||
         now.difference(currentBackPressTime) > Duration(seconds: 2)) {
@@ -2585,9 +2795,13 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
     }
     return Future.value(true);
   }
+
+
   @override
   Widget build(BuildContext context) {
-    pr = ProgressDialog(context, type: ProgressDialogType.Normal,isDismissible: false);
+//    getname();
+    ProgressDialog pr = ProgressDialog(
+        context, type: ProgressDialogType.Normal, isDismissible: false);
     pr.style(message: " Wait");
     txtclr = Colors.black;
     List<String> events = [
@@ -2600,9 +2814,9 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
         bottomNavigationBar: FancyBottomNavigation(
           initialSelection: 0,
 //          notchedShape: CircularNotchedRectangle(),
-          activeIconColor:Colors.white ,
-          inactiveIconColor:  HexColor.fromHex("#008080"),
-          circleColor:  HexColor.fromHex("#008080"),
+          activeIconColor: Colors.white,
+          inactiveIconColor: Color(0xff6d6d46),
+          circleColor: Color(0xff6d6d46),
 
           tabs: [
             TabData(iconData: Icons.home, title: "Home",),
@@ -2629,7 +2843,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                         builder: (context) => defaulter(),
                       ));
                 }
-              }catch(Exception){}
+              } catch (Exception) {}
             });
           },
         ),
@@ -2643,83 +2857,80 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                 ? admindrawer(context)
                 : drawer(context)),
         body: Container(
+          color: Colors.black,
           padding: EdgeInsets.only(
-              top: 3 * SizeConfig.heightMultiplier,
-              left: 12 * SizeConfig.widthMultiplier,
-              right: 12 * SizeConfig.widthMultiplier),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              //stops: [0,0.5,1],
-              colors: [
-                txtclr, txtclr
-                //              HexColor.fromHex("#4dffb8"),
-//              HexColor.fromHex("#fff"),
-//              HexColor.fromHex("#4dffb8")
-              ],
-            ),
-          ),
-          child: Container(
-            margin: EdgeInsets.symmetric(
-                horizontal: 3.8 * SizeConfig.widthMultiplier,
-                vertical: 5 * SizeConfig.heightMultiplier),
-            width: 114 * SizeConfig.widthMultiplier,
-            child: GridView(
-              physics: BouncingScrollPhysics(),
-              gridDelegate:
-              SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
-              children: events.map((title) {
-                return GestureDetector(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: <BoxShadow>[
-                        BoxShadow(
-                            color: Colors.black54,
-                            blurRadius: 10.0,
-                            spreadRadius: -20)
-                      ],
-                    ),
-                    child: Card(
-                      shape: new RoundedRectangleBorder(
-                          borderRadius: new BorderRadius.circular(20.0)),
-                      margin: EdgeInsets.symmetric(
-                          vertical: 2.5 * SizeConfig.heightMultiplier,
-                          horizontal: 5 * SizeConfig.widthMultiplier),
-                      child: getCardByTitle(title),
-                    ),
-                  ),
-                  onTap: () async {
-                    if (title == "View/Modify Attendance") {
-                      if (prefs.getBool("check") == false) {
+
+              top: SizeConfig.grp <= 4 ? 1 * SizeConfig.heightMultiplier : 4 *
+                  SizeConfig.heightMultiplier,
+              left: 15 * SizeConfig.widthMultiplier,
+              right: 15 * SizeConfig.widthMultiplier),
+          child: GridView(
+            physics: BouncingScrollPhysics(),
+            gridDelegate:
+            SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 1),
+            children: events.map((title) {
+              return GestureDetector(
+                child: Card(
+                  shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(20.0)),
+                  margin: EdgeInsets.symmetric(
+                      vertical: 2.5 * SizeConfig.heightMultiplier,
+                      horizontal: 5 * SizeConfig.widthMultiplier),
+                  child: getCardByTitle(title),
+                ),
+                onTap: () async {
+                  if (title == "View/Modify Attendance") {
+                    if (prefs.getBool("check") == false) {
+                      ProgressDialog pr = ProgressDialog(
+                          context, type: ProgressDialogType.Normal,
+                          isDismissible: false);
+                      pr.style(message: " Wait");
+                      try {
                         pr.show();
                         await Teacher.data();
+                        //  await Teacher.daylist();
                         pr.hide();
+                      } catch (ex) {
+                        print("ex");
                       }
-                      Dateinfo.fetch = true;
-                      Dateinfo.viewmod = false;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Date(),
-                          ));
-                    } else {
-                      if (prefs.getBool("check") == false) {
-                        pr.show();
-                        await Teacher.data();
-                        pr.hide();
-                      }
-                      Dateinfo.fetch = true;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Passcode(),
-                          ));
                     }
-                  },
-                );
-              }).toList(),
-            ),
+                    Dateinfo.fetch = true;
+                    Dateinfo.viewmod = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Date(),
+                        ));
+                  } else {
+                    print("null");
+                    print(prefs.getBool("check"));
+                    if (prefs.getBool("check") == false) {
+                      print("fff");
+                      ProgressDialog pr = ProgressDialog(
+                          context, type: ProgressDialogType.Normal,
+                          isDismissible: false);
+                      pr.style(message: " Wait");
+                      try {
+                        pr.show();
+                        await Teacher.data();
+                        // await Teacher.daylist();
+//                        print("gg");
+                        pr.hide();
+                      } catch (Ex) {
+//                        print("lll");
+                        print(Ex);
+                      }
+                    }
+                    Dateinfo.fetch = true;
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Passcode(),
+                        ));
+                  }
+                },
+              );
+            }).toList(),
           ),
         ),
         appBar: new AppBar(
@@ -2730,7 +2941,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                 fontWeight: FontWeight.bold,
                 fontSize: 3 * SizeConfig.textMultiplier),
           ),
-          backgroundColor: HexColor.fromHex("#008080"),
+          backgroundColor: Color(0xff6d6d46),
         ),
       ),
     );
@@ -2772,6 +2983,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
   Widget drawer(BuildContext context) {
     double iconsize = 3 * SizeConfig.heightMultiplier;
     double textsize = 2 * SizeConfig.textMultiplier;
+    Color left = Color(0xff000000);
     return (Container(
       width: 64 * SizeConfig.widthMultiplier,
       child: new Drawer(
@@ -2790,7 +3002,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                 child: Icon(
                   Icons.person,
                   size: 8 * SizeConfig.heightMultiplier,
-                  color: Colors.black87,
+                  color: Colors.black,
                 ),
               ),
               decoration: BoxDecoration(
@@ -2810,6 +3022,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                         child: new Icon(
                           Icons.library_books,
                           size: iconsize,
+                          color: left,
                         ),
                       ),
                       new Text(
@@ -2843,6 +3056,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                         child: new Icon(
                           Icons.local_parking,
                           size: 2.5 * SizeConfig.heightMultiplier,
+                          color: left,
                         ),
                       ),
                       new Text(
@@ -2857,6 +3071,10 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                     color: Colors.black,
                   ),
                   onTap: () async {
+                    ProgressDialog pr = ProgressDialog(
+                        context, type: ProgressDialogType.Normal,
+                        isDismissible: false);
+                    pr.style(message: " Wait");
                     pr.show();
                     await parentteachermap();
                     pr.hide();
@@ -2878,6 +3096,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                         child: new Icon(
                           Icons.edit,
                           size: iconsize,
+                          color: left,
                         ),
                       ),
                       new Text(
@@ -2892,6 +3111,10 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                     color: Colors.black,
                   ),
                   onTap: () async {
+                    ProgressDialog pr = ProgressDialog(
+                        context, type: ProgressDialogType.Normal,
+                        isDismissible: false);
+                    pr.style(message: " Wait");
                     if (prefs.getBool("check") == false) {
                       pr.show();
                       await Teacher.data();
@@ -2916,6 +3139,7 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                         child: new Icon(
                           Icons.settings,
                           size: iconsize,
+                          color: left,
                         ),
                       ),
                       new Text(
@@ -2939,7 +3163,6 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                   }),
             ),
 
-//            ),
           ],
         ),
       ),
@@ -2947,9 +3170,12 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
   }
 
   Widget admindrawer(BuildContext context) {
+    ProgressDialog pr = ProgressDialog(
+        context, type: ProgressDialogType.Normal, isDismissible: false);
+    pr.style(message: " Wait");
     double iconsize = 3 * SizeConfig.heightMultiplier;
     double textsize = 2 * SizeConfig.textMultiplier;
-    Color iconclr = Color(0xff008080);
+    Color iconclr = Color(0xff000000);
     return (Container(
       width: 64 * SizeConfig.widthMultiplier,
       child: new Drawer(
@@ -3003,6 +3229,8 @@ class _thomeState extends State<thome> with SingleTickerProviderStateMixin {
                     color: Colors.black,
                   ),
                   onTap: () {
+//                    Alert1.selectdept(context);
+
                     Navigator.pop(context);
                     Navigator.push(
                         context,
@@ -3311,12 +3539,11 @@ void parentteachermap() async {
         for (final k in map.keys) {
           Dateinfo.parentteacherlist.add(k.toString());
           Dateinfo.studclass.addAll({k.toString(): key.toString()});
-          Map yd=map[k];
-          if(yd.containsKey("Yd")){
+          Map yd = map[k];
+          if (yd.containsKey("Yd")) {
             Dateinfo.ydlist.add(k);
           }
         }
-
       }
     });
     // print(Dateinfo.ydlist.contains("F17111009"));

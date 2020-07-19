@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/pages/Signup.dart';
 import 'package:flutter_app/pages/Student.dart';
 import 'package:flutter_app/pages/TeacherHome.dart';
+import 'package:flutter_app/pages/demo.dart';
 
 //import 'package:flutter_app/pages/parentinfo.dart';
 import 'package:flutter_app/responsive/Screensize.dart';
@@ -31,6 +32,8 @@ class _LoginPageState extends State<LoginPage>
       mech = Color(0xff898989),
       entc = Color(0xff898989);
   String dept = "";
+  bool checktype;
+  static int snacktime=0;
   final FirebaseAuth auth = FirebaseAuth.instance;
   FocusNode focusNode1 = new FocusNode();
   FocusNode focusNode2 = new FocusNode();
@@ -40,9 +43,9 @@ class _LoginPageState extends State<LoginPage>
   bool _autovalidate = false;
   Map data;
   final successSnackBar = new SnackBar(
-    duration: Duration(milliseconds: 2000),
+    duration: Duration(milliseconds: snacktime),
     shape:
-        RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+    RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
     backgroundColor: HexColor.fromHex("#00004d"),
     elevation: 2.0,
     content: new Row(
@@ -70,7 +73,7 @@ class _LoginPageState extends State<LoginPage>
   final incorrectPSnackBar = new SnackBar(
       duration: Duration(milliseconds: 1000),
       shape:
-          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+      RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
       backgroundColor: HexColor.fromHex(" #ff4d4d"),
       elevation: 2.0,
       content: new Text("Incorrect Password",
@@ -81,7 +84,7 @@ class _LoginPageState extends State<LoginPage>
   final noUserSnackBar = new SnackBar(
       duration: Duration(milliseconds: 1000),
       shape:
-          RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+      RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
       elevation: 2.0,
       backgroundColor: Colors.red,
       content: new Text("User not Found",
@@ -125,32 +128,32 @@ class _LoginPageState extends State<LoginPage>
                     Padding(
                       padding: grp == 1
                           ? EdgeInsets.only(
-                              top: 1 * SizeConfig.heightMultiplier,
-                              bottom: 1 * SizeConfig.heightMultiplier)
+                          top: 0 * SizeConfig.heightMultiplier,
+                          bottom: 0.4 * SizeConfig.heightMultiplier)
                           : grp == 2
-                              ? EdgeInsets.only(
-                                  top: 2 * SizeConfig.heightMultiplier,
-                                  bottom: 1 * SizeConfig.heightMultiplier)
-                              : grp == 3
-                                  ? EdgeInsets.only(
-                                      top: 2.5 * SizeConfig.heightMultiplier,
-                                      bottom: 1 * SizeConfig.heightMultiplier)
-                                  : grp == 4
-                                      ? EdgeInsets.only(
-                                          top: 2 * SizeConfig.heightMultiplier,
-                                          bottom:
-                                              1 * SizeConfig.heightMultiplier)
-                                      : grp == 5
-                                          ? EdgeInsets.only(
-                                              top: 6 *
-                                                  SizeConfig.heightMultiplier,
-                                              bottom: 1 *
-                                                  SizeConfig.heightMultiplier)
-                                          : EdgeInsets.only(
-                                              top: 8 *
-                                                  SizeConfig.heightMultiplier,
-                                              bottom: 1 *
-                                                  SizeConfig.heightMultiplier),
+                          ? EdgeInsets.only(
+                          top: 0.5 * SizeConfig.heightMultiplier,
+                          bottom: 0.5 * SizeConfig.heightMultiplier)
+                          : grp == 3
+                          ? EdgeInsets.only(
+                          top: 1 * SizeConfig.heightMultiplier,
+                          bottom: 1 * SizeConfig.heightMultiplier)
+                          : grp == 4
+                          ? EdgeInsets.only(
+                          top: 2 * SizeConfig.heightMultiplier,
+                          bottom:
+                          1 * SizeConfig.heightMultiplier)
+                          : grp == 5
+                          ? EdgeInsets.only(
+                          top: 6 *
+                              SizeConfig.heightMultiplier,
+                          bottom: 1 *
+                              SizeConfig.heightMultiplier)
+                          : EdgeInsets.only(
+                          top: 8 *
+                              SizeConfig.heightMultiplier,
+                          bottom: 1 *
+                              SizeConfig.heightMultiplier),
                       child: new Image(
                         image: new AssetImage("assets/college_logo.png"),
                         alignment: Alignment.topCenter,
@@ -176,11 +179,11 @@ class _LoginPageState extends State<LoginPage>
                                   brightness: Brightness.light,
                                   primarySwatch: Colors.blue,
                                   inputDecorationTheme:
-                                      new InputDecorationTheme(
-                                          labelStyle: new TextStyle(
-                                              color: Colors.blue,
-                                              fontSize: 2 *
-                                                  SizeConfig.textMultiplier))),
+                                  new InputDecorationTheme(
+                                      labelStyle: new TextStyle(
+                                          color: Colors.blue,
+                                          fontSize: 2 *
+                                              SizeConfig.textMultiplier))),
                               child: new Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -189,14 +192,14 @@ class _LoginPageState extends State<LoginPage>
                                     padding: EdgeInsets.only(
                                         top: 2 * SizeConfig.heightMultiplier,
                                         bottom:
-                                            1 * SizeConfig.heightMultiplier),
+                                        1 * SizeConfig.heightMultiplier),
                                     child: new Text(
                                       "LOGIN",
                                       style: TextStyle(
                                         // fontStyle: FontStyle.italic,
                                         color: HexColor.fromHex("#00004d"),
                                         fontSize:
-                                            3.4 * SizeConfig.heightMultiplier,
+                                        3.4 * SizeConfig.heightMultiplier,
                                         fontWeight: FontWeight.bold,
                                         decoration: TextDecoration.underline,
                                       ),
@@ -205,14 +208,14 @@ class _LoginPageState extends State<LoginPage>
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                    CrossAxisAlignment.center,
                                     children: <Widget>[
                                       Text(
                                         "Department:",
                                         style: TextStyle(
                                           color: HexColor.fromHex("#800000"),
                                           fontSize:
-                                              2.5 * SizeConfig.heightMultiplier,
+                                          2.5 * SizeConfig.heightMultiplier,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -221,11 +224,11 @@ class _LoginPageState extends State<LoginPage>
                                               left: 2 *
                                                   SizeConfig.widthMultiplier)),
                                       IconButton(
-                                        icon: Icon(Icons.build, color: mech),
+                                        icon: Icon(Icons.settings, color: mech),
                                         onPressed: () {
                                           setState(() {
                                             mech = Color(0xff00004d);
-                                            dept = "Mech";
+                                            dept = "MECH";
                                             comp = Color(0xff898989);
                                             entc = Color(0xff898989);
                                           });
@@ -243,7 +246,7 @@ class _LoginPageState extends State<LoginPage>
                                               comp = Color(0xff00004d);
                                               mech = Color(0xff898989);
                                               entc = Color(0xff898989);
-                                              dept = "Comp";
+                                              dept = "COMP";
                                             });
                                           }),
                                       new Padding(
@@ -252,12 +255,12 @@ class _LoginPageState extends State<LoginPage>
                                                   SizeConfig.widthMultiplier)),
                                       IconButton(
                                           icon: Icon(
-                                              Icons.settings_input_antenna,
+                                              Icons.tap_and_play,
                                               color: entc),
                                           onPressed: () {
                                             setState(() {
                                               entc = Color(0xff00004d);
-                                              dept = "Entc";
+                                              dept = "ENTC";
                                               comp = Color(0xff898989);
                                               mech = Color(0xff898989);
                                             });
@@ -268,7 +271,7 @@ class _LoginPageState extends State<LoginPage>
                                       padding: EdgeInsets.symmetric(
                                           vertical: SizeConfig.heightMultiplier,
                                           horizontal:
-                                              2 * SizeConfig.widthMultiplier)),
+                                          2 * SizeConfig.widthMultiplier)),
                                   Padding(
                                     padding: EdgeInsets.only(
                                         left: 5 * SizeConfig.widthMultiplier,
@@ -281,19 +284,19 @@ class _LoginPageState extends State<LoginPage>
                                             style: TextStyle(
                                                 fontFamily: 'BalooChettan2',
                                                 color:
-                                                    HexColor.fromHex("#00004d"),
+                                                HexColor.fromHex("#00004d"),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 2.2 *
                                                     SizeConfig
                                                         .heightMultiplier),
                                             cursorColor:
-                                                HexColor.fromHex("#00004d"),
+                                            HexColor.fromHex("#00004d"),
                                             decoration: new InputDecoration(
                                                 focusedBorder:
-                                                    OutlineInputBorder(
+                                                OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(10)),
+                                                  BorderRadius.all(
+                                                      Radius.circular(10)),
                                                   borderSide: BorderSide(
                                                       width: 1,
                                                       color: HexColor.fromHex(
@@ -315,9 +318,10 @@ class _LoginPageState extends State<LoginPage>
                                                             .widthMultiplier),
                                                 border: OutlineInputBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.00)),
+                                                    BorderRadius.circular(
+                                                        10.00)),
                                                 labelText: "Enter Email",
+                                                hintText: "E-mail or PRN",
                                                 labelStyle: new TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     color: HexColor.fromHex(
@@ -326,7 +330,7 @@ class _LoginPageState extends State<LoginPage>
                                                         SizeConfig
                                                             .textMultiplier)),
                                             keyboardType:
-                                                TextInputType.emailAddress,
+                                            TextInputType.emailAddress,
                                             validator: validateEmail,
                                             onSaved: (val) {
                                               setState(() => _email = val);
@@ -343,19 +347,19 @@ class _LoginPageState extends State<LoginPage>
                                             style: TextStyle(
                                                 fontFamily: 'BalooChettan2',
                                                 color:
-                                                    HexColor.fromHex("#00004d"),
+                                                HexColor.fromHex("#00004d"),
                                                 fontWeight: FontWeight.bold,
                                                 fontSize: 2.2 *
                                                     SizeConfig
                                                         .heightMultiplier),
                                             cursorColor:
-                                                HexColor.fromHex("#00004d"),
+                                            HexColor.fromHex("#00004d"),
                                             decoration: new InputDecoration(
                                                 focusedBorder:
-                                                    OutlineInputBorder(
+                                                OutlineInputBorder(
                                                   borderRadius:
-                                                      BorderRadius.all(
-                                                          Radius.circular(10)),
+                                                  BorderRadius.all(
+                                                      Radius.circular(10)),
                                                   borderSide: BorderSide(
                                                       width: 1,
                                                       color: HexColor.fromHex(
@@ -377,8 +381,8 @@ class _LoginPageState extends State<LoginPage>
                                                             .widthMultiplier),
                                                 border: OutlineInputBorder(
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.00)),
+                                                    BorderRadius.circular(
+                                                        10.00)),
                                                 labelText: "Enter Password",
                                                 labelStyle: TextStyle(
                                                     fontWeight: FontWeight.bold,
@@ -399,314 +403,400 @@ class _LoginPageState extends State<LoginPage>
                                   new Padding(
                                       padding: EdgeInsets.only(
                                           top:
-                                              4 * SizeConfig.heightMultiplier)),
+                                          4 * SizeConfig.heightMultiplier)),
                                   new SizedBox(
                                     width: 25 * SizeConfig.widthMultiplier,
                                     height: 5 * SizeConfig.heightMultiplier,
                                     child: RaisedButton(
                                         shape: new RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(80.00)),
+                                            BorderRadius.circular(80.00)),
                                         splashColor:
-                                            HexColor.fromHex("#ffffff"),
+                                        HexColor.fromHex("#ffffff"),
                                         onPressed: () async {
-                                          //  fun(context);
+                                          //fun(context);
+                                          Map map;
+                                          String prn;
                                           if (formKey.currentState.validate()) {
                                             formKey.currentState.save();
-                                            _email = _email.toLowerCase();
-                                            signIn(_email, _password)
-                                                .then((user) async {
-                                              SharedPreferences prefs =
-                                                  await SharedPreferences
-                                                      .getInstance();
-                                              prefs.clear();
-                                              prefs.setBool('login', true);
-                                              var e;
-                                              if (user != null) {
-                                                String uemail = _email;
-                                                setState(() {
-                                                  scaffoldKey.currentState
-                                                      .showSnackBar(
-                                                          successSnackBar);
+                                            try {
+                                              setState(() {
+                                                scaffoldKey.currentState
+                                                    .showSnackBar(
+                                                    successSnackBar);
+                                              });
+                                              if (!checktype) {
+                                                _email = _email.toLowerCase();
+                                              } else {
+                                                _email = _email.toUpperCase();
+                                                await checkemail.child(
+                                                    "Registration")
+                                                    .child("Student").child(
+                                                    dept).child(_email)
+                                                    .once()
+                                                    .then((onValue) {
+                                                  if (onValue.value ==
+                                                      null) throw Exception;
+                                                  map = onValue.value;
+                                                  prn = _email;
+                                                  _email = map["Email"];
                                                 });
-                                                e = uemail.split('@');
-                                                String b = e[0]
-                                                    .toString()
-                                                    .replaceAll(
-                                                        new RegExp(r'\W'), "_")
-                                                    .toLowerCase();
-                                                prefs.setString(
-                                                    'email', uemail);
-                                                if (e[1].toString() ==
-                                                    "mescoepune.org") {
-                                                  Map map;
-                                                  await checkemail
-                                                      .child("Registration")
-                                                      .child('Teacher_account')
-                                                      .child(b.toString())
-                                                      .once()
-                                                      .then((snap) async {
-                                                    map = snap.value;
-                                                    prefs.setString(
-                                                        "name", map["Name"]);
-                                                    Dateinfo.teachname =
-                                                        map["Name"].toString();
-                                                    prefs.setString("dept",
-                                                        map["Department"]);
-                                                    Dateinfo.dept =
-                                                        map["Department"]
-                                                            .toString();
-                                                    Dateinfo.teachemail =
-                                                        uemail;
-                                                    var e = Dateinfo.teachemail
-                                                        .split("@");
-                                                    Dateinfo.email = e[0]
+                                              }
+
+                                              signIn(_email, _password)
+                                                  .then((user) async {
+                                                SharedPreferences prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                                prefs.clear();
+                                                //var e;
+                                                if (user != null) {
+                                                  prefs.setBool('login', true);
+                                                  String uemail = _email;
+
+                                                  //e = uemail.split('@');
+
+                                                  prefs.setString(
+                                                      'email', uemail);
+                                                  if (!checktype) {
+                                                    var e = _email.split("@");
+                                                    String b = e[0]
                                                         .toString()
                                                         .replaceAll(
-                                                            new RegExp(r'\W'),
-                                                            "_");
-                                                    Map days;
-                                                    prefs.setBool(
-                                                        "check", false);
-                                                    if (map
-                                                        .containsKey("Admin")) {
-                                                      prefs.setString(
-                                                          "type", "admin");
-                                                    } else {
-                                                      prefs.setString(
-                                                          "type", "teacher");
-                                                    }
-                                                    checkemail
+                                                        new RegExp(r'\W'), "_")
+                                                        .toLowerCase();
+                                                    Map map;
+                                                    await checkemail
                                                         .child("Registration")
                                                         .child(
-                                                            'Teacher_account')
-                                                        .child(Dateinfo.email)
-                                                        .child("slot")
+                                                        'Teacher_account')
+                                                        .child(b.toString())
                                                         .once()
-                                                        .then((snapshot) {
-                                                      try {
-                                                        Map data =
-                                                            snapshot.value;
-                                                        if (data == null) {
-                                                          throw Exception;
-                                                        }
-                                                        List<String> slot =
-                                                            new List<String>();
-                                                        for (final key
-                                                            in data.keys) {
-                                                          slot.add(
-                                                              key.toString() +
-                                                                  "h");
-                                                        }
-                                                        prefs.setStringList(
-                                                            "slot", slot);
-                                                      } catch (Exception) {
-                                                        List<String> slot =
-                                                            new List<String>();
-                                                        prefs.setStringList(
-                                                            "slot", slot);
+                                                        .then((snap) async {
+                                                      map = snap.value;
+                                                      prefs.setString(
+                                                          "name", map["Name"]);
+                                                      Dateinfo.teachname =
+                                                          map["Name"]
+                                                              .toString();
+                                                      prefs.setString("dept",
+                                                          map["Department"]);
+                                                      Dateinfo.dept =
+                                                          map["Department"]
+                                                              .toString();
+                                                      Dateinfo.teachemail =
+                                                          uemail;
+                                                      var e = Dateinfo
+                                                          .teachemail
+                                                          .split("@");
+                                                      Dateinfo.email = e[0]
+                                                          .toString()
+                                                          .replaceAll(
+                                                          new RegExp(r'\W'),
+                                                          "_");
+                                                      Map days;
+                                                      prefs.setBool(
+                                                          "check", false);
+                                                      if (map
+                                                          .containsKey(
+                                                          "Admin")) {
+                                                        prefs.setString(
+                                                            "type", "admin");
+                                                      } else {
+                                                        prefs.setString(
+                                                            "type", "teacher");
                                                       }
-                                                    });
-                                                    checkemail
-                                                        .child("Registration")
-                                                        .child(
-                                                            'Teacher_account')
-                                                        .child(Dateinfo.email)
-                                                        .child("work_hr")
-                                                        .once()
-                                                        .then((snapshot) {
-                                                      try {
-                                                        Map data =
-                                                            snapshot.value;
-                                                        if (data == null)
-                                                          throw Exception;
-                                                        else {
+                                                      checkemail
+                                                          .child("Registration")
+                                                          .child(
+                                                          'Teacher_account')
+                                                          .child(Dateinfo.email)
+                                                          .child("slot")
+                                                          .once()
+                                                          .then((snapshot) {
+                                                        try {
+                                                          Map data =
+                                                              snapshot.value;
+                                                          if (data == null) {
+                                                            throw Exception;
+                                                          }
+                                                          List<String> slot =
+                                                          new List<String>();
+                                                          for (final key
+                                                          in data.keys) {
+                                                            slot.add(
+                                                                key.toString() +
+                                                                    "h");
+                                                          }
+                                                          prefs.setStringList(
+                                                              "slot", slot);
+                                                        } catch (Exception) {
+                                                          List<String> slot =
+                                                          new List<String>();
+                                                          prefs.setStringList(
+                                                              "slot", slot);
+                                                        }
+                                                      });
+
+                                                      checkemail
+                                                          .child("Registration")
+                                                          .child(
+                                                          'Teacher_account')
+                                                          .child(Dateinfo.email)
+                                                          .child("work_hr")
+                                                          .once()
+                                                          .then((snapshot) {
+                                                        try {
+                                                          Map data =
+                                                              snapshot.value;
+                                                          if (data == null)
+                                                            throw Exception;
+                                                          else {
+                                                            prefs.setString(
+                                                                "today_date",
+                                                                data["date"]);
+                                                            // print(prefs.getString("today_date"));
+                                                            prefs.setInt(
+                                                                "week_no",
+                                                                data["weekno"]);
+
+                                                            prefs.setInt("dayc",
+                                                                data["dayc"]);
+
+                                                            prefs.setInt(
+                                                                "weekc",
+                                                                data["weekc"]);
+                                                          }
+                                                        } catch (Exception) {
+                                                          print("work");
+                                                          var now =
+                                                          new DateTime.now();
+                                                          var ford =
+                                                          new DateFormat(
+                                                              "yyyy_MM_dd");
+
+                                                          String date =
+                                                          ford.format(now);
+
+                                                          int current =
+                                                              DateTime
+                                                                  .utc(
+                                                                  now.year,
+                                                                  now.month,
+                                                                  1)
+                                                                  .weekday;
+                                                          int weekno = 0;
+                                                          int i = 9 - current;
+                                                          for (; i < 30;
+                                                          i += 7) {
+                                                            weekno += 1;
+                                                            if (now.day < i) {
+                                                              break;
+                                                            }
+                                                          }
                                                           prefs.setString(
                                                               "today_date",
-                                                              data["date"]);
-                                                          // print(prefs.getString("today_date"));
+                                                              date);
+                                                          prefs.setInt(
+                                                              "dayc", 0);
                                                           prefs.setInt(
                                                               "week_no",
-                                                              data["weekno"]);
-
-                                                          prefs.setInt("dayc",
-                                                              data["dayc"]);
-
-                                                          prefs.setInt("weekc",
-                                                              data["weekc"]);
+                                                              weekno);
+                                                          prefs.setInt(
+                                                              "weekc", 0);
                                                         }
-                                                      } catch (Exception) {
-                                                        print("work");
-                                                        var now =
-                                                            new DateTime.now();
-                                                        var ford =
-                                                            new DateFormat(
-                                                                "yyyy_MM_dd");
 
-                                                        String date =
-                                                            ford.format(now);
-
-                                                        int current =
-                                                            DateTime.utc(
-                                                                    now.year,
-                                                                    now.month,
-                                                                    1)
-                                                                .weekday;
-                                                        int weekno = 0;
-                                                        int i = 9 - current;
-                                                        for (; i < 30; i += 7) {
-                                                          weekno += 1;
-                                                          if (now.day < i) {
-                                                            break;
-                                                          }
-                                                        }
-                                                        prefs.setString(
-                                                            "today_date", date);
-                                                        prefs.setInt("dayc", 0);
-                                                        prefs.setInt(
-                                                            "week_no", weekno);
-                                                        prefs.setInt(
-                                                            "weekc", 0);
-                                                      }
-
-                                                      //  checkemail.child("")
-                                                    });
-                                                    await Teacher.data();
-                                                  });
-                                                  //  await Future.delayed(Duration(seconds: 3));
-                                                  Navigator.pushReplacement(
-                                                      context,
-                                                      PageTransition(
-                                                          type:
-                                                              PageTransitionType
-                                                                  .fade,
-                                                          duration: Duration(
-                                                              seconds: 2),
-                                                          child: thome()));
-                                                } else {
-                                                  try {
-                                                    prefs.setString(
-                                                        "type", "student");
-                                                    Map map;
-                                                    if (dept.isEmpty) {
-                                                      Fluttertoast.showToast(
-                                                          msg:
-                                                              "Select Department",
-                                                          toastLength: Toast
-                                                              .LENGTH_SHORT,
-                                                          gravity: ToastGravity
-                                                              .BOTTOM,
-                                                          backgroundColor:
-                                                              Colors.red,
-                                                          textColor:
-                                                              Colors.white,
-                                                          fontSize: 16.0);
-                                                    } else {
-                                                      await checkemail
-                                                          .child("Registration")
-                                                          .child('Student')
-                                                          .child(dept)
-                                                          .child(b.toString())
-                                                          .once()
-                                                          .then((snap) async {
-                                                        map = snap.value;
-                                                        print(map);
-                                                        //    await Future.delayed(Duration(seconds: 5));
-                                                        Studinfo.name =
-                                                            map["Name"];
-                                                        Studinfo.roll =
-                                                            map["Prn"];
-                                                        prefs.setString("name",
-                                                            map["Name"]);
-                                                        prefs.setString(
-                                                            "branch", dept);
-                                                        Studinfo.branch = dept;
-                                                        Studinfo.classs =
-                                                            map["Class"];
-                                                        Studinfo.batch =
-                                                            map["Batch"];
-                                                        // prefs.setString("roll", map["Serial"]);
-                                                        prefs.setString("class",
-                                                            map["Class"]);
-                                                        prefs.setString("batch",
-                                                            map["Batch"]);
-                                                        prefs.setString(
-                                                            "text", " ");
-                                                        prefs.setString(
-                                                            "roll", map["Prn"]);
-                                                        Studinfo.email = uemail;
-                                                        print(Studinfo.email +
-                                                            " email");
-                                                        prefs.setInt(
-                                                            "fetchatt", 1);
+                                                        //  checkemail.child("")
                                                       });
-                                                      if (map.containsKey("Parent")){
-                                                        Studinfo.parentname = map["Parent"];
-                                                        prefs.setString("parent", map["Parent"]);
-                                                      }
-                                                      await FirebaseDatabase
-                                                          .instance
-                                                          .reference()
-                                                          .child("defaulter")
-                                                          .child("modified")
-                                                          .child(Studinfo.roll)
-                                                          .once()
-                                                          .then((onValue) {
-                                                        if (onValue.value == -1)
-                                                          throw Exception;
-                                                      });
-                                                      final FirebaseMessaging
-                                                          firebaseMessaging =
-                                                          FirebaseMessaging();
-                                                      firebaseMessaging
-                                                          .subscribeToTopic(
-                                                              Studinfo.roll);
-
                                                       try {
-                                                        await Attendance
-                                                            .owndata();
-                                                        FirebaseDatabase
+                                                        checkemail.child(
+                                                            "cdate")
+                                                            .once()
+                                                            .then((val) {
+                                                          if (val.value == null)
+                                                            throw Exception;
+
+                                                          prefs.setString(
+                                                              "cdate", val.value
+                                                              .toString());
+                                                        });
+                                                      } catch (Exception) {
+
+                                                      }
+                                                      await Teacher.data();
+                                                    });
+                                                    //  await Future.delayed(Duration(seconds: 3));
+                                                    Navigator.pushReplacement(
+                                                        context,
+                                                        PageTransition(
+                                                            type:
+                                                            PageTransitionType
+                                                                .fade,
+                                                            duration: Duration(
+                                                                seconds: 2),
+                                                            child: thome()));
+                                                  } else {
+                                                    try {
+                                                      prefs.setString(
+                                                          "type", "student");
+                                                      Map map;
+                                                      if (dept.isEmpty) {
+                                                        Fluttertoast.showToast(
+                                                            msg:
+                                                            "Select Department",
+                                                            toastLength: Toast
+                                                                .LENGTH_SHORT,
+                                                            gravity: ToastGravity
+                                                                .BOTTOM,
+                                                            backgroundColor:
+                                                            Colors.red,
+                                                            textColor:
+                                                            Colors.white,
+                                                            fontSize: 16.0);
+                                                      } else {
+                                                        await checkemail
+                                                            .child(
+                                                            "Registration")
+                                                            .child('Student')
+                                                            .child(dept)
+                                                            .child(prn)
+                                                            .once()
+                                                            .then((snap) async {
+                                                          map = snap.value;
+                                                          print(map);
+                                                          //    await Future.delayed(Duration(seconds: 5));
+                                                          Studinfo.name =
+                                                          map["Name"];
+                                                          Studinfo.roll =
+                                                          map["Prn"];
+                                                          prefs.setString(
+                                                              "name",
+                                                              map["Name"]);
+                                                          prefs.setString(
+                                                              "branch", dept);
+                                                          Studinfo.branch =
+                                                              dept;
+                                                          Studinfo.classs =
+                                                          map["Class"];
+                                                          Studinfo.batch =
+                                                          map["Batch"];
+                                                          try {
+                                                            prefs.setString(
+                                                                "text",
+                                                                map["text"]);
+                                                          } catch (Exception) {
+                                                            prefs.setString(
+                                                                "text", "");
+                                                          }
+                                                          // prefs.setString("roll", map["Serial"]);
+                                                          prefs.setString(
+                                                              "class",
+                                                              map["Class"]);
+                                                          prefs.setString(
+                                                              "batch",
+                                                              map["Batch"]);
+//                                                        prefs.setString(
+//                                                            "text", " ");
+                                                          prefs.setString(
+                                                              "roll",
+                                                              map["Prn"]);
+                                                          Studinfo.email =
+                                                              uemail;
+                                                          print(Studinfo.email +
+                                                              " email");
+                                                          prefs.setInt(
+                                                              "fetchatt", 1);
+                                                        });
+                                                        if (map.containsKey(
+                                                            "Parent")) {
+                                                          Studinfo.parentname =
+                                                          map["Parent"];
+                                                          prefs.setString(
+                                                              "parent",
+                                                              map["Parent"]);
+                                                        }
+                                                        await FirebaseDatabase
                                                             .instance
                                                             .reference()
                                                             .child("defaulter")
                                                             .child("modified")
                                                             .child(
-                                                                Studinfo.roll)
-                                                            .set(0);
-                                                      } catch (Exception) {}
+                                                            Studinfo.roll)
+                                                            .once()
+                                                            .then((onValue) {
+                                                          if (onValue.value ==
+                                                              -1)
+                                                            throw Exception;
+                                                        });
+                                                        final FirebaseMessaging
+                                                        firebaseMessaging =
+                                                        FirebaseMessaging();
+                                                        firebaseMessaging
+                                                            .subscribeToTopic(
+                                                            Studinfo.roll);
 
-                                                      //  await Future.delayed(Duration(seconds: 5));
-                                                      Navigator.pushReplacement(
-                                                          context,
-                                                          PageTransition(
-                                                              type:
-                                                                  PageTransitionType
-                                                                      .fade,
-                                                              duration:
-                                                                  Duration(
-                                                                      seconds:
-                                                                          2),
-                                                              child: Demopage()));
+                                                        try {
+                                                          await Attendance
+                                                              .owndata();
+                                                          FirebaseDatabase
+                                                              .instance
+                                                              .reference()
+                                                              .child(
+                                                              "defaulter")
+                                                              .child("modified")
+                                                              .child(
+                                                              Studinfo.roll)
+                                                              .set(0);
+                                                        } catch (Exception) {}
+
+                                                        //  await Future.delayed(Duration(seconds: 5));
+                                                        Navigator
+                                                            .pushReplacement(
+                                                            context,
+                                                            PageTransition(
+                                                                type:
+                                                                PageTransitionType
+                                                                    .fade,
+                                                                duration:
+                                                                Duration(
+                                                                    seconds:
+                                                                    2),
+                                                                child: shome()));
+                                                      }
+                                                    } catch (Exception) {
+                                                      print(Exception);
+                                                      Fluttertoast.showToast(
+                                                          msg: "No data Found",
+                                                          toastLength:
+                                                          Toast.LENGTH_SHORT,
+                                                          gravity:
+                                                          ToastGravity.BOTTOM,
+                                                          backgroundColor:
+                                                          Colors.red,
+                                                          textColor: Colors
+                                                              .white,
+                                                          fontSize: 16.0);
                                                     }
-                                                  } catch (Exception) {
-                                                    print(Exception);
-                                                    Fluttertoast.showToast(
-                                                        msg: "No data Found",
-                                                        toastLength:
-                                                            Toast.LENGTH_SHORT,
-                                                        gravity:
-                                                            ToastGravity.BOTTOM,
-                                                        backgroundColor:
-                                                            Colors.red,
-                                                        textColor: Colors.white,
-                                                        fontSize: 16.0);
                                                   }
+                                                } else {
+                                                  scaffoldKey.currentState
+                                                      .showSnackBar(
+                                                      errSnackBar);
                                                 }
-                                              } else {
-                                                scaffoldKey.currentState
-                                                    .showSnackBar(errSnackBar);
-                                              }
-                                            });
+                                              });
+                                            }catch(Exception){
+                                              Fluttertoast.showToast(
+                                                  msg: "No data Found",
+                                                  toastLength:
+                                                  Toast.LENGTH_SHORT,
+                                                  gravity:
+                                                  ToastGravity.BOTTOM,
+                                                  backgroundColor:
+                                                  Colors.red,
+                                                  textColor: Colors
+                                                      .white,
+                                                  fontSize: 16.0);
+                                            }
                                           } else {
                                             setState(() {
                                               _autovalidate = true;
@@ -729,7 +819,7 @@ class _LoginPageState extends State<LoginPage>
                                   new Padding(
                                       padding: EdgeInsets.only(
                                           bottom:
-                                              2 * SizeConfig.heightMultiplier))
+                                          2 * SizeConfig.heightMultiplier))
                                 ],
                               )),
                         ),
@@ -740,13 +830,9 @@ class _LoginPageState extends State<LoginPage>
                       children: <Widget>[
                         new MaterialButton(
                           onPressed: () => {
-                            FocusScope.of(context).requestFocus(new FocusNode()),
-                            //fun(context),
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Demopage(),
-                                )),
+                            FocusScope.of(context)
+                                .requestFocus(new FocusNode()),
+                            fun(context),
                           },
                           shape: new RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50.00)),
@@ -759,11 +845,13 @@ class _LoginPageState extends State<LoginPage>
                         ),
                         new MaterialButton(
                           onPressed: () => {
-                            FocusScope.of(context).requestFocus(new FocusNode()),
+                            FocusScope.of(context)
+                                .requestFocus(new FocusNode()),
                             Navigator.pushReplacement(
                                 context,
                                 PageTransition(
-                                    type: PageTransitionType.rightToLeftWithFade,
+                                    type:
+                                    PageTransitionType.rightToLeftWithFade,
                                     duration: Duration(seconds: 1),
                                     child: Signup()))
                           },
@@ -794,12 +882,14 @@ class _LoginPageState extends State<LoginPage>
       AuthResult result = await auth.signInWithEmailAndPassword(
           email: email, password: password);
       FirebaseUser user = result.user;
-      assert(user != null);
-      assert(await user.getIdToken() != null);
+//      if(user.isEmailVerified){
+      if(true){
+        assert(user != null);
+        assert(await user.getIdToken() != null);
 
-      final FirebaseUser currentUser = await auth.currentUser();
-      assert(user.uid == currentUser.uid);
-      return user;
+        final FirebaseUser currentUser = await auth.currentUser();
+        assert(user.uid == currentUser.uid);
+        return user;}
     } catch (e) {
       handleError(e);
       return null;
@@ -808,12 +898,26 @@ class _LoginPageState extends State<LoginPage>
 
   String validateEmail(String value) {
     Pattern pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(mescoepune\.org))$';
     RegExp regex = new RegExp(pattern);
-    if (value.isEmpty || !regex.hasMatch(value))
-      return 'Invalid Email';
-    else
-      return null;
+    if (value.isEmpty || !regex.hasMatch(value)) {
+      RegExp re = RegExp(r'^F|S[0-9]+$');
+      if (value.isEmpty || !re.hasMatch(value) || value.length < 9)
+        return "invalid username";
+
+      else{
+        setState(() {
+          snacktime=4500;
+        });
+        checktype=true;
+        return null;}
+    }
+    else{
+      setState(() {
+        snacktime=2500;
+      });
+      checktype=false;
+      return null;}
   }
 
   String validatePassword(String value) {

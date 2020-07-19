@@ -25,36 +25,50 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
       show = true,
       app = true,
       wardfetch = true,
-      refreshpage = false;
+      refreshpage = false,
+      gen = false,
+      wardgen = false;
   String classs;
   var studmap = new Map();
   String subjectName = 'Overall';
   int height;
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<bool> _onbackpressed() {
     if (isloading == true) {
-      setState(() {
-        isloading = false;
-        show = true;
-        app = false;
-        wardfetch = true;
-      });
+      if (mounted) {
+        setState(() {
+          isloading = false;
+          show = true;
+          app = false;
+          wardfetch = true;
+        });
+      }
     } else {
-      // if(isloading==false && show==true){
-      if (refreshpage) {
-        Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Parentteacherlist(),
-            ));
-      } else {
+      if (!refreshpage) {
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => thome(),
             ));
-        //}
+      } else {
+        Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => Parentteacherlist(),
+            ));
       }
+    }
+  }
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
     }
   }
 
@@ -68,18 +82,21 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
   Future<void> get() async {
     try {
       await parentteachermap();
-      setState(() {
-        len = Dateinfo.parentteacherlist.length;
-        app = false;
-      });
+      if (mounted) {
+        setState(() {
+          len = Dateinfo.parentteacherlist.length;
+          app = false;
+        });
+      }
     } catch (Exception) {
-      Fluttertoast.showToast(
-          msg: "List not generated!!",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 2 * SizeConfig.textMultiplier);
+//      print("lol");
+//      Fluttertoast.showToast(
+//          msg: "List not generated!!",
+//          toastLength: Toast.LENGTH_LONG,
+//          gravity: ToastGravity.BOTTOM,
+//          backgroundColor: Colors.red,
+//          textColor: Colors.white,
+//          fontSize: 2 * SizeConfig.textMultiplier);
     }
   }
 
@@ -87,190 +104,244 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
   Widget build(BuildContext context) {
     var info = show
         ? new SpinKitThreeBounce(
-            color: Color(0xff999966),
-            size: 40.0,
-            // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
-          )
-        : Column(crossAxisAlignment: CrossAxisAlignment.center,
-            // mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-                AttendancePieChart(subjectName),
-                new Padding(
-                    padding: EdgeInsetsDirectional.only(
-                        top: 5 * SizeConfig.heightMultiplier)),
-                new Swiper(
-                    layout: SwiperLayout.TINDER,
-                    customLayoutOption:
-                        new CustomLayoutOption(startIndex: -1, stateCount: 3)
-                            .addRotate(
-                                [-45.0 / 180, 0.0, 45.0 / 180]).addTranslate([
-                      new Offset(-370.0, -40.0),
-                      new Offset(0.0, 0.0),
-                      new Offset(370.0, -40.0)
-                    ]),
-                    onIndexChanged: (int index) {
-                      setState(() {
-                        subjectName = Teacher.subjectList.elementAt(index);
-                      });
-                    },
-                    itemWidth: 50 * SizeConfig.widthMultiplier,
-                    itemHeight: 10 * SizeConfig.heightMultiplier,
-                    itemBuilder: (context, index) {
-                      return new Container(
-//                                          width: 100,
-//                                          height: 100,
-                        child: Center(
-                            child: Text(
+      color: Color(0xff003333),
+      size: 40.0,
+      // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+    )
+        : !gen
+        ? Center(
+        child: Text(
+          "No data",
+          style: TextStyle(
+              fontSize: 3 * SizeConfig.heightMultiplier,
+              fontWeight: FontWeight.bold),
+        ))
+        : Container(
+      color: Colors.black,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.center,
+          // mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            AttendancePieChart(subjectName),
+            new Padding(
+                padding: EdgeInsetsDirectional.only(
+                    top: 5 * SizeConfig.heightMultiplier)),
+            new Swiper(
+                layout: SwiperLayout.CUSTOM,
+                scrollDirection: Axis.vertical,
+                // physics: NeverScrollableScrollPhysics(),
+                //pagination: SwiperPagination(),
+                customLayoutOption: new CustomLayoutOption(
+                    startIndex: -1, stateCount: 3)
+                    .addRotate(
+                    [-45.0 / 180, 0.0, 45.0 / 180]).addTranslate([
+                  new Offset(370.0, -40.0),
+                  new Offset(0.0, 0.0),
+                  new Offset(370.0, -40.0)
+                ]),
+                onIndexChanged: (int index) {
+                  if (mounted) {
+                    setState(() {
+                      subjectName =
+                          Teacher.subjectList.elementAt(index);
+                    });
+                  }
+                },
+                itemWidth: 50 * SizeConfig.widthMultiplier,
+                itemHeight: 10 * SizeConfig.heightMultiplier,
+                itemBuilder: (context, index) {
+                  return new Container(
+                    child: Center(
+                        child: Text(
                           Teacher.subjectList.elementAt(index),
                           style: TextStyle(
                               fontSize: 4 * SizeConfig.heightMultiplier,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87),
                         )),
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: new AssetImage("assets/card1.jpg"),
-                            fit: BoxFit.cover,
-                          ),
-                          borderRadius: new BorderRadius.circular(30.0),
-                          shape: BoxShape.rectangle,
-                          border: Border.all(
-                              width: 4.0, color: Colors.grey.shade500),
-//
-//                                            wAccent
-//                                                  ])
-                        ),
-                      );
-                    },
-                    itemCount: Teacher.subjectList.length),
-              ]);
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: new AssetImage("assets/card1.jpg"),
+                        fit: BoxFit.cover,
+                      ),
+                      borderRadius: new BorderRadius.circular(30.0),
+                      shape: BoxShape.rectangle,
+                      border: Border.all(
+                          width: 4.0, color: Colors.grey.shade500),
+//                                          ])
+                    ),
+                  );
+                },
+                itemCount: Teacher.subjectList.length),
+          ]),
+    );
     var parentinfo = wardfetch
         ? new SpinKitThreeBounce(
-            color: Color(0xff999966),
-            size: 40.0,
-            // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
-          )
-        : new SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: DataTable(
-              columns: [
-                DataColumn(
-                  label: Text(
-                    "Subjects",
-                    style:
-                        TextStyle(fontWeight: FontWeight.bold, fontSize: 15.0),
-                  ),
-                  numeric: false,
-                  tooltip: "This is  subject",
-                ),
-                DataColumn(
-                  label: Text(
-                    "Remedial hours",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15.0,
-                        color: Colors.black),
-                  ),
-                  numeric: true,
-                  tooltip: "This is Last work",
-                ),
-              ],
-              rows: warddata.warddatalist
-                  .map(
-                    (user) => DataRow(cells: [
-                      DataCell(
-                        Text(user.key),
-                      ),
-                      DataCell(
-                        Text(user.value.toString()),
-                      ),
-                    ]),
-                  )
-                  .toList(),
+      color: Color(0xff003333),
+      size: 40.0,
+      // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+    )
+        : !wardgen
+        ? Center(
+        child: Text(
+          "No data",
+          style: TextStyle(
+              fontSize: 3 * SizeConfig.heightMultiplier,
+              fontWeight: FontWeight.bold),
+        ))
+        : Container(
+      color: Colors.black,
+      child: new SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: DataTable(
+          columns: [
+            DataColumn(
+              label: Text(
+                "key",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 3 * SizeConfig.heightMultiplier,
+                    color: Color(0xffBA8B02)),
+              ),
+              numeric: false,
+              tooltip: "key",
             ),
-          );
+            DataColumn(
+              label: Text(
+                "info",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 3 * SizeConfig.heightMultiplier,
+                    color: Color(0xffBA8B02)),
+              ),
+              numeric: true,
+              tooltip: "vslue",
+            ),
+          ],
+          rows: warddata.warddatalist
+              .map(
+                (user) => DataRow(cells: [
+              DataCell(
+                Text(
+                  user.key,
+                  style: TextStyle(
+                      fontSize: 2.5 * SizeConfig.heightMultiplier,
+                      color: Color(0xffffffff)),
+                ),
+              ),
+              DataCell(
+                Text(user.value.toString().split("_")[0],
+                    style: TextStyle(
+                        fontSize:
+                        2.5 * SizeConfig.heightMultiplier,
+                        color: Color(0xffffffff))),
+              ),
+            ]),
+          )
+              .toList(),
+        ),
+      ),
+    );
     return new WillPopScope(
       onWillPop: _onbackpressed,
       child: isloading
           ? DefaultTabController(
-              length: 2,
-              child: new Scaffold(
-                appBar: new AppBar(
-                  leading: IconButton(
-                      onPressed: () {
-                        // Navigator.pop(context);
-                        _onbackpressed();
-                      },
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: Colors.white,
-                      )),
-                  backgroundColor: HexColor.fromHex("#008080"),
-                  title: Text('attendance'),
-                  bottom: new TabBar(
-                    onTap: (index) async {
-                      if (index == 1) {
-                        if (wardfetch == true) {
-                          await warddata.wardinfo(
-                              Teacher.studprn, Teacher.studclass);
-                          setState(() {
-                            wardfetch = false;
-                          });
-                        }
+        length: 2,
+        child: new Scaffold(
+          resizeToAvoidBottomInset: false,
+          resizeToAvoidBottomPadding: true,
+          appBar: new AppBar(
+            leading: IconButton(
+                onPressed: () {
+                  // Navigator.pop(context);
+                  _onbackpressed();
+                },
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                )),
+            backgroundColor: Color(0xff6d6d46),
+            title: Text('attendance'),
+            bottom: new TabBar(
+              unselectedLabelColor: Color(0xff4e4e32),
+              labelColor: Colors.white,
+              onTap: (index) async {
+                if (index == 1) {
+                  print(wardfetch);
+                  if (wardfetch == true) {
+                    try {
+                      await warddata.wardinfo(
+                          Teacher.studprn, Teacher.studclass);
+                      print("hh");
+                      if (mounted) {
+                        setState(() {
+                          wardfetch = false;
+                          wardgen = true;
+                        });
                       }
-                    },
-                    tabs: [
-                      new Tab(
-                        icon: new Icon(Icons.assessment),
-                      ),
-                      new Tab(
-                        icon: new Icon(Icons.grid_on),
-                      ),
-                    ],
-                    //  controller: tabController,
-                    indicatorColor: Colors.white,
-                  ),
-                  actions: <Widget>[
-                    IconButton(
-                      icon: Icon(
-                        Icons.local_hospital,
-                        color: Colors.white,
-                        size: 10 * SizeConfig.widthMultiplier,
-                      ),
-                      onPressed: () {
-                        _medstud(context);
-                        // print("red");
-                      },
-                    ),
-                  ],
+                    } catch (Exception) {
+                      setState(() {
+                        wardgen = false;
+                      });
+                    }
+                  }
+                }
+              },
+              tabs: [
+                new Tab(
+                  icon: new Icon(Icons.assessment),
+                  text: "Analysis",
                 ),
-                body: new TabBarView(
-                  physics: NeverScrollableScrollPhysics(),
-                  //controller: tabController,
-                  children: [
-                    info,
-                    parentinfo,
-                  ],
+                new Tab(
+                    icon: new Icon(Icons.contact_phone),
+                    text: "parent info"),
+              ],
+              //  controller: tabController,
+              indicatorColor: Colors.white,
+            ),
+            actions: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.local_hospital,
+                  color: Colors.white,
+                  size: 10 * SizeConfig.widthMultiplier,
                 ),
+                onPressed: () {
+                  _medstud(context);
+                  // print("red");
+                },
               ),
-            )
+            ],
+          ),
+          body: new TabBarView(
+            // physics: NeverScrollableScrollPhysics(),
+            //controller: tabController,
+            children: [
+              info,
+              parentinfo,
+            ],
+          ),
+        ),
+      )
           : new Scaffold(
-              resizeToAvoidBottomPadding: true,
-              resizeToAvoidBottomInset: false,
-              bottomNavigationBar: FancyBottomNavigation(
-                activeIconColor: Colors.white,
-                inactiveIconColor: HexColor.fromHex("#008080"),
-                circleColor: HexColor.fromHex("#008080"),
-                initialSelection: 1,
-                tabs: [
-                  TabData(iconData: Icons.home, title: "Home"),
-                  TabData(
-                      iconData: Icons.local_parking, title: "Parent Teacher"),
-                  TabData(iconData: Icons.assignment, title: "Remedial hr")
-                ],
-                onTabChangedListener: (position) {
-                  setState(() {
-                    // currentPage = position;
+        resizeToAvoidBottomPadding: true,
+        resizeToAvoidBottomInset: false,
+        bottomNavigationBar: FancyBottomNavigation(
+          activeIconColor: Colors.white,
+          inactiveIconColor: Color(0xff6d6d46),
+          circleColor: Color(0xff6d6d46),
+          initialSelection: 1,
+          tabs: [
+            TabData(iconData: Icons.home, title: "Home"),
+            TabData(
+                iconData: Icons.local_parking, title: "Parent Teacher"),
+            TabData(iconData: Icons.assignment, title: "Remedial hr")
+          ],
+          onTabChangedListener: (position) {
+            try {
+              if (mounted) {
+                setState(() {
+                  // currentPage = position;
+                  if (mounted) {
                     if (position == 0) {
                       Navigator.pushReplacement(
                           context,
@@ -285,398 +356,458 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
                             builder: (context) => defaulter(),
                           ));
                     }
-                  });
-                },
-              ),
-              appBar: new AppBar(
-                leading: IconButton(
-                    onPressed: () {
-                      // Navigator.pop(context);
-                      _onbackpressed();
-                    },
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                    )),
-                title: new Text("Homepage/Parentteacherlist"),
-                backgroundColor: HexColor.fromHex("#008080"),
-              ),
-              body: app
-                  ? new SpinKitThreeBounce(
-                      color: Color(0xff999966),
-                      size: 40.0,
-                      // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
-                    )
-                  : Container(
-                      //height:0.75*SizeConfig.screenHeight,
-                      color: Colors.black,
-                      child: (len != 0)
-                          ? ListView.builder(
-                              padding: kMaterialListPadding,
-                              itemCount: len,
-                              itemBuilder: (BuildContext context, int index) {
-                                if (isPRN(Dateinfo.parentteacherlist
-                                    .elementAt(index))) {
-                                  return Container(
-                                    height: 9 * SizeConfig.heightMultiplier,
-                                    child: Card(
-                                      elevation: 20,
-                                      shape: new RoundedRectangleBorder(
-                                          borderRadius:
-                                              new BorderRadius.circular(15.0)),
-                                      child: ListTile(
-                                          onLongPress: () async {
-                                            bool cnfchn = false;
-                                            String display;
-                                            if(Dateinfo.ydlist.contains(Dateinfo
-                                                .parentteacherlist
-                                                .elementAt(index)
-                                                .toString())){
-                                              display="Add student";
-                                            }
-                                            else{
-                                              display="Remove student";
-                                            }
-                                            await Alert(
-                                              context: context,
-                                              type: AlertType.warning,
-                                              style: AlertStyle(
-                                                  animationType:
-                                                      AnimationType.fromTop,
-                                                  isCloseButton: false,
-                                                  isOverlayTapDismiss: false,
-                                                  descStyle: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                  animationDuration: Duration(
-                                                      milliseconds: 400),
-                                                  titleStyle: TextStyle(
-                                                      color: Color(0xff00004d)),
-                                                  alertBorder:
-                                                      RoundedRectangleBorder(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10.0),
-                                                    side: BorderSide(
-                                                      color: Colors.grey,
-                                                    ),
-                                                  )),
-                                              title: display,
-                                              buttons: [
-                                                DialogButton(
-                                                  child: Text(
-                                                    "Confirm",
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 2.5 *
-                                                            SizeConfig
-                                                                .textMultiplier),
-                                                  ),
-                                                  // ignore: missing_return
-                                                  onPressed: () {
-                                                    setState(() {
-                                                      cnfchn = true;
-                                                    });
-                                                    Navigator.pop(context);
-                                                  },
-                                                  color: Color.fromRGBO(
-                                                      0, 179, 134, 1.0),
-                                                ),
-                                                DialogButton(
-                                                  child: Text(
-                                                    "Cancel",
-                                                    style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 2.5 *
-                                                            SizeConfig
-                                                                .textMultiplier),
-                                                  ),
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                    setState(() {
-                                                      cnfchn = false;
-                                                    });
-                                                  },
-                                                  gradient: LinearGradient(
-                                                      colors: [
-                                                        Color(0xffe63900),
-                                                        Color(0xffe63900)
-                                                      ]),
-                                                )
-                                              ],
-                                            ).show();
-                                            if (cnfchn) {
-                                              String cl;
-                                              for (final cla in Dateinfo
-                                                  .parentteacherclass) {
-                                                Map map = Dateinfo
-                                                    .parentteacherstud[cla];
-                                                if (map.containsKey(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index))) {
-                                                  cl = cla;
-                                                  break;
-                                                }
-                                              }
-                                              if(Dateinfo.ydlist.contains(Dateinfo.parentteacherlist
-                                              .elementAt(index))){
-                                                FirebaseDatabase.instance
-                                                    .reference()
-                                                    .child("ParentTeacher")
-                                                    .child(Dateinfo.teachname)
-                                                    .child(cl)
-                                                    .child(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index)
-                                                    .toString())
-                                                    .child("Yd").remove();
-                                              setState(() {
-                                                Dateinfo.ydlist.remove(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index)
-                                                    .toString());
-                                                FirebaseDatabase.instance
-                                                    .reference()
-                                                    .child("defaulter")
-                                                    .child("modified")
-                                                    .child(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index))
-                                                    .set(0);
-                                              });
-                                              }
-                                              else{
-                                              FirebaseDatabase.instance
-                                                  .reference()
-                                                  .child("defaulter")
-                                                  .child(Dateinfo.dept)
-                                                  .child(cl)
-                                                  .child(Dateinfo
-                                                      .parentteacherlist
-                                                      .elementAt(index)
-                                                      .toString())
-                                                  .remove();
-                                              FirebaseDatabase.instance
-                                                  .reference()
-                                                  .child("ParentTeacher")
-                                                  .child(Dateinfo.teachname)
-                                                  .child(cl)
-                                                  .child(Dateinfo
-                                                      .parentteacherlist
-                                                      .elementAt(index)
-                                                      .toString()
-                                                      .toString())
-                                                  .child("Yd")
-                                                  .set("yes");
-                                              setState(() {
-                                                Dateinfo.ydlist.add(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index)
-                                                    .toString()
-                                                    .toString());
-                                              });
-                                              FirebaseDatabase.instance
-                                                  .reference()
-                                                  .child("Student")
-                                                  .child(Dateinfo.dept)
-                                                  .child(cl)
-                                                  .child(Dateinfo
-                                                      .parentteacherstud[
-                                                          Dateinfo.studclass[Dateinfo
-                                                              .parentteacherlist
-                                                              .elementAt(index)]]
-                                                          [(Dateinfo
-                                                              .parentteacherlist
-                                                              .elementAt(index)
-                                                              .toString())]
-                                                          ["name"]
-                                                      .toString()
-                                                      .split("_")[1])
-                                                  .child(Dateinfo.parentteacherlist.elementAt(index))
-                                                  .remove();
-                                              FirebaseDatabase.instance
-                                                  .reference()
-                                                  .child("defaulter")
-                                                  .child("modified")
-                                                  .child(Dateinfo
-                                                      .parentteacherlist
-                                                      .elementAt(index))
-                                                  .set(-1);
-                                              }
-                                            }
-                                          },
-                                          onTap: () async {
-                                            try {
-                                              print(index);
-                                              String cl;
-                                              for (final cla in Dateinfo
-                                                  .parentteacherclass) {
-                                                Map map = Dateinfo
-                                                    .parentteacherstud[cla];
-                                                if (map.containsKey(Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index))) {
-                                                  cl = cla;
-                                                  break;
-                                                }
-                                              }
-                                              setState(() {
-                                                isloading = true;
-                                              });
-                                              await Teacher.getprndata(
-                                                  Dateinfo.parentteacherlist
-                                                      .elementAt(index),
-                                                  cl,
-                                                  Dateinfo.parentteacherstud[
-                                                          Dateinfo.studclass[
-                                                              Dateinfo
-                                                                  .parentteacherlist
-                                                                  .elementAt(
-                                                                      index)]][
-                                                          (Dateinfo
-                                                              .parentteacherlist
-                                                              .elementAt(index)
-                                                              .toString())]
-                                                          ["name"]
-                                                      .toString()
-                                                      .split("_")[1]);
-                                              setState(() {
-                                                Teacher.studprn = Dateinfo
-                                                    .parentteacherlist
-                                                    .elementAt(index);
-                                                Teacher.studclass = cl;
-                                                Teacher.studbatch = Dateinfo
-                                                    .parentteacherstud[Dateinfo
-                                                            .studclass[
-                                                        Dateinfo
-                                                            .parentteacherlist
-                                                            .elementAt(
-                                                                index)]][(Dateinfo
-                                                        .parentteacherlist
-                                                        .elementAt(index)
-                                                        .toString())]["name"]
-                                                    .toString()
-                                                    .split("_")[1];
-                                              });
-                                              setState(() {
-                                                show = false;
-                                                app = true;
-                                              });
-                                            } catch (ex) {
-                                              // print(Dateinfo.plist.elementAt(index));
-                                              print(Dateinfo.parentteacherstud[
-                                                      Dateinfo.studclass[
-                                                          Dateinfo
-                                                              .parentteacherlist
-                                                              .elementAt(
-                                                                  index)]][
-                                                      (Dateinfo
-                                                          .parentteacherlist
-                                                          .elementAt(index)
-                                                          .toString())]["name"]
-                                                  .toString()
-                                                  .split("_")[1]);
-                                              print(ex);
-                                            }
-                                          },
-                                          isThreeLine: false,
-                                          leading: Text(
-                                              "  " +
-                                                  Dateinfo.parentteacherlist
-                                                      .elementAt(index) +
-                                                  "    ::   ",
-                                              style: TextStyle(
-                                                  fontSize: 2.5 *
-                                                      SizeConfig.textMultiplier,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Color(0xffac3973))),
-                                          title: Text(
-                                            Dateinfo.parentteacherstud[
-                                                    Dateinfo.studclass[Dateinfo
-                                                        .parentteacherlist
-                                                        .elementAt(index)]][
-                                                    (Dateinfo.parentteacherlist
-                                                        .elementAt(index)
-                                                        .toString())]["name"]
-                                                .toString()
-                                                .split("_")[0],
-                                            style: TextStyle(
-                                                fontSize: 2.2 *
-                                                    SizeConfig.textMultiplier,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          trailing: Dateinfo.ydlist.contains(
-                                                  Dateinfo.parentteacherlist
-                                                      .elementAt(index)
-                                                      .toString())
-                                              ?
-                                                 FittedBox(
-                                                   child: Row(
-                                                    children: <Widget>[
-                                                      Text("Yd",style: TextStyle(color: Colors.red,fontWeight: FontWeight.bold),),
-                                                      IconButton(
-                                                          icon: Icon(
-                                                              Icons.chevron_right,
-                                                              color: Colors.black),
-                                                          onPressed: null,
-                                                        ),
-                                                    ],
-                                                ),
-                                                 )
-                                              : IconButton(
-                                                  icon: Icon(
-                                                      Icons.chevron_right,
-                                                      color: Colors.black),
-                                                  onPressed: null,
-
-                                                  //subtitle: const Text("hiiiii"),
-                                                )),
-                                    ),
-                                  );
-                                } else {
-                                  return Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        vertical: 10,
-                                        horizontal:
-                                            SizeConfig.screenWidth / 2 - 30),
-                                    child: Text(
-                                        Dateinfo.parentteacherlist
-                                                .elementAt(index) +
-                                            " ",
-                                        style: TextStyle(
-                                            fontSize:
-                                                3 * SizeConfig.textMultiplier,
-                                            fontWeight: FontWeight.bold,
-                                            color: Color(0xffffffff))),
-                                  );
+                  }
+                });
+              }
+            } catch (Ex) {}
+          },
+        ),
+        appBar: new AppBar(
+          leading: IconButton(
+              onPressed: () {
+                // Navigator.pop(context);
+                _onbackpressed();
+              },
+              icon: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+              )),
+          title: new Text("Homepage/Parentteacherlist"),
+          backgroundColor: Color(0xff6d6d46),
+        ),
+        body: app
+            ? new SpinKitThreeBounce(
+          color: Color(0xff003333),
+          size: 40.0,
+          // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
+        )
+            : Container(
+          //height:0.75*SizeConfig.screenHeight,
+          color: Colors.black,
+          child: (len != 0)
+              ? ListView.builder(
+            padding: kMaterialListPadding,
+            itemCount: len,
+            itemBuilder: (BuildContext context, int index) {
+              return isPRN(Dateinfo.parentteacherlist
+                  .elementAt(index))
+                  ? Container(
+                height: SizeConfig.grp <= 4
+                    ? 10 * SizeConfig.heightMultiplier
+                    : 8.8 * SizeConfig.heightMultiplier,
+                child: Card(
+                  elevation: 20,
+                  shape: new RoundedRectangleBorder(
+                      borderRadius:
+                      new BorderRadius.circular(
+                          15.0)),
+                  child: ListTile(
+                      onLongPress: () async {
+                        bool cnfchn = false;
+                        String display =
+                            "Delete  Student";
+                        if (Dateinfo.ydlist.contains(
+                            Dateinfo.parentteacherlist
+                                .elementAt(index))) {
+                          display = "Add Student";
+                        }
+                        await Alert(
+                          context: context,
+                          type: AlertType.warning,
+                          style: AlertStyle(
+                              animationType:
+                              AnimationType.fromTop,
+                              isCloseButton: false,
+                              isOverlayTapDismiss:
+                              false,
+                              descStyle: TextStyle(
+                                  fontWeight:
+                                  FontWeight.bold),
+                              animationDuration:
+                              Duration(
+                                  milliseconds:
+                                  400),
+                              titleStyle: TextStyle(
+                                  color: Color(
+                                      0xff00004d)),
+                              alertBorder:
+                              RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius
+                                    .circular(10.0),
+                                side: BorderSide(
+                                  color: Colors.grey,
+                                ),
+                              )),
+                          title: display,
+                          buttons: [
+                            DialogButton(
+                              child: Text(
+                                "Confirm",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 2.5 *
+                                        SizeConfig
+                                            .textMultiplier),
+                              ),
+                              // ignore: missing_return
+                              onPressed: () {
+                                if (mounted) {
+                                  setState(() {
+                                    cnfchn = true;
+                                  });
+                                }
+                                Navigator.pop(context);
+                              },
+                              color: Color.fromRGBO(
+                                  0, 179, 134, 1.0),
+                            ),
+                            DialogButton(
+                              child: Text(
+                                "Cancel",
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 2.5 *
+                                        SizeConfig
+                                            .textMultiplier),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                if (mounted) {
+                                  setState(() {
+                                    cnfchn = false;
+                                  });
                                 }
                               },
+                              gradient: LinearGradient(
+                                  colors: [
+                                    Color(0xffe63900),
+                                    Color(0xffe63900)
+                                  ]),
                             )
-                          : Align(
-                              alignment: FractionalOffset.center,
-                              child: new Text("Add students here",
-                                  style: TextStyle(
-                                      fontSize: 3 * SizeConfig.textMultiplier,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xff898989)))),
-                    ),
-              floatingActionButton: FloatingActionButton(
-                backgroundColor: Color(0xff008080),
-                onPressed: () async {
-                  try {
-                    _addstud(context);
-                    setState(() {
-//              len = Dateinfo.parentteacherlist.length - 1;
-                    });
-                  } catch (Exc) {
-                    print(Exc);
-                  }
-                },
-                tooltip: 'Increment',
-                child: Icon(Icons.add),
-              ),
-            ),
+                          ],
+                        ).show();
+                        if (cnfchn) {
+                          String cl;
+                          for (final cla in Dateinfo
+                              .parentteacherclass) {
+                            Map map = Dateinfo
+                                .parentteacherstud[cla];
+                            if (map.containsKey(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))) {
+                              cl = cla;
+                              break;
+                            }
+                          }
+
+                          if (Dateinfo.ydlist.contains(
+                              Dateinfo.parentteacherlist
+                                  .elementAt(index))) {
+                            await FirebaseDatabase
+                                .instance
+                                .reference()
+                                .child("ParentTeacher")
+                                .child(
+                                Dateinfo.teachname)
+                                .child(cl)
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))
+                                .child("Yd")
+                                .remove();
+                            if (mounted) {
+                              setState(() {
+                                Dateinfo.ydlist.remove(
+                                    Dateinfo
+                                        .parentteacherlist
+                                        .elementAt(
+                                        index));
+                              });
+                            }
+                            FirebaseDatabase.instance
+                                .reference()
+                                .child("defaulter")
+                                .child("modified")
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))
+                                .set(0);
+                          } else {
+                            FirebaseDatabase.instance
+                                .reference()
+                                .child("defaulter")
+                                .child(Dateinfo.dept)
+                                .child(cl)
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index)
+                                .toString())
+                                .remove();
+                            FirebaseDatabase.instance
+                                .reference()
+                                .child("Student")
+                                .child(Dateinfo.dept)
+                                .child(cl)
+                                .child(Dateinfo
+                                .parentteacherstud[
+                            Dateinfo.studclass[Dateinfo.parentteacherlist.elementAt(index)]]
+                            [(Dateinfo
+                                .parentteacherlist
+                                .elementAt(
+                                index)
+                                .toString())]
+                            ["name"]
+                                .toString()
+                                .split("_")[1])
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))
+                                .remove();
+                            await FirebaseDatabase
+                                .instance
+                                .reference()
+                                .child("ParentTeacher")
+                                .child(
+                                Dateinfo.teachname)
+                                .child(cl)
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))
+                                .child("Yd")
+                                .set("Yes");
+                            FirebaseDatabase.instance
+                                .reference()
+                                .child("defaulter")
+                                .child("modified")
+                                .child(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))
+                                .set(-1);
+                            if (mounted) {
+                              setState(() {
+                                Dateinfo.ydlist.add(
+                                    Dateinfo
+                                        .parentteacherlist
+                                        .elementAt(
+                                        index));
+                              });
+                            }
+                          }
+                        }
+                      },
+                      onTap: () async {
+                        try {
+                          print(index);
+                          String cl;
+                          for (final cla in Dateinfo
+                              .parentteacherclass) {
+                            Map map = Dateinfo
+                                .parentteacherstud[cla];
+                            if (map.containsKey(Dateinfo
+                                .parentteacherlist
+                                .elementAt(index))) {
+                              cl = cla;
+                              break;
+                            }
+                          }
+                          if (mounted) {
+                            setState(() {
+                              isloading = true;
+                            });
+                          }
+                          if (mounted) {
+                            setState(() {
+                              Teacher.studprn = Dateinfo
+                                  .parentteacherlist
+                                  .elementAt(index);
+                              Teacher.studclass = cl;
+                              Teacher.studbatch = Dateinfo
+                                  .parentteacherstud[
+                              Dateinfo
+                                  .studclass[
+                              Dateinfo
+                                  .parentteacherlist
+                                  .elementAt(
+                                  index)]]
+                              [(Dateinfo
+                                  .parentteacherlist
+                                  .elementAt(
+                                  index)
+                                  .toString())]
+                              ["name"]
+                                  .toString()
+                                  .split("_")[1];
+                            });
+                          }
+                          await Teacher.getprndata(
+                              Dateinfo.parentteacherlist
+                                  .elementAt(index),
+                              cl,
+                              Dateinfo.parentteacherstud[
+                              Dateinfo.studclass[
+                              Dateinfo
+                                  .parentteacherlist
+                                  .elementAt(
+                                  index)]]
+                              [(Dateinfo
+                                  .parentteacherlist
+                                  .elementAt(
+                                  index)
+                                  .toString())]
+                              ["name"]
+                                  .toString()
+                                  .split("_")[1]);
+
+                          if (mounted) {
+                            setState(() {
+                              show = false;
+                              app = true;
+                              gen = true;
+                            });
+                          }
+                        } catch (ex) {
+                          print("object");
+                          setState(() {
+                            show = false;
+                            app = true;
+                            gen = false;
+                          });
+                          // print(Dateinfo.plist.elementAt(index));
+                          print(Dateinfo
+                              .parentteacherstud[
+                          Dateinfo.studclass[
+                          Dateinfo
+                              .parentteacherlist
+                              .elementAt(
+                              index)]][
+                          (Dateinfo
+                              .parentteacherlist
+                              .elementAt(index)
+                              .toString())]
+                          ["name"]
+                              .toString()
+                              .split("_")[1]);
+                          print(ex);
+                        }
+                      },
+                      isThreeLine: false,
+                      leading: Text(
+                          " " +
+                              Dateinfo.parentteacherlist
+                                  .elementAt(index) +
+                              " ::",
+                          style: TextStyle(
+                              fontSize: 2.2 *
+                                  SizeConfig
+                                      .textMultiplier,
+                              fontWeight:
+                              FontWeight.bold,
+                              color:
+                              Color(0xffac3973))),
+                      title: Text(
+                        Dateinfo.parentteacherstud[
+                        Dateinfo.studclass[
+                        Dateinfo
+                            .parentteacherlist
+                            .elementAt(
+                            index)]][
+                        (Dateinfo
+                            .parentteacherlist
+                            .elementAt(index)
+                            .toString())]
+                        ["name"]
+                            .toString()
+                            .split("_")[0],
+                        style: TextStyle(
+                            fontSize: 2 *
+                                SizeConfig
+                                    .textMultiplier,
+                            color: Color(0xff997a00),
+                            fontWeight:
+                            FontWeight.bold),
+                      ),
+                      trailing:
+//                                              IconButton(
+//                                                        icon: Icon(Icons.chevron_right,
+//                                                            color: Colors.black),
+//                                                        onPressed: null,
+//                                                      ),
+
+                      FittedBox(
+                        //width: 50,
+                        child: Row(
+                          children: <Widget>[
+                            Dateinfo.ydlist.contains(
+                                (Dateinfo
+                                    .parentteacherlist
+                                    .elementAt(
+                                    index)
+                                    .toString()))
+                                ? Text(
+                              "YD",
+                              style: TextStyle(
+                                  color:
+                                  Colors.red,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold),
+                            )
+                                : Text(""),
+                            IconButton(
+                              icon: Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.black),
+                              onPressed: null,
+                            ),
+                          ],
+                        ),
+                      )),
+                ),
+              )
+                  : Padding(
+                padding: EdgeInsets.symmetric(
+                    vertical: 1.6 *
+                        SizeConfig.heightMultiplier,
+                    horizontal:
+                    SizeConfig.screenWidth / 2 -
+                        30),
+                child: Text(
+                    Dateinfo.parentteacherlist
+                        .elementAt(index) +
+                        " ",
+                    style: TextStyle(
+                        fontSize: 2 *
+                            SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xffffffff))),
+              );
+            },
+          )
+              : Align(
+              alignment: FractionalOffset.center,
+              child: new Text("Add students here",
+                  style: TextStyle(
+                      fontSize: 3 * SizeConfig.textMultiplier,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xff898989)))),
+        ),
+        floatingActionButton: FloatingActionButton(
+          backgroundColor: Color(0xffff3333),
+          onPressed: () async {
+            try {
+              _addstud(context);
+//              setState(() {
+////              len = Dateinfo.parentteacherlist.length - 1;
+//              });
+            } catch (Exc) {
+              print(Exc);
+            }
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons.add),
+        ),
+      ),
     );
   }
 
@@ -735,7 +866,7 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
     return showGeneralDialog(
         barrierColor: Colors.black.withOpacity(0.5),
         transitionBuilder: (context, a1, a2, widget) {
-          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+          // final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
           return StatefulBuilder(
             builder: (context, setState) {
               return Opacity(
@@ -775,7 +906,7 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
                               decoration: new InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                     horizontal:
-                                        5.5 * SizeConfig.widthMultiplier),
+                                    5.5 * SizeConfig.widthMultiplier),
                                 border: OutlineInputBorder(
                                     borderSide: BorderSide(
                                         width: 1,
@@ -816,9 +947,11 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
                               );
                             }).toList(),
                             onChanged: (val) {
-                              setState(() {
-                                classs = val;
-                              });
+                              if (mounted) {
+                                setState(() {
+                                  classs = val;
+                                });
+                              }
                             },
                             value: classs,
                           ),
@@ -837,75 +970,101 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
                           onPressed: pressed
                               ? null
                               : () async {
+                            if (classs == "Class" || prn == null) {
+                              Fluttertoast.showToast(
+                                  msg: "Fill the details");
+                              //  print(prn);
+
+                            } else {
+                              if (mounted) {
+                                setState(() {
                                   pressed = true;
-                                  if (classs == "Class" || prn == null) {
-                                    Fluttertoast.showToast(
-                                        msg: "Fill the details");
-                                    //  print(prn);
-
-                                  } else {
-                                    refreshpage = true;
-                                    if (form.currentState.validate()) {
-                                      pr.show();
-                                      Map map;
+                                  refreshpage = true;
+                                });
+                              }
+                              if (form.currentState.validate()) {
+                                pr.show();
+                                Map map;
+                                if (Dateinfo.dept.startsWith("FE")) {
+                                  await Alert1.selectdept(context);
+                                }
+                                await dbref
+                                    .child("Registration")
+                                    .child("Student")
+                                    .child(Dateinfo.dept)
+                                    .child(prn)
+                                    .child("Parent")
+                                    .set(Dateinfo.teachname);
+                                await dbref
+                                    .child("Student")
+                                    .child(Dateinfo.dept)
+                                    .child(classs)
+                                    .once()
+                                    .then((snap) {
+                                  map = snap.value;
+                                });
+                                try {
+                                  for (final key in map.keys) {
+                                    Map map1 = map[key];
+                                    if (map1.containsKey(prn)) {
                                       await dbref
-                                          .child("Student")
-                                          .child(Dateinfo.dept)
+                                          .child("ParentTeacher")
+                                          .child(Dateinfo.teachname)
                                           .child(classs)
-                                          .once()
-                                          .then((snap) {
-                                        map = snap.value;
-                                      });
-                                      try {
-                                        for (final key in map.keys) {
-                                          Map map1 = map[key];
-                                          if (map1.containsKey(prn)) {
-                                            await dbref
-                                                .child("ParentTeacher")
-                                                .child(Dateinfo.teachname)
-                                                .child(classs)
-                                                .child(prn.toString())
-                                                .child("name")
-                                                .set(map1[prn].toString() +
-                                                    "_$key");
-                                            break;
-                                          }
-                                        }
-                                      } catch (Ex) {}
-
-                                      await parentteachermap();
-                                      pr.hide();
-                                    } else {
-                                      setState(() {
-                                        autovalidate = true;
-                                      });
+                                          .child(prn.toString())
+                                          .child("name")
+                                          .set(map1[prn].toString() +
+                                          "_$key");
+                                      break;
                                     }
                                   }
-                                  pressed = false;
-                                }),
-                      new FlatButton(
-                          child: new Text(
-                            'cancel',
-                            style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.5 * SizeConfig.textMultiplier),
-                          ),
-                          onPressed: pressed
-                              ? null
-                              : () async {
-                                  pressed = true;
+                                } catch (Ex) {}
 
-                                  Navigator.of(context).pop();
-                                  if (refreshpage) {
-                                    Navigator.pushReplacement(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              Parentteacherlist(),
-                                        ));
-                                  }
-                                })
+                                await parentteachermap();
+                                pr.hide();
+                              } else {
+                                if (mounted) {
+                                  setState(() {
+                                    autovalidate = true;
+                                  });
+                                }
+                              }
+                            }
+                            if (mounted) {
+                              setState(() {
+                                pressed = false;
+                              });
+                            }
+                          }),
+                      new FlatButton(
+                        child: new Text(
+                          'cancel',
+                          style: TextStyle(
+                              color: Color(0xff444422),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 2.5 * SizeConfig.textMultiplier),
+                        ),
+                        onPressed: pressed == false
+                            ? () async {
+                          Navigator.of(context).pop();
+
+                          if (refreshpage) {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Parentteacherlist(),
+                                ));
+                          }
+                          if (mounted) {
+                            setState(() {
+                              pressed = true;
+                              refreshpage = false;
+                            });
+                          }
+                        }
+                            : null,
+                      )
                     ],
                   ),
                 ),
@@ -947,11 +1106,11 @@ Widget AttendancePieChart(String sub) {
       total_tut += (Teacher.attendanceDataList[i].total_tut);
     }
     TotalAttendance = (att_tut +
-            att_lect +
-            att_pract +
-            Teacher.sports +
-            Teacher.other +
-            Teacher.medical) /
+        att_lect +
+        att_pract +
+        Teacher.sports +
+        Teacher.other +
+        Teacher.medical) /
         (total_lect + total_pract + total_tut) *
         100;
     TotalAttendance = TotalAttendance.toStringAsFixed(2) as double;
@@ -1000,7 +1159,7 @@ Widget AttendancePieChart(String sub) {
     double value;
     if (Teacher.attendanceDataList[index].total_lect != 0) {
       value = (Teacher.attendanceDataList[index].attended_lect /
-              Teacher.attendanceDataList[index].total_lect) *
+          Teacher.attendanceDataList[index].total_lect) *
           100;
       tot += Teacher.attendanceDataList[index].total_lect;
       cnt += Teacher.attendanceDataList[index].attended_lect;
@@ -1010,7 +1169,7 @@ Widget AttendancePieChart(String sub) {
     if (value != 0) {
       AttendanceCounter += (value / 2);
       PieChartSectionData _item1 = PieChartSectionData(
-        color: value > 75 ? Color(0xff155511) : Color(0xffa60c0c),
+        color: value > 75 ? Color(0xff008080) : Color(0xffff4d4d),
         value: value / 2,
         title: 'Lec',
         radius: 5 * SizeConfig.heightMultiplier,
@@ -1023,7 +1182,7 @@ Widget AttendancePieChart(String sub) {
 //    For Practicals :
     if (Teacher.attendanceDataList[index].total_pract != 0) {
       value = (Teacher.attendanceDataList[index].attended_pract /
-              Teacher.attendanceDataList[index].total_pract) *
+          Teacher.attendanceDataList[index].total_pract) *
           100;
       tot += Teacher.attendanceDataList[index].total_pract;
       cnt += Teacher.attendanceDataList[index].attended_pract;
@@ -1034,7 +1193,7 @@ Widget AttendancePieChart(String sub) {
     AttendanceCounter += (value / 2);
     if (value != 0) {
       PieChartSectionData _item2 = PieChartSectionData(
-        color: value > 75 ? Color(0xff155511) : Color(0xffa60c0c),
+        color: value > 75 ? Color(0xff008080) : Color(0xffff4d4d),
         value: value / 2,
         title: 'Prac',
         radius: 5 * SizeConfig.heightMultiplier,
@@ -1046,7 +1205,7 @@ Widget AttendancePieChart(String sub) {
     //for tutorial
     if (Teacher.attendanceDataList[index].total_tut != 0) {
       value = (Teacher.attendanceDataList[index].attended_tut /
-              Teacher.attendanceDataList[index].total_tut) *
+          Teacher.attendanceDataList[index].total_tut) *
           100;
       tot += Teacher.attendanceDataList[index].total_tut;
       cnt += Teacher.attendanceDataList[index].attended_tut;
@@ -1057,7 +1216,7 @@ Widget AttendancePieChart(String sub) {
     AttendanceCounter += (value / 2);
     if (value != 0) {
       PieChartSectionData _item2 = PieChartSectionData(
-        color: value > 75 ? Color(0xff155511) : Color(0xffa60c0c),
+        color: value > 75 ? Color(0xff008080) : Color(0xffff4d4d),
         value: value / 2,
         title: 'Tut',
         radius: 5 * SizeConfig.heightMultiplier,
@@ -1070,7 +1229,7 @@ Widget AttendancePieChart(String sub) {
   if (b == false) {
     if (AttendanceCounter < 100) {
       PieChartSectionData _item = PieChartSectionData(
-        color: HexColor.fromHex("#a60c0c"),
+        color: Color(0xff008080),
         value: (100 - AttendanceCounter),
         title: 'Abs',
         radius: 5 * SizeConfig.heightMultiplier,
@@ -1082,211 +1241,267 @@ Widget AttendancePieChart(String sub) {
       _sections.add(_item);
     }
   }
-  return Container(
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      //    mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        AspectRatio(
+  return Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    //crossAxisAlignment: CrossAxisAlignment.center,
+    //    mainAxisSize: MainAxisSize.min,
+    children: <Widget>[
+      Container(
+        margin: EdgeInsets.only(
+            right: 7.2 * SizeConfig.heightMultiplier,
+            left: 7.2 * SizeConfig.heightMultiplier,
+            top: SizeConfig.grp <= 4
+                ? 4 * SizeConfig.heightMultiplier
+                : 7 * SizeConfig.heightMultiplier,
+            bottom: SizeConfig.grp <= 4
+                ? 4 * SizeConfig.heightMultiplier
+                : 7 * SizeConfig.heightMultiplier),
+        decoration: BoxDecoration(
+            color: Colors.white, //     borderRadius: BorderRadius.circular(60),
+            shape: BoxShape.circle),
+        child: AspectRatio(
             aspectRatio:
-                (SizeConfig.widthMultiplier / SizeConfig.heightMultiplier) *
-                    3.4,
+            (SizeConfig.widthMultiplier / SizeConfig.heightMultiplier) *
+                3.0,
             child: FlChart(
                 chart: PieChart(
-              PieChartData(
-                sections: _sections,
-                borderData: FlBorderData(show: false),
-                centerSpaceRadius: 7 * SizeConfig.heightMultiplier,
-                sectionsSpace: 5,
+                  PieChartData(
+                    sections: _sections,
+                    borderData: FlBorderData(show: false),
+                    centerSpaceRadius: 6.5 * SizeConfig.heightMultiplier,
+                    sectionsSpace: 0.0,
+                  ),
+                ))),
+      ),
+      sub == 'Overall'
+          ? Container(
+        width: 300,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Extra Attendance : ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${Teacher.other}',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-            ))),
-        sub == 'Overall'
-            ? Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier,
-                        bottom: 1 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Medical Attendance : ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${Teacher.medical}',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier,
-                        bottom: 1 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Total Attendance : ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${TotalAttendance.toStringAsFixed(2)} %',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('lectures  Attended: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '$att_lect' + '/' + '$total_lect',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Practicals  Attended: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '$att_pract' + '/' + '$total_pract',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Tutorials  Attended: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '$att_tut' + '/' + '$total_tut',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
+                  Text('Total Attendance : ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${TotalAttendance.toStringAsFixed(2)} %',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
-              )
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
                 children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier,
-                        bottom: 1 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Total  Attendance: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${(cnt / tot * 100).toStringAsFixed(2)} %',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Attended Lectures : ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${Teacher.attendanceDataList[index].attended_lect}/${Teacher.attendanceDataList[index].total_lect}',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Attended Practicals: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${Teacher.attendanceDataList[index].attended_pract}/${Teacher.attendanceDataList[index].total_pract}',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: 7.7 * SizeConfig.widthMultiplier,
-                        top: 2 * SizeConfig.heightMultiplier),
-                    child: new Row(
-                      children: <Widget>[
-                        Text('Tutorials  Attended: ',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 2.7 * SizeConfig.textMultiplier)),
-                        Text(
-                          '${Teacher.attendanceDataList[index].attended_tut}/${Teacher.attendanceDataList[index].total_tut}',
-                          style: TextStyle(
-                              fontSize: 2.4 * SizeConfig.textMultiplier,
-                              fontWeight: FontWeight.bold),
-                        )
-                      ],
-                    ),
+                  Text('lectures  Attended: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '$att_lect' + '/' + '$total_lect',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Practicals  Attended: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '$att_pract' + '/' + '$total_pract',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Tutorials  Attended: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '$att_tut' + '/' + '$total_tut',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      )
+          : Container(
+        width: 300,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Extra Attendance : ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${Teacher.other}',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
                   ),
                 ],
-              )
-      ],
-    ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier,
+                  bottom: 0 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Total  Attendance: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${(cnt / tot * 100).toStringAsFixed(2)} %',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Attended Lectures : ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${Teacher.attendanceDataList[index].attended_lect}/${Teacher.attendanceDataList[index].total_lect}',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Attended Practicals: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${Teacher.attendanceDataList[index].attended_pract}/${Teacher.attendanceDataList[index].total_pract}',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(
+                  left: 7.7 * SizeConfig.widthMultiplier,
+                  top: 2 * SizeConfig.heightMultiplier),
+              child: new Row(
+                children: <Widget>[
+                  Text('Tutorials  Attended: ',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 2.7 * SizeConfig.textMultiplier)),
+                  Text(
+                    '${Teacher.attendanceDataList[index].attended_tut}/${Teacher.attendanceDataList[index].total_tut}',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 2.4 * SizeConfig.textMultiplier,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      )
+    ],
   );
 }
 
@@ -1317,14 +1532,14 @@ _medstud(BuildContext context) async {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.0)),
                 title: Text(
-                  'Add medical attendance',
+                  'Add extra attendance',
                   style: TextStyle(
                       color: HexColor.fromHex("#444422"),
                       fontWeight: FontWeight.bold),
                 ),
                 content: Padding(
                   padding:
-                      EdgeInsets.only(top: 2 * SizeConfig.heightMultiplier),
+                  EdgeInsets.only(top: 2 * SizeConfig.heightMultiplier),
                   child: Container(
                     height: 50,
                     child: Column(
@@ -1390,7 +1605,7 @@ _medstud(BuildContext context) async {
                             .child(Dateinfo.dept)
                             .child(Teacher.studclass)
                             .child(Teacher.studprn)
-                            .child("medical")
+                            .child("other")
                             .set(int.parse(_studatt.text));
                         int att = 0;
                         await databaseReference
@@ -1419,14 +1634,14 @@ _medstud(BuildContext context) async {
                     child: new Text(
                       'cancel',
                       style: TextStyle(
-                          color: Colors.black,
+                          color: Color(0xff444422),
                           fontWeight: FontWeight.bold,
                           fontSize: 2.3 * SizeConfig.textMultiplier),
                     ),
                     onPressed: pressed == false
                         ? () {
-                            Navigator.of(context).pop();
-                          }
+                      Navigator.of(context).pop();
+                    }
                         : null,
                   )
                 ],

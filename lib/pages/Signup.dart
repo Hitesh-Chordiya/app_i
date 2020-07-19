@@ -36,7 +36,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
     'BE2',
     'BESS'
   ];
-  var branch = ["Branch", "Comp", "Entc", "Mech", "FE"];
+  var branch = ["Branch", "COMP", "ENTC", "MECH", "FE"];
   bool touch = false,cnfpass=false,confirmvalidate=false;
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   final formKey = new GlobalKey<FormState>();
@@ -751,18 +751,20 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                           "Registration")
                                                           .child("Student")
                                                           .child(fDep).child(
-                                                          b) //.child("Batch")
+                                                          fPRN) //.child("Batch")
                                                           .once()
                                                           .then((
                                                           onValue) { //print(onValue.value);
                                                         if (onValue.value ==
-                                                            null)
-                                                          throw Exception;
+                                                            null){
+                                                          throw Exception;}
+                                                        Map map=onValue.value;
+                                                        _femail==map["Email"];
                                                       });
+
                                                       await confirm(_fpassword);
                                                       if(cnfpass) {
                                                         if (await signUp(
-
                                                             _femail,
                                                             _fpassword) ==
                                                             1) {
@@ -1508,17 +1510,30 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
       },
     );
   }
-
   Future<int> signUp(String email, String password) async {
     try {
       AuthResult result = await auth.createUserWithEmailAndPassword(
           email: email, password: password);
-      FirebaseUser user = result.user;
-      assert(user != null);
-      assert(await user.getIdToken() != null);
 
-      final FirebaseUser currentUser = await auth.currentUser();
-      assert(user.uid == currentUser.uid);
+      FirebaseUser user = result.user;
+      await user.sendEmailVerification();
+      if(user.isEmailVerified) {
+        assert(user != null);
+        assert(await user.getIdToken() != null);
+
+        final FirebaseUser currentUser = await auth.currentUser();
+        assert(user.uid == currentUser.uid);
+      }
+      else{
+        Fluttertoast.showToast(
+            msg: "Verify your email",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0
+        );
+      }
     }
     catch (e) {
       if (e is PlatformException) {
@@ -1554,7 +1569,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(mescoepune\.org))$';
     RegExp regex = new RegExp(pattern);
-    if (value.isEmpty || !regex.hasMatch(value) || value.length < 9)
+    if (value.isEmpty || !regex.hasMatch(value))
       return 'Invalid Email';
     else
       return null;
