@@ -180,15 +180,7 @@ class _ParentteacherlistState extends State<Parentteacherlist> {
       size: 40.0,
       // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
     )
-        : !wardgen
-        ? Center(
-        child: Text(
-          "No data",
-          style: TextStyle(
-              fontSize: 3 * SizeConfig.heightMultiplier,
-              fontWeight: FontWeight.bold),
-        ))
-        : Container(
+        :Container(
       color: Colors.black,
       child: new SingleChildScrollView(
         scrollDirection: Axis.vertical,

@@ -101,7 +101,7 @@ class Dateinfo {
   static List<String> list = List<String>(),
       ydlist = List<String>(),
       prnlist = List<String>(),
-      batches = List<String>(),parentteacherclass=List<String>(),
+      batches = List<String>(),parentteacherclass=List<String>(),slots=List<String>(),
       parentteacherlist=List<String>();
   static String date1,
       type,
@@ -1229,6 +1229,7 @@ class warddata{
   static List<warddata>warddatalist=List<warddata>();
   static void wardinfo(String prn,String classs)async{
     warddatalist.clear();
+//    print(classs);
     await FirebaseDatabase.instance.reference()
         .child("ParentTeacher")
         .child(Dateinfo.teachname)
@@ -1257,7 +1258,7 @@ class Teacher {
   static String studprn,studclass,studbatch;
 
   static Future<void>daylist()async{
-    print("daylist");
+//  print("daylist");
     var map=new Map();
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
@@ -1268,7 +1269,7 @@ class Teacher {
         map.addAll({daynames[i]:("0/"+(prefs.getInt(daynames[i])).toString())});
         total+=prefs.getInt(daynames[i]);
       }
-      map.addAll({"ztotal":("0/"+(total.toString()))});
+      map.addAll({"ztotal":("0.00%")});
       var cdate;
       var ford = new DateFormat("dd_MM_yyyy");
       var now = ford.format(new DateTime.now());
@@ -1315,14 +1316,14 @@ class Teacher {
     Tutlist.clear();
     daynames.clear();
     final databaseReference = FirebaseDatabase.instance.reference();
-    print(Dateinfo.dept);
+//    print(Dateinfo.dept);
     await databaseReference.child("personal_tt")
         .child(prefs.getString("dept"))
         .child(Dateinfo.teachname)
         .once().then((snap) {
       try {
         Map days = snap.value;
-        print(days);
+//        print(days);
         //int tot=0;
         for (final k in days.keys) {
           try {
@@ -1375,7 +1376,7 @@ class Teacher {
                   List<String> practsub = ["Select sub"];
                   practsub.clear();
                   practsub.add(a[1].toString());
-                  print(a[0] + practsub.toString());
+//                  print(a[0] + practsub.toString());
                   prefs.setStringList(
                       a[0].toString() + "_" + "P", practsub.toSet().toList());
                   List<String> batch = ["Select sub"];
@@ -1406,7 +1407,7 @@ class Teacher {
                   List<String> tutsub = ["Select sub"];
                   tutsub.clear();
                   tutsub.add(a[1].toString());
-                  print(a[0] + tutsub.toString());
+//                  print(a[0] + tutsub.toString());
                   prefs.setStringList(
                       a[0].toString() + "_" + "T", tutsub.toSet().toList());
                   List<String> batch = ["Select sub"];
@@ -1501,7 +1502,7 @@ class Teacher {
           throw Exception;
         }
       } catch (Exception) {
-        print("object");
+//        print("object");
         throw Exception;
       }
       // getlist();
@@ -1815,7 +1816,7 @@ class Teacher {
 //    _PasscodeState po=new _PasscodeState();
 //    p.get();
   }
-  static void update()async{
+  static Future<void> update(String subject,String classs)async{
     var ford = new DateFormat("yyyy_MM_dd");
     var now = new DateTime.now();
     String date = ford.format(now);
@@ -1831,7 +1832,6 @@ class Teacher {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-//      print(prefs.getInt("week_no"));
       if (prefs.getInt("week_no") == weekno) {
         prefs.setBool("reset_week", false);
       } else {
@@ -1847,10 +1847,8 @@ class Teacher {
         prefs.setBool("reset", true);
         prefs.setInt("dayc", 0);
 
-
         if (prefs.getStringList("scount") != null) {
-          // print("get");
-          FirebaseDatabase.instance.reference()
+          await FirebaseDatabase.instance.reference()
               .child("Registration")
               .child('Teacher_account')
               .child(Dateinfo.email)
@@ -1858,24 +1856,43 @@ class Teacher {
           var map=new Map();
           List<String> scount = prefs.getStringList("scount");
           for (int i = 0; i < scount.length; i++) {
-            //print("kk");
             var dummy = prefs.getString(scount[i]).split(" ");
             prefs.setString(scount[i], dummy[0].toString() + " " + "0");
             map.addAll({scount[i]: dummy[0].toString() + " " + "0"});
           }
-          FirebaseDatabase.instance.reference()
+          await FirebaseDatabase.instance.reference()
               .child("teach_att")
               .child(Dateinfo.dept)
               .child(Dateinfo.teachname)
               .set(map);
-          FirebaseDatabase.instance.reference()
-              .child("Registration")
-              .child('Teacher_account')
-              .child(Dateinfo.email)
-              .child("slot").remove();
-          List<String> demo=new List<String>();
-          prefs.setStringList("slot", demo);
+
+//          List<String> demo=new List<String>();
+//          prefs.setStringList("slot", demo);
         }
+      }
+      try{
+        String dept;
+        if (Dateinfo.dept ==
+            "FE") {
+          dept = subject
+              .toString()
+              .substring(
+              subject
+                  .length -
+                  4);
+        }
+        await FirebaseDatabase.instance.reference().child("c_teacher").child(dept).child(classs).child("slot").once().then((snap){
+          Map map=snap.value;
+          if( map.containsKey(date)){
+            String slot=map[date];
+            Dateinfo.slots= slot.split(" ");
+          }else{
+            FirebaseDatabase.instance.reference().child("c_teacher").child(dept).child(classs).child("slot").remove();
+            throw Exception;
+          }
+        });
+      }catch(Exception){
+        Dateinfo.slots=new List<String>();
       }
     } catch (exception) {
       print("wedf");

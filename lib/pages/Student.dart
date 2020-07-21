@@ -629,7 +629,8 @@ class _shomestate extends State<shome> with TickerProviderStateMixin {
                                 });
 
                                 try {
-                                  if (time < 19 && time > 9) {
+//                                              if (time < 19 && time > 9) {
+                                  if(true){
                                     // pr.show();
 
                                     await get();
@@ -675,7 +676,7 @@ class _shomestate extends State<shome> with TickerProviderStateMixin {
                                     // Studinfo.relist();
 
                                   } catch (e) {
-                                    print("pko");
+//                                                print("pko");
                                     throw Exception;
 //
                                   }
@@ -965,8 +966,9 @@ class _shomestate extends State<shome> with TickerProviderStateMixin {
                           color: Colors.black,
                         ),
                         onTap: () async {
-                          Navigator.pop(context);
                           try {
+                            Navigator.pop(context,true);
+
                             final FirebaseMessaging firebaseMessaging =
                             FirebaseMessaging();
                             firebaseMessaging
@@ -977,11 +979,12 @@ class _shomestate extends State<shome> with TickerProviderStateMixin {
                               ..child("Registration")
                                   .child('Student')
                                   .child(Studinfo.branch)
-                                  .child(Alert1.name)
+                                  .child(Studinfo.roll)
                                   .child("text")
                                   .set(prefs.getString("text"));
                             FirebaseAuth.instance.signOut();
-                            Navigator.pushReplacement(
+                            Navigator.pop(context,true);
+                            Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => LoginPage(),

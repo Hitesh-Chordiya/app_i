@@ -104,7 +104,7 @@ class defaulterState extends State<defaulter> {
         body: isloading
             ? show
             ? new SpinKitThreeBounce(
-          color: Color(0xff008080),
+          color: Color(0xff6d6d46),
           size: 40.0,
           // controller: AnimationController(vsync: this, duration: const Duration(milliseconds: 1200)),
         )
@@ -361,7 +361,9 @@ class defaulterState extends State<defaulter> {
                                 sub = prefs
                                     .getStringList(classs + "_l");
                                 sub.add("value");
-                              } catch (Exception) {}
+                              } catch (Exception) {
+
+                              }
                               List<String> subp =
                               new List<String>();
 
@@ -549,7 +551,7 @@ class defaulterState extends State<defaulter> {
 //                      textAlign: TextAlign.justify,
 
                             text: TextSpan(
-                              text: "                  Subject : ",
+                              text: "             Subject : ",
                               style: TextStyle(
                                   color: cl2[index % 3],
                                   fontFamily: "Roboto",
@@ -557,10 +559,7 @@ class defaulterState extends State<defaulter> {
                                   fontWeight: FontWeight.bold),
                               children: <TextSpan>[
                                 TextSpan(
-                                    text: Dateinfo.dept.startsWith("FE") ?
-                                    classlist.elementAt(index)
-                                        .toString().split("_")[1].substring(0,classlist.elementAt(index).toString().split("_")[1].length-4)
-                                    :classlist.elementAt(index)
+                                    text:classlist.elementAt(index)
                                 .toString().split("_")[1],
                                     style: TextStyle(
                                         fontSize: rightsize,
@@ -846,6 +845,10 @@ class defaulterState extends State<defaulter> {
           }
         }
       });
+      if(obj.studmap.isEmpty||obj.studmap==null)
+        {
+          throw Exception;
+        }
     } catch (Exception) {
       throw Exception;
     }
@@ -872,7 +875,7 @@ class _gendefaulterState extends State with TickerProviderStateMixin {
     // TODO: implement initState
     super.initState();
     classlist.clear();
-    if (Dateinfo.dept == "Comp") {
+    if (Dateinfo.dept == "COMP") {
       classlist = [
         "FE1",
         "FE2",

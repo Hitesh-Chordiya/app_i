@@ -307,7 +307,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                               .fromHex(
                                                               "#800000")),
                                                     ),
-                                                    labelText: "Enter e-mail",
+                                                    labelText: "Enter Email",
                                                     labelStyle: new TextStyle(
                                                         fontWeight: FontWeight
                                                             .bold,
@@ -531,6 +531,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                                         .circular(
                                                                         10.00)),
                                                                 labelText: "PRN",
+                                                                hintText: "F17112001",
                                                                 labelStyle: new TextStyle(
                                                                     fontWeight: FontWeight
                                                                         .bold,
@@ -601,6 +602,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                                           .circular(
                                                                           10.00)),
                                                                   labelText: "Batch",
+                                                                  hintText: "(P/Q/R)",
                                                                   labelStyle: new TextStyle(
                                                                       fontWeight: FontWeight
                                                                           .bold,
@@ -740,28 +742,6 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                         .toLowerCase();
                                                     // ignore: unrelated_type_equality_checks
                                                     try {
-                                                      var a = _femail.split(
-                                                          "@");
-                                                      String b = a[0]
-                                                          .toString()
-                                                          .replaceAll(
-                                                          new RegExp(r'\W'),
-                                                          "_");
-                                                      await dbref.child(
-                                                          "Registration")
-                                                          .child("Student")
-                                                          .child(fDep).child(
-                                                          fPRN) //.child("Batch")
-                                                          .once()
-                                                          .then((
-                                                          onValue) { //print(onValue.value);
-                                                        if (onValue.value ==
-                                                            null){
-                                                          throw Exception;}
-                                                        Map map=onValue.value;
-                                                        _femail==map["Email"];
-                                                      });
-
                                                       await confirm(_fpassword);
                                                       if(cnfpass) {
                                                         if (await signUp(
@@ -770,8 +750,19 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                             1) {
                                                           formKey.currentState
                                                               .save();
-
-
+                                                          await dbref.child("Registration").child('Student')
+                                                              .child(fDep).child(fPRN)
+                                                              .set({
+                                                            "Class": classs.toString().toUpperCase(),
+                                                            "Prn": fPRN.toString().toUpperCase(),
+                                                            "Name": _fname.toString(),
+                                                            "Batch":_batch.toString().toUpperCase(),
+                                                            "Email":_femail.toString().toLowerCase()
+                                                              });
+                                                            await dbref.child("Student").child(fDep).child(classs).
+                                                            child(_batch.toString().toUpperCase()).child(fPRN).set(_fname);
+                                                            await dbref.child("defaulter").child(fDep).child(classs).child(fPRN).child("other")
+                                                          .set(0);
                                                           Navigator
                                                               .pushReplacement(
                                                               context,
@@ -1098,39 +1089,39 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                         value: bDep,
                                                       ),
                                                     ),
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          left: 2.5 * SizeConfig
-                                                              .widthMultiplier),
-                                                      child: Theme(
-                                                        data: ThemeData(
-                                                            unselectedWidgetColor: HexColor
-                                                                .fromHex(
-                                                                "#00004d")),
-                                                        child: new Checkbox(
-                                                            value: checkBoxValue,
-                                                            activeColor: HexColor
-                                                                .fromHex(
-                                                                "#008066"),
-                                                            onChanged: (
-                                                                bool newValue) {
-                                                              setState(() {
-                                                                checkBoxValue =
-                                                                    newValue;
-                                                              });
-                                                            }),
-                                                      ),
-                                                    ),
-                                                    new Text('Admin',
-                                                      style: TextStyle(
-                                                          color: HexColor
-                                                              .fromHex(
-                                                              "#00004d"),
-                                                          fontWeight: FontWeight
-                                                              .bold,
-                                                          fontSize: 2.2 *
-                                                              SizeConfig
-                                                                  .textMultiplier),),
+//                                                    Padding(
+//                                                      padding: EdgeInsets.only(
+//                                                          left: 2.5 * SizeConfig
+//                                                              .widthMultiplier),
+//                                                      child: Theme(
+//                                                        data: ThemeData(
+//                                                            unselectedWidgetColor: HexColor
+//                                                                .fromHex(
+//                                                                "#00004d")),
+//                                                        child: new Checkbox(
+//                                                            value: checkBoxValue,
+//                                                            activeColor: HexColor
+//                                                                .fromHex(
+//                                                                "#008066"),
+//                                                            onChanged: (
+//                                                                bool newValue) {
+//                                                              setState(() {
+//                                                                checkBoxValue =
+//                                                                    newValue;
+//                                                              });
+//                                                            }),
+//                                                      ),
+//                                                    ),
+//                                                    new Text('Admin',
+//                                                      style: TextStyle(
+//                                                          color: HexColor
+//                                                              .fromHex(
+//                                                              "#00004d"),
+//                                                          fontWeight: FontWeight
+//                                                              .bold,
+//                                                          fontSize: 2.2 *
+//                                                              SizeConfig
+//                                                                  .textMultiplier),),
                                                   ]),
                                             ),
 
@@ -1255,7 +1246,7 @@ class _SignupState extends State<Signup> with SingleTickerProviderStateMixin {
                                                     });
                                                     pr.show();
                                                     _bemail =
-                                                        _bemail.toString();
+                                                        _bemail.toString().toLowerCase();
                                                     if (await signUp(
                                                         _bemail, _bpassword) ==
                                                         1) {

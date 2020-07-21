@@ -32,8 +32,8 @@ class _LoginPageState extends State<LoginPage>
       mech = Color(0xff898989),
       entc = Color(0xff898989);
   String dept = "";
-  bool checktype;
-  static int snacktime=0;
+  bool checktype, pressed = false;
+  static int snacktime = 0;
   final FirebaseAuth auth = FirebaseAuth.instance;
   FocusNode focusNode1 = new FocusNode();
   FocusNode focusNode2 = new FocusNode();
@@ -43,7 +43,28 @@ class _LoginPageState extends State<LoginPage>
   bool _autovalidate = false;
   Map data;
   final successSnackBar = new SnackBar(
-    duration: Duration(milliseconds: snacktime),
+    duration: Duration(days: 1),
+    shape:
+    RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
+    backgroundColor: HexColor.fromHex("#00004d"),
+    elevation: 2.0,
+    content: new Row(
+      children: <Widget>[
+        new CircularProgressIndicator(
+          valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+        new Padding(padding: EdgeInsets.only(left: 5.0)),
+        new Text("Logging in ",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                fontFamily: 'BalooChettan2',
+                color: Colors.white,
+                fontSize: 3 * SizeConfig.textMultiplier))
+      ],
+    ),
+  );
+  final successSnackBar1 = new SnackBar(
+    duration: Duration(days: 1),
     shape:
     RoundedRectangleBorder(borderRadius: new BorderRadius.circular(5.00)),
     backgroundColor: HexColor.fromHex("#00004d"),
@@ -254,8 +275,7 @@ class _LoginPageState extends State<LoginPage>
                                               left: 2 *
                                                   SizeConfig.widthMultiplier)),
                                       IconButton(
-                                          icon: Icon(
-                                              Icons.tap_and_play,
+                                          icon: Icon(Icons.tap_and_play,
                                               color: entc),
                                           onPressed: () {
                                             setState(() {
@@ -303,7 +323,7 @@ class _LoginPageState extends State<LoginPage>
                                                           "#800000")),
                                                 ),
                                                 suffixIcon: Icon(
-                                                  Icons.email,
+                                                  Icons.person,
                                                   size: 2.5 *
                                                       SizeConfig
                                                           .heightMultiplier,
@@ -320,8 +340,8 @@ class _LoginPageState extends State<LoginPage>
                                                     borderRadius:
                                                     BorderRadius.circular(
                                                         10.00)),
-                                                labelText: "Enter Email",
-                                                hintText: "E-mail or PRN",
+                                                labelText: "Enter Username",
+                                                // hintText: "username",
                                                 labelStyle: new TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     color: HexColor.fromHex(
@@ -413,30 +433,45 @@ class _LoginPageState extends State<LoginPage>
                                             BorderRadius.circular(80.00)),
                                         splashColor:
                                         HexColor.fromHex("#ffffff"),
-                                        onPressed: () async {
+                                        onPressed: pressed
+                                            ? null
+                                            : () async {
+                                          bool show = true;
                                           //fun(context);
+                                          setState(() {
+                                            pressed = true;
+                                          });
                                           Map map;
                                           String prn;
-                                          if (formKey.currentState.validate()) {
+                                          if (formKey.currentState
+                                              .validate()) {
                                             formKey.currentState.save();
                                             try {
-                                              setState(() {
+//                                              setState(() {
+//                                                show=true;
+//                                              });
+                                              if (!checktype) {
+                                                scaffoldKey.currentState
+                                                    .showSnackBar(
+                                                    successSnackBar1);
+                                                _email =
+                                                    _email.toLowerCase();
+                                              } else {
                                                 scaffoldKey.currentState
                                                     .showSnackBar(
                                                     successSnackBar);
-                                              });
-                                              if (!checktype) {
-                                                _email = _email.toLowerCase();
-                                              } else {
-                                                _email = _email.toUpperCase();
-                                                await checkemail.child(
-                                                    "Registration")
-                                                    .child("Student").child(
-                                                    dept).child(_email)
+                                                _email =
+                                                    _email.toUpperCase();
+                                                await checkemail
+                                                    .child("Registration")
+                                                    .child("Student")
+                                                    .child(dept)
+                                                    .child(_email)
                                                     .once()
                                                     .then((onValue) {
                                                   if (onValue.value ==
-                                                      null) throw Exception;
+                                                      null)
+                                                    throw Exception;
                                                   map = onValue.value;
                                                   prn = _email;
                                                   _email = map["Email"];
@@ -451,262 +486,332 @@ class _LoginPageState extends State<LoginPage>
                                                 prefs.clear();
                                                 //var e;
                                                 if (user != null) {
-                                                  prefs.setBool('login', true);
                                                   String uemail = _email;
-
-                                                  //e = uemail.split('@');
 
                                                   prefs.setString(
                                                       'email', uemail);
                                                   if (!checktype) {
-                                                    var e = _email.split("@");
-                                                    String b = e[0]
-                                                        .toString()
-                                                        .replaceAll(
-                                                        new RegExp(r'\W'), "_")
-                                                        .toLowerCase();
-                                                    Map map;
-                                                    await checkemail
-                                                        .child("Registration")
-                                                        .child(
-                                                        'Teacher_account')
-                                                        .child(b.toString())
-                                                        .once()
-                                                        .then((snap) async {
-                                                      map = snap.value;
-                                                      prefs.setString(
-                                                          "name", map["Name"]);
-                                                      Dateinfo.teachname =
-                                                          map["Name"]
-                                                              .toString();
-                                                      prefs.setString("dept",
-                                                          map["Department"]);
-                                                      Dateinfo.dept =
-                                                          map["Department"]
-                                                              .toString();
-                                                      Dateinfo.teachemail =
-                                                          uemail;
-                                                      var e = Dateinfo
-                                                          .teachemail
+                                                    try {
+                                                      var e = _email
                                                           .split("@");
-                                                      Dateinfo.email = e[0]
+                                                      String b = e[0]
                                                           .toString()
                                                           .replaceAll(
-                                                          new RegExp(r'\W'),
-                                                          "_");
-                                                      Map days;
-                                                      prefs.setBool(
-                                                          "check", false);
-                                                      if (map
-                                                          .containsKey(
-                                                          "Admin")) {
-                                                        prefs.setString(
-                                                            "type", "admin");
-                                                      } else {
-                                                        prefs.setString(
-                                                            "type", "teacher");
-                                                      }
-                                                      checkemail
-                                                          .child("Registration")
+                                                          new RegExp(
+                                                              r'\W'),
+                                                          "_")
+                                                          .toLowerCase();
+                                                      Map map;
+                                                      await checkemail
+                                                          .child(
+                                                          "Registration")
                                                           .child(
                                                           'Teacher_account')
-                                                          .child(Dateinfo.email)
-                                                          .child("slot")
+                                                          .child(b
+                                                          .toString())
                                                           .once()
-                                                          .then((snapshot) {
-                                                        try {
-                                                          Map data =
-                                                              snapshot.value;
-                                                          if (data == null) {
-                                                            throw Exception;
-                                                          }
-                                                          List<String> slot =
-                                                          new List<String>();
-                                                          for (final key
-                                                          in data.keys) {
-                                                            slot.add(
-                                                                key.toString() +
-                                                                    "h");
-                                                          }
-                                                          prefs.setStringList(
-                                                              "slot", slot);
-                                                        } catch (Exception) {
-                                                          List<String> slot =
-                                                          new List<String>();
-                                                          prefs.setStringList(
-                                                              "slot", slot);
-                                                        }
-                                                      });
-
-                                                      checkemail
-                                                          .child("Registration")
-                                                          .child(
-                                                          'Teacher_account')
-                                                          .child(Dateinfo.email)
-                                                          .child("work_hr")
-                                                          .once()
-                                                          .then((snapshot) {
-                                                        try {
-                                                          Map data =
-                                                              snapshot.value;
-                                                          if (data == null)
-                                                            throw Exception;
-                                                          else {
-                                                            prefs.setString(
-                                                                "today_date",
-                                                                data["date"]);
-                                                            // print(prefs.getString("today_date"));
-                                                            prefs.setInt(
-                                                                "week_no",
-                                                                data["weekno"]);
-
-                                                            prefs.setInt("dayc",
-                                                                data["dayc"]);
-
-                                                            prefs.setInt(
-                                                                "weekc",
-                                                                data["weekc"]);
-                                                          }
-                                                        } catch (Exception) {
-                                                          print("work");
-                                                          var now =
-                                                          new DateTime.now();
-                                                          var ford =
-                                                          new DateFormat(
-                                                              "yyyy_MM_dd");
-
-                                                          String date =
-                                                          ford.format(now);
-
-                                                          int current =
-                                                              DateTime
-                                                                  .utc(
-                                                                  now.year,
-                                                                  now.month,
-                                                                  1)
-                                                                  .weekday;
-                                                          int weekno = 0;
-                                                          int i = 9 - current;
-                                                          for (; i < 30;
-                                                          i += 7) {
-                                                            weekno += 1;
-                                                            if (now.day < i) {
-                                                              break;
+                                                          .then(
+                                                              (snap) async {
+                                                            map = snap.value;
+                                                            if (map == null) {
+                                                              throw Exception;
                                                             }
-                                                          }
-                                                          prefs.setString(
-                                                              "today_date",
-                                                              date);
-                                                          prefs.setInt(
-                                                              "dayc", 0);
-                                                          prefs.setInt(
-                                                              "week_no",
-                                                              weekno);
-                                                          prefs.setInt(
-                                                              "weekc", 0);
-                                                        }
 
-                                                        //  checkemail.child("")
+                                                            prefs.setString(
+                                                                "name",
+                                                                map["Name"]);
+                                                            Dateinfo
+                                                                .teachname = map[
+                                                            "Name"]
+                                                                .toString();
+                                                            prefs.setString(
+                                                                "dept",
+                                                                map["Department"]);
+                                                            Dateinfo
+                                                                .dept = map[
+                                                            "Department"]
+                                                                .toString();
+                                                            Dateinfo.teachemail =
+                                                                uemail;
+                                                            var e = Dateinfo
+                                                                .teachemail
+                                                                .split("@");
+                                                            Dateinfo
+                                                                .email = e[
+                                                            0]
+                                                                .toString()
+                                                                .replaceAll(
+                                                                new RegExp(
+                                                                    r'\W'),
+                                                                "_");
+                                                            Map days;
+                                                            prefs.setBool(
+                                                                'login',
+                                                                true);
+
+                                                            prefs.setBool(
+                                                                "check",
+                                                                false);
+                                                            if (map
+                                                                .containsKey(
+                                                                "Admin")) {
+                                                              prefs.setString(
+                                                                  "type",
+                                                                  "admin");
+                                                            } else {
+                                                              prefs.setString(
+                                                                  "type",
+                                                                  "teacher");
+                                                            }
+                                                            checkemail
+                                                                .child(
+                                                                "Registration")
+                                                                .child(
+                                                                'Teacher_account')
+                                                                .child(Dateinfo
+                                                                .email)
+                                                                .child(
+                                                                "work_hr")
+                                                                .once()
+                                                                .then(
+                                                                    (snapshot) {
+                                                                  try {
+                                                                    Map data =
+                                                                        snapshot
+                                                                            .value;
+                                                                    if (data ==
+                                                                        null)
+                                                                      throw Exception;
+                                                                    else {
+                                                                      prefs.setString(
+                                                                          "today_date",
+                                                                          data[
+                                                                          "date"]);
+                                                                      // print(prefs.getString("today_date"));
+                                                                      print("date:"+data[
+                                                                      "date"]);
+                                                                      prefs.setInt(
+                                                                          "week_no",
+                                                                          data[
+                                                                          "weekno"]);
+
+                                                                      prefs.setInt(
+                                                                          "dayc",
+                                                                          data[
+                                                                          "dayc"]);
+
+                                                                      prefs.setInt(
+                                                                          "weekc",
+                                                                          data[
+                                                                          "weekc"]);
+                                                                    }
+                                                                  } catch (Exception) {
+                                                                    print("work");
+                                                                    var now =
+                                                                    new DateTime
+                                                                        .now();
+                                                                    var ford =
+                                                                    new DateFormat(
+                                                                        "yyyy_MM_dd");
+
+                                                                    String date =
+                                                                    ford.format(
+                                                                        now);
+
+                                                                    int current = DateTime.utc(
+                                                                        now.year,
+                                                                        now.month,
+                                                                        1)
+                                                                        .weekday;
+                                                                    int weekno =
+                                                                    0;
+                                                                    int i = 9 -
+                                                                        current;
+                                                                    for (;
+                                                                    i < 30;
+                                                                    i += 7) {
+                                                                      weekno += 1;
+                                                                      if (now.day <
+                                                                          i) {
+                                                                        break;
+                                                                      }
+                                                                    }
+                                                                    prefs.setString(
+                                                                        "today_date",
+                                                                        date);
+                                                                    prefs.setInt(
+                                                                        "dayc",
+                                                                        0);
+                                                                    prefs.setInt(
+                                                                        "week_no",
+                                                                        weekno);
+                                                                    prefs.setInt(
+                                                                        "weekc",
+                                                                        0);
+                                                                  }
+
+                                                                  //  checkemail.child("")
+                                                                });
+                                                            try {
+                                                              checkemail
+                                                                  .child(
+                                                                  "cdate")
+                                                                  .once()
+                                                                  .then(
+                                                                      (val) {
+                                                                    if (val.value ==
+                                                                        null)
+                                                                      throw Exception;
+
+                                                                    prefs.setString(
+                                                                        "cdate",
+                                                                        val.value
+                                                                            .toString());
+                                                                  });
+                                                            } catch (Exception) {}
+                                                            await Teacher
+                                                                .data();
+                                                          });
+                                                      if (show)
+                                                        scaffoldKey
+                                                            .currentState
+                                                            .hideCurrentSnackBar();
+                                                      setState(() {
+                                                        show = false;
                                                       });
-                                                      try {
-                                                        checkemail.child(
-                                                            "cdate")
-                                                            .once()
-                                                            .then((val) {
-                                                          if (val.value == null)
-                                                            throw Exception;
 
-                                                          prefs.setString(
-                                                              "cdate", val.value
-                                                              .toString());
-                                                        });
-                                                      } catch (Exception) {
-
-                                                      }
-                                                      await Teacher.data();
-                                                    });
-                                                    //  await Future.delayed(Duration(seconds: 3));
-                                                    Navigator.pushReplacement(
-                                                        context,
-                                                        PageTransition(
-                                                            type:
-                                                            PageTransitionType
-                                                                .fade,
-                                                            duration: Duration(
-                                                                seconds: 2),
-                                                            child: thome()));
+                                                      //  await Future.delayed(Duration(seconds: 3));
+                                                      Navigator.pushReplacement(
+                                                          context,
+                                                          PageTransition(
+                                                              type: PageTransitionType
+                                                                  .fade,
+                                                              duration: Duration(
+                                                                  seconds:
+                                                                  2),
+                                                              child:
+                                                              thome()));
+                                                    } catch (Exception) {
+                                                      Fluttertoast.showToast(
+                                                          msg:
+                                                          "No data Found",
+                                                          toastLength: Toast
+                                                              .LENGTH_SHORT,
+                                                          gravity:
+                                                          ToastGravity
+                                                              .BOTTOM,
+                                                          backgroundColor:
+                                                          Colors.red,
+                                                          textColor:
+                                                          Colors
+                                                              .white,
+                                                          fontSize: 16.0);
+                                                      if (show)
+                                                        scaffoldKey
+                                                            .currentState
+                                                            .hideCurrentSnackBar();
+                                                      setState(() {
+                                                        show = false;
+                                                      });
+                                                    }
                                                   } else {
                                                     try {
                                                       prefs.setString(
-                                                          "type", "student");
+                                                          "type",
+                                                          "student");
                                                       Map map;
                                                       if (dept.isEmpty) {
+                                                        print(show);
+                                                        if (show)
+                                                          scaffoldKey
+                                                              .currentState
+                                                              .hideCurrentSnackBar();
+                                                        setState(() {
+                                                          show = false;
+                                                        });
                                                         Fluttertoast.showToast(
                                                             msg:
                                                             "Select Department",
                                                             toastLength: Toast
                                                                 .LENGTH_SHORT,
-                                                            gravity: ToastGravity
+                                                            gravity:
+                                                            ToastGravity
                                                                 .BOTTOM,
                                                             backgroundColor:
-                                                            Colors.red,
+                                                            Colors
+                                                                .red,
                                                             textColor:
-                                                            Colors.white,
-                                                            fontSize: 16.0);
+                                                            Colors
+                                                                .white,
+                                                            fontSize:
+                                                            16.0);
                                                       } else {
                                                         await checkemail
                                                             .child(
                                                             "Registration")
-                                                            .child('Student')
+                                                            .child(
+                                                            'Student')
                                                             .child(dept)
                                                             .child(prn)
                                                             .once()
-                                                            .then((snap) async {
-                                                          map = snap.value;
-                                                          print(map);
-                                                          //    await Future.delayed(Duration(seconds: 5));
-                                                          Studinfo.name =
-                                                          map["Name"];
-                                                          Studinfo.roll =
-                                                          map["Prn"];
-                                                          prefs.setString(
-                                                              "name",
-                                                              map["Name"]);
-                                                          prefs.setString(
-                                                              "branch", dept);
-                                                          Studinfo.branch =
-                                                              dept;
-                                                          Studinfo.classs =
-                                                          map["Class"];
-                                                          Studinfo.batch =
-                                                          map["Batch"];
-                                                          try {
-                                                            prefs.setString(
-                                                                "text",
-                                                                map["text"]);
-                                                          } catch (Exception) {
-                                                            prefs.setString(
-                                                                "text", "");
-                                                          }
-                                                          // prefs.setString("roll", map["Serial"]);
-                                                          prefs.setString(
-                                                              "class",
-                                                              map["Class"]);
-                                                          prefs.setString(
-                                                              "batch",
-                                                              map["Batch"]);
+                                                            .then(
+                                                                (snap) async {
+                                                              map =
+                                                                  snap.value;
+                                                              if (map == null)
+                                                                throw Exception;
+//                                                          print(map);
+                                                              //    await Future.delayed(Duration(seconds: 5));
+                                                              Studinfo.name =
+                                                              map["Name"];
+                                                              Studinfo.roll =
+                                                              map["Prn"];
+                                                              prefs.setString(
+                                                                  "name",
+                                                                  map["Name"]);
+                                                              prefs.setString(
+                                                                  "branch",
+                                                                  dept);
+                                                              Studinfo.branch =
+                                                                  dept;
+                                                              Studinfo.classs =
+                                                              map["Class"];
+                                                              Studinfo.batch =
+                                                              map["Batch"];
+                                                              try {
+                                                                prefs.setString(
+                                                                    "text",
+                                                                    map["text"]);
+                                                              } catch (Exception) {
+                                                                prefs.setString(
+                                                                    "text",
+                                                                    "");
+                                                              }
+                                                              prefs.setBool(
+                                                                  'login',
+                                                                  true);
+
+                                                              // prefs.setString("roll", map["Serial"]);
+                                                              prefs.setString(
+                                                                  "class",
+                                                                  map["Class"]);
+                                                              prefs.setString(
+                                                                  "batch",
+                                                                  map["Batch"]);
 //                                                        prefs.setString(
 //                                                            "text", " ");
-                                                          prefs.setString(
-                                                              "roll",
-                                                              map["Prn"]);
-                                                          Studinfo.email =
-                                                              uemail;
-                                                          print(Studinfo.email +
-                                                              " email");
-                                                          prefs.setInt(
-                                                              "fetchatt", 1);
-                                                        });
+                                                              prefs.setString(
+                                                                  "roll",
+                                                                  map["Prn"]);
+                                                              Studinfo.email =
+                                                                  uemail;
+                                                              print(Studinfo
+                                                                  .email +
+                                                                  " email");
+                                                              prefs.setInt(
+                                                                  "fetchatt",
+                                                                  1);
+                                                            });
                                                         if (map.containsKey(
                                                             "Parent")) {
                                                           Studinfo.parentname =
@@ -718,22 +823,28 @@ class _LoginPageState extends State<LoginPage>
                                                         await FirebaseDatabase
                                                             .instance
                                                             .reference()
-                                                            .child("defaulter")
-                                                            .child("modified")
                                                             .child(
-                                                            Studinfo.roll)
+                                                            "defaulter")
+                                                            .child(
+                                                            "modified")
+                                                            .child(
+                                                            Studinfo
+                                                                .roll)
                                                             .once()
-                                                            .then((onValue) {
-                                                          if (onValue.value ==
-                                                              -1)
-                                                            throw Exception;
-                                                        });
+                                                            .then(
+                                                                (onValue) {
+                                                              if (onValue
+                                                                  .value ==
+                                                                  -1)
+                                                                throw Exception;
+                                                            });
                                                         final FirebaseMessaging
                                                         firebaseMessaging =
                                                         FirebaseMessaging();
                                                         firebaseMessaging
                                                             .subscribeToTopic(
-                                                            Studinfo.roll);
+                                                            Studinfo
+                                                                .roll);
 
                                                         try {
                                                           await Attendance
@@ -743,67 +854,130 @@ class _LoginPageState extends State<LoginPage>
                                                               .reference()
                                                               .child(
                                                               "defaulter")
-                                                              .child("modified")
                                                               .child(
-                                                              Studinfo.roll)
+                                                              "modified")
+                                                              .child(
+                                                              Studinfo
+                                                                  .roll)
                                                               .set(0);
                                                         } catch (Exception) {}
-
+                                                        if (show)
+                                                          scaffoldKey
+                                                              .currentState
+                                                              .hideCurrentSnackBar();
+                                                        setState(() {
+                                                          show = false;
+                                                        });
                                                         //  await Future.delayed(Duration(seconds: 5));
-                                                        Navigator
-                                                            .pushReplacement(
+                                                        Navigator.pushReplacement(
                                                             context,
                                                             PageTransition(
-                                                                type:
-                                                                PageTransitionType
+                                                                type: PageTransitionType
                                                                     .fade,
-                                                                duration:
-                                                                Duration(
+                                                                duration: Duration(
                                                                     seconds:
                                                                     2),
-                                                                child: shome()));
+                                                                child:
+                                                                shome()));
                                                       }
                                                     } catch (Exception) {
-                                                      print(Exception);
+//                                                      print(Exception);
+                                                      print(show);
+                                                      if (show)
+                                                        scaffoldKey
+                                                            .currentState
+                                                            .hideCurrentSnackBar();
+                                                      setState(() {
+                                                        show = false;
+                                                      });
+
                                                       Fluttertoast.showToast(
-                                                          msg: "No data Found",
-                                                          toastLength:
-                                                          Toast.LENGTH_SHORT,
+                                                          msg:
+                                                          "No data Found",
+                                                          toastLength: Toast
+                                                              .LENGTH_SHORT,
                                                           gravity:
-                                                          ToastGravity.BOTTOM,
+                                                          ToastGravity
+                                                              .BOTTOM,
                                                           backgroundColor:
                                                           Colors.red,
-                                                          textColor: Colors
+                                                          textColor:
+                                                          Colors
                                                               .white,
                                                           fontSize: 16.0);
                                                     }
                                                   }
                                                 } else {
+                                                  if (show)
+                                                    scaffoldKey
+                                                        .currentState
+                                                        .hideCurrentSnackBar();
+                                                  setState(() {
+                                                    show = false;
+                                                  });
                                                   scaffoldKey.currentState
                                                       .showSnackBar(
                                                       errSnackBar);
                                                 }
                                               });
-                                            }catch(Exception){
-                                              Fluttertoast.showToast(
-                                                  msg: "No data Found",
-                                                  toastLength:
-                                                  Toast.LENGTH_SHORT,
-                                                  gravity:
-                                                  ToastGravity.BOTTOM,
-                                                  backgroundColor:
-                                                  Colors.red,
-                                                  textColor: Colors
-                                                      .white,
-                                                  fontSize: 16.0);
+                                            } catch (Exception) {
+//                                              print("kk");
+//                                              print(show);
+                                              if (dept.isEmpty) {
+//                                                      print(show);
+                                                if (show)
+                                                  scaffoldKey.currentState
+                                                      .hideCurrentSnackBar();
+                                                setState(() {
+                                                  show = false;
+                                                });
+                                                Fluttertoast.showToast(
+                                                    msg:
+                                                    "Select Department",
+                                                    toastLength: Toast
+                                                        .LENGTH_SHORT,
+                                                    gravity: ToastGravity
+                                                        .BOTTOM,
+                                                    backgroundColor:
+                                                    Colors.red,
+                                                    textColor:
+                                                    Colors.white,
+                                                    fontSize: 16.0);
+                                              } else {
+                                                if (show)
+                                                  scaffoldKey.currentState
+                                                      .hideCurrentSnackBar();
+                                                setState(() {
+                                                  show = false;
+                                                });
+                                                Fluttertoast.showToast(
+                                                    msg: "No data Found",
+                                                    toastLength: Toast
+                                                        .LENGTH_SHORT,
+                                                    gravity: ToastGravity
+                                                        .BOTTOM,
+                                                    backgroundColor:
+                                                    Colors.red,
+                                                    textColor:
+                                                    Colors.white,
+                                                    fontSize: 16.0);
+                                              }
                                             }
                                           } else {
                                             setState(() {
                                               _autovalidate = true;
                                             });
                                           }
+//                                          if(show){
+//                                          scaffoldKey.currentState.removeCurrentSnackBar();
+//
+//                                          }
+                                          setState(() {
+                                            pressed = false;
+                                          });
                                           FocusScope.of(context)
-                                              .requestFocus(new FocusNode());
+                                              .requestFocus(
+                                              new FocusNode());
                                         },
                                         elevation: 2.0,
                                         color: HexColor.fromHex("#00004d"),
@@ -883,13 +1057,22 @@ class _LoginPageState extends State<LoginPage>
           email: email, password: password);
       FirebaseUser user = result.user;
 //      if(user.isEmailVerified){
-      if(true){
+      if (true) {
         assert(user != null);
         assert(await user.getIdToken() != null);
 
         final FirebaseUser currentUser = await auth.currentUser();
         assert(user.uid == currentUser.uid);
-        return user;}
+        return user;
+      } else {
+        Fluttertoast.showToast(
+            msg: "Verify your email first",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            backgroundColor: Colors.red,
+            textColor: Colors.white,
+            fontSize: 16.0);
+      }
     } catch (e) {
       handleError(e);
       return null;
@@ -897,27 +1080,28 @@ class _LoginPageState extends State<LoginPage>
   } //Firebase Sign in
 
   String validateEmail(String value) {
+    bool flag=false,flag2=false;
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(mescoepune\.org))$';
     RegExp regex = new RegExp(pattern);
     if (value.isEmpty || !regex.hasMatch(value)) {
-      RegExp re = RegExp(r'^F|S[0-9]+$');
-      if (value.isEmpty || !re.hasMatch(value) || value.length < 9)
-        return "invalid username";
+      flag=true;
 
-      else{
-        setState(() {
-          snacktime=4500;
-        });
-        checktype=true;
-        return null;}
+    } else {
+      checktype = false;
+      return null;
     }
-    else{
-      setState(() {
-        snacktime=2500;
-      });
-      checktype=false;
-      return null;}
+    RegExp re = RegExp(r'^F|S[0-9]+$');
+    if (value.isEmpty || !re.hasMatch(value) || value.length < 9)
+      flag2=true;
+    else {
+
+      checktype = true;
+      return null;
+    }
+    if(flag==true && flag2==true){
+      return "invalid username";
+    }
   }
 
   String validatePassword(String value) {
